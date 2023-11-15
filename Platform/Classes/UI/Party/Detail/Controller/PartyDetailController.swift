@@ -1,0 +1,1224 @@
+//
+//  PartyDetailController.swift
+//  constellation
+//
+//  Created by Lee on 2020/4/10.
+//  Copyright © 2020 Constellation. All rights reserved.
+//
+
+import UIKit
+import SnapKit
+import MJRefresh
+import IQKeyboardManagerSwift
+
+class PartyDetailController: BaseController {
+    
+    // chatKeyBoard
+    private let kToolBarLastH: CGFloat = 52
+    
+    let userInfo = LoginManager.shared.getUserInfo()
+    let leftMargin = 16.0
+    let CellHeight = 110.0
+    let topHeight:CGFloat = 300.0
+    let creatorAvatarWidth = 46.0
+    var uniCode: String = ""
+    var partyDetail: PartyDetailModel?
+    var participateData: ParticipateModel?
+    var commentData: CommentListModel = CommentListModel()
+    var joinData: JoinModel?
+    var selectedIndexPath: IndexPath?
+    var isOwner = false
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // 重置Navigation
+        resetNavigation()
+        setupUI()
+        
+        // 设置下拉刷新
+        commentTableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
+            // 在这里执行下拉刷新的操作，例如加载最新数据
+            self?.loadNewData()
+        })
+        
+        commentTableView.mj_header?.beginRefreshing()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        LSLog("ChatController viewWillAppear")
+        super.viewWillAppear(animated)
+        IQKeyboardManager.shared.enable = false
+        IQKeyboardManager.shared.enableAutoToolbar = false
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        LSLog("ChatController viewDidDisappear")
+        super.viewDidDisappear(animated)
+        IQKeyboardManager.shared.enable = true
+        IQKeyboardManager.shared.enableAutoToolbar = true
+    }
+    
+    fileprivate lazy var headerView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    // TopView
+    fileprivate lazy var topView: UIView = {
+        let v = UIView()
+        return v
+    }()
+    
+    // 游戏封面
+    fileprivate lazy var cover: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderBig)
+        return iv
+    }()
+    
+    // 组局人头像
+    fileprivate lazy var creatorAvatar: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.ls_cornerRadius(CGFloat(creatorAvatarWidth/2))
+        iv.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderAvatar)
+        return iv
+    }()
+    
+    fileprivate lazy var creatorTipView: UIView = {
+        let v = UIView()
+        v.layer.cornerRadius = 9
+        v.backgroundColor = UIColor.ls_color("#FE9C5B")
+        return v
+    }()
+    
+    fileprivate lazy var creatorTipLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(10)
+        label.textColor = UIColor.white
+        label.text = "组局人"
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 二维码
+    fileprivate lazy var qrCodeBtn: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "icon_qrcode"), for: .normal)
+        button.addTarget(self, action: #selector(clickQrCodeBtn(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    // 详情view
+    fileprivate lazy var detailView: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.white
+        v.layer.cornerRadius = 8
+        v.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        return v
+    }()
+    
+    // 时间
+    fileprivate lazy var timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = " "
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 费用
+    fileprivate lazy var feeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_font(14)
+        label.textColor = UIColor.ls_color("#999999")
+        label.text = " "
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 组局介绍
+    fileprivate lazy var introductionView: UIView = {
+        let v = UIView()
+        return v
+    }()
+    
+    fileprivate lazy var introductionTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "组局介绍"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var introductionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_font(14)
+        label.textColor = UIColor.ls_color("#666666")
+        label.text = " "
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 主打游戏
+    fileprivate lazy var gameView: UIView = {
+        let v = UIView()
+        return v
+    }()
+    
+    fileprivate lazy var gameTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "主打游戏"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var gameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_font(14)
+        label.textColor = UIColor.ls_color("#666666")
+        label.text = "无游戏/稍后选择"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var gameArrow: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.image = UIImage(named: "icon_arrow_right")
+        return iv
+    }()
+    
+    // 地点
+    fileprivate lazy var addressView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    fileprivate lazy var addressTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "活动场所"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var addressMapView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 8
+        view.backgroundColor = UIColor.ls_color("#F9F9F9")
+        return view
+    }()
+    
+    fileprivate lazy var addressLocalIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "icon_local")
+        return imageView
+    }()
+    
+    // 名称
+    fileprivate lazy var addressNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontMedium16
+        label.textColor = UIColor.ls_color("#333333")
+        label.numberOfLines = 1
+        label.lineBreakMode = .byTruncatingTail
+        label.text = " "
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 地址
+    fileprivate lazy var addressDetailLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer12
+        label.textColor = UIColor.ls_color("#aaaaaa")
+        label.numberOfLines = 1
+        label.lineBreakMode = .byTruncatingTail
+        label.text = " "
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 参与人
+    fileprivate lazy var personView: UIView = {
+        let v = UIView()
+        return v
+    }()
+    
+    fileprivate lazy var personTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "参与人（0/0）"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var personContent: UIView = {
+        let v = UIView()
+        return v
+    }()
+    
+    // footer
+    fileprivate lazy var footerView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: kTabBarHeight + 40))
+        return view
+    }()
+    
+    fileprivate lazy var footLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_font(12)
+        label.textColor = UIColor.ls_color("#999999")
+        label.text = "展开更多评论"
+        label.sizeToFit()
+        // 添加点击手势识别器
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
+        label.addGestureRecognizer(tapGesture)
+        return label
+    }()
+    
+    fileprivate lazy var footerIcon: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(named: "icon_expand")
+        return iv
+    }()
+    
+    // 评论列表
+    fileprivate lazy var commentTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
+        tableView.tableHeaderView = headerView
+        tableView.tableFooterView = footerView
+        tableView.estimatedRowHeight = CellHeight
+        tableView.rowHeight = UITableView.automaticDimension
+        
+        // 注册UITableViewCell类
+        tableView.register(CommentCell.self, forCellReuseIdentifier: "CommentCell")
+        tableView.register(SubCommentCell.self, forCellReuseIdentifier: "SubCommentCell")
+        return tableView
+    }()
+    
+    // 创建底部工具栏
+    fileprivate lazy var bottomView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.white
+        return view
+    }()
+    
+    // 评论按钮
+    fileprivate lazy var commentBtn: UIButton = {
+        let button = UIButton(frame: CGRectMake(0, 0, 112, 40))
+        button.backgroundColor = UIColor.ls_color("#F4F4F4")
+        button.layer.cornerRadius = 20
+        button.clipsToBounds = true
+        button.setTitle("写评论", for: .normal)
+        button.setTitleColor(UIColor.ls_color("#CFCFCF"), for: .normal)
+        button.titleLabel?.font = kFontMedium15
+        button.addTarget(self, action: #selector(clickCommentBtn(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    // 加入组局
+    fileprivate lazy var joinBtn: UIButton = {
+        let button = UIButton()
+        button.setTitleColor(kColorTextWhite, for: .normal)
+        button.titleLabel?.font = kFontMedium15
+        button.layer.cornerRadius = 20
+        button.clipsToBounds = true
+        button.backgroundColor = UIColor.ls_color("#FE9C5B")
+        button.setTitle("加入组局", for: .normal)
+        button.addTarget(self, action: #selector(clickJoinBtn(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    fileprivate lazy var chatKeyboard: ChatKeyboardView = {
+        let keyBoard = ChatKeyboardView(frame: CGRect(x: 0, y: kScreenH, width: kScreenW, height: kToolBarLastH))
+        keyBoard.needHiddenToolBar = true
+        keyBoard.delegate = self
+        return keyBoard
+    }()
+}
+
+extension PartyDetailController {
+    
+    func setData(uniqueCode: String) {
+        uniCode = uniqueCode
+    }
+    
+    // 获取详情
+    func getPartyDetail() {
+        NetworkManager.shared.getPartyDetail (uniCode) { resp in
+            if resp.status == .success {
+                LSLog("getPartyDetail data:\(resp.data)")
+                self.partyDetail = resp.data
+                self.refreshData()
+                self.refreshPersions()
+            } else {
+                LSLog("getPartyDetail fail")
+            }
+        }
+    }
+    
+    // 获取参与人信息
+    func getParticipateList() {
+        
+        NetworkManager.shared.getParticipateList(uniCode) { resp in
+            if resp.status == .success {
+                LSLog("getParticipateList data:\(resp.data)")
+                self.participateData = resp.data
+                self.refreshPersions()
+            } else {
+                LSLog("getParticipateList fail")
+            }
+        }
+    }
+    
+    // 获取评论
+    func getComments(pageNum:Int64, pageSize:Int64, uniqueCode:String , parentId:Int64) {
+        NetworkManager.shared.getComments(pageNum, pageSize: pageSize, uniqueCode: uniqueCode, parentId: parentId ) { resp in
+            
+            if resp.status == .success {
+                LSLog("getComments succ")
+                self.handleCommentsData(parentId: parentId, data: resp.data)
+            } else {
+                LSLog("getComments fail")
+                if (self.commentTableView.mj_header.isRefreshing) {
+                    self.commentTableView.mj_header.endRefreshing()
+                }
+            }
+        }
+    }
+    
+    // 发评论
+    func sendComment(_ uniqueCode:String, content:String) {
+        var toCommentItem: CommentItem?
+        if let indexPath = selectedIndexPath {
+            if (indexPath.row == 0) {
+                toCommentItem = commentData.comments[indexPath.section]
+            } else {
+                let pitem = commentData.comments[indexPath.section]
+                toCommentItem = pitem.childComments[indexPath.row-1]
+            }
+        }
+        
+        // 构造本地评论数据
+        let fromUser:UserBrief = UserBrief()
+        fromUser.userId = userInfo?.userId ?? ""
+        fromUser.nick = userInfo?.nick ?? ""
+        fromUser.portrait = userInfo?.portrait ?? ""
+        fromUser.sex = userInfo?.sex ?? 0
+        var toUser:UserBrief = UserBrief()
+        let tempComment:CommentItem = CommentItem()
+        tempComment.from = fromUser
+        tempComment.commentTime = Date().ls_formatterStr("yyyy-MM-dd HH:mm:ss")
+        tempComment.content = content
+        if let toCommentItem = toCommentItem {
+            tempComment.parentId = toCommentItem.parentId
+            toUser = tempComment.from
+        }
+        tempComment.to = toUser
+        updateComment(tempComment)
+        
+        NetworkManager.shared.sendComment(uniqueCode, toCommentId: toCommentItem?.id ?? 0, content: content ) { [self] resp in
+            if resp.status == .success {
+                LSLog("sendComment succ")
+                self.selectedIndexPath = nil
+                tempComment.id = resp.data.commentId
+                self.updateComment(tempComment)
+            } else {
+                self.selectedIndexPath = nil
+                LSLog("sendComment fail")
+                
+            }
+        }
+    }
+    
+    // 邀请加入组局
+    func inviteJoinParty(_ peopleIds:[String]) {
+        NetworkManager.shared.inviteJoinParty(uniCode, peopleIds: peopleIds) { resp in
+            
+            if resp.status == .success {
+                LSLog("inviteJoinParty:\(resp)")
+                LSHUD.showInfo("邀请已发出")
+            } else {
+                LSLog("inviteJoinParty fail")
+            }
+        }
+    }
+    
+    // 加入组局
+    func joinParty() {
+        NetworkManager.shared.joinParty(uniCode) { resp in
+            if resp.status == .success {
+                LSLog("joinParty data:\(resp.data)")
+                self.joinData = resp.data
+                // 加入成功后，刷新数据
+                self.loadNewData()
+            } else {
+                LSLog("joinParty fail")
+            }
+        }
+    }
+    
+    // 加入组局
+    func dismissParty() {
+        NetworkManager.shared.dismissParty(uniCode) { resp in
+            if resp.status == .success {
+                LSLog("dismissParty succ")
+                self.partyDetail?.state = 2
+                self.pop()
+            } else {
+                LSLog("dismissParty fail")
+            }
+        }
+    }
+    
+    func refreshData() {
+        if let detail = partyDetail {
+            isOwner = userInfo?.userId == detail.userId
+            // 封面
+            cover.kf.setImage(with: URL(string: detail.cover ?? ""), placeholder: PlaceHolderBig)
+            
+            // 创建者头像
+            creatorAvatar.kf.setImage(with: URL(string: detail.portrait ?? ""), placeholder: PlaceHolderAvatar)
+            
+            // 时间
+//            timeLabel.text = formatDate(startTime: detail.startTime, endTime: detail.endTime)
+            timeLabel.text = Date.formatDate(startTime: detail.startTime, endTime: detail.endTime)
+            timeLabel.sizeToFit()
+            
+            // 费用
+            if let fee = detail.fee, fee != 0 {
+                feeLabel.text = "费用：¥" + String(fee)
+            } else {
+                feeLabel.text = "费用免费"
+            }
+            feeLabel.sizeToFit()
+            
+            // 组局介绍
+            introductionLabel.text = detail.introduction
+            introductionLabel.sizeToFit()
+            
+            // 主打游戏
+            if detail.relationGame?.name != "" {
+                gameLabel.text = detail.relationGame?.name
+                gameLabel.sizeToFit()
+            }
+            
+            // 活动场所
+            addressNameLabel.text = detail.landmark
+            addressNameLabel.sizeToFit()
+            addressDetailLabel.text = detail.address
+            addressDetailLabel.sizeToFit()
+            
+            
+            // 根据参数确认底部按钮
+            if (isOwner) {
+                // 是自己创建的局，按钮文字展示为解散此桔
+                joinBtn.isEnabled = true
+                joinBtn.backgroundColor = UIColor.white
+                joinBtn.layer.borderWidth = 1
+                joinBtn.layer.borderColor = UIColor.ls_color("#FE9C5B").cgColor
+                joinBtn.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
+                joinBtn.setTitle("解散此桔", for: .normal)
+                
+            } else if (detail.joinState == 1) {
+                // 已参与
+                joinBtn.isEnabled = false
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#eeeeee")
+                joinBtn.setTitleColor(UIColor.ls_color("#999999"), for: .disabled)
+                joinBtn.setTitle("已参与", for: .normal)
+            } else if (detail.maleRemainCount == 0 && detail.femaleRemainCount == 0) {
+                // 空余位置为0，已满员
+                joinBtn.isEnabled = false
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#eeeeee")
+                joinBtn.setTitleColor(UIColor.ls_color("#999999"), for: .disabled)
+                joinBtn.setTitle("已满员", for: .normal)
+            } else if (detail.joinState == 2) {
+                // 待付款
+                joinBtn.isEnabled = true
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#FE9C5B")
+                joinBtn.setTitleColor(UIColor.white, for: .normal)
+                let fee = String(format: "%.2f", Float(detail.fee!)/100)
+                joinBtn.setTitle("¥\(fee)加入组局", for: .normal)
+            } else if (detail.joinState == 0) {
+                // 未加入
+                joinBtn.isEnabled = true
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#FE9C5B")
+                joinBtn.setTitleColor(UIColor.white, for: .normal)
+                joinBtn.setTitle("加入组局", for: .normal)
+            }
+        }
+    }
+    
+    func refreshPersions() {
+        // 需要数据partyDetail、participateData都存在才能绘制
+        if let pDetail = partyDetail, let partData = participateData {
+            // 参与人
+            let total = pDetail.maleCnt! + pDetail.femaleCnt!
+            personTitleLabel.text = "参与人（\(partData.participateList.count)/\(total)）"
+            personTitleLabel.sizeToFit()
+            
+            // 移除personContent 所有子view
+            for subview in personContent.subviews {
+                subview.removeFromSuperview()
+            }
+            
+            view.layoutIfNeeded()
+            
+            let h_count:Int = 4
+            let h_margin:CGFloat = 8.0
+            let v_margin:CGFloat = 5.0
+            let v_width = (personContent.frame.width + h_margin)/CGFloat(h_count) - h_margin
+            let v_height:CGFloat = 106
+            let len = partData.participateList.count
+            for i in 0 ..< len {
+                let item = partData.participateList[i]
+                
+                let pcv = UIView()
+                pcv.layer.cornerRadius = 8
+                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
+                personContent.addSubview(pcv)
+                
+                let pIV = UIImageView()
+                pIV.layer.cornerRadius = 22
+                pIV.clipsToBounds = true
+                pIV.kf.setImage(with: URL(string: item.portrait), placeholder: PlaceHolderAvatar)
+                pcv.addSubview(pIV)
+                
+                let aIV = UIImageView()
+                aIV.image = UIImage(named: item.sex == 1 ? "icon_male" : "icon_female")
+                pcv.addSubview(aIV)
+                
+                let nick = UILabel()
+                nick.font = UIFont.ls_font(12)
+                nick.textColor = UIColor.ls_color("#333333")
+                nick.text = item.nick
+                nick.sizeToFit()
+                pcv.addSubview(nick)
+                
+                
+                let v_left:CGFloat = CGFloat(i%h_count) * (v_width + h_margin)
+                let v_top:CGFloat = CGFloat(i/h_count) * (v_margin + v_height)
+                
+                pcv.snp.makeConstraints { (make) in
+                    make.left.equalTo(v_left)
+                    make.top.equalTo(v_top)
+                    make.width.equalTo(v_width)
+                    make.height.equalTo(v_height)
+                }
+                
+                pIV.snp.makeConstraints { (make) in
+                    make.centerX.equalToSuperview()
+                    make.top.equalToSuperview().offset(16)
+                    make.size.equalTo(CGSize(width: 44, height: 44))
+                }
+                
+                aIV.snp.makeConstraints { (make) in
+                    make.centerX.equalToSuperview()
+                    make.centerY.equalTo(pIV.snp.bottom)
+                    make.size.equalTo(CGSize(width: 16, height: 16))
+                }
+                
+                nick.snp.makeConstraints { (make) in
+                    make.centerX.equalToSuperview()
+                    make.top.equalTo(pIV.snp.bottom).offset(16)
+                }
+            }
+            
+            var finalLen = len
+            if ((pDetail.joinState == 1 || userInfo?.userId == pDetail.userId) && !(pDetail.maleRemainCount == 0 && pDetail.femaleRemainCount == 0)) {
+                finalLen += 1
+                // 已参与
+                let pcv = UIView()
+                pcv.layer.cornerRadius = 8
+                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
+                // 添加点击手势识别器
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleAddPersonTap))
+                pcv.addGestureRecognizer(tapGesture)
+                personContent.addSubview(pcv)
+                
+                let addIcon = UIImageView()
+                addIcon.layer.cornerRadius = 22
+                addIcon.clipsToBounds = true
+                addIcon.image = UIImage(named: "icon_add_person")
+                pcv.addSubview(addIcon)
+                
+                let v_left:CGFloat = CGFloat((finalLen-1)%h_count) * (v_width + h_margin)
+                let v_top:CGFloat = CGFloat((finalLen-1)/h_count) * (v_margin + v_height)
+                pcv.snp.makeConstraints { (make) in
+                    make.left.equalTo(v_left)
+                    make.top.equalTo(v_top)
+                    make.width.equalTo(v_width)
+                    make.height.equalTo(v_height)
+                }
+                
+                addIcon.snp.makeConstraints { (make) in
+                    make.center.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 28, height: 28))
+                }
+            }
+            
+            if (userInfo?.userId == pDetail.userId && partData.participateList.count >= 2) {
+                finalLen += 1
+                // 已参与
+                let pcv = UIView()
+                pcv.layer.cornerRadius = 8
+                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
+                // 添加点击手势识别器
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDelPersonTap))
+                pcv.addGestureRecognizer(tapGesture)
+                personContent.addSubview(pcv)
+                
+                let delIcon = UIImageView()
+                delIcon.layer.cornerRadius = 22
+                delIcon.clipsToBounds = true
+                delIcon.image = UIImage(named: "icon_del_person")
+                pcv.addSubview(delIcon)
+                
+                let v_left:CGFloat = CGFloat((finalLen-1)%h_count) * (v_width + h_margin)
+                let v_top:CGFloat = CGFloat((finalLen-1)/h_count) * (v_margin + v_height)
+                pcv.snp.makeConstraints { (make) in
+                    make.left.equalTo(v_left)
+                    make.top.equalTo(v_top)
+                    make.width.equalTo(v_width)
+                    make.height.equalTo(v_height)
+                }
+                
+                delIcon.snp.makeConstraints { (make) in
+                    make.center.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 28, height: 28))
+                }
+            }
+            
+            let pc_height = CGFloat(((finalLen + h_count - 1)/h_count)) * (v_height + v_margin)
+            personContent.snp.updateConstraints { make in
+                make.height.equalTo(pc_height)
+            }
+        }
+    }
+
+    func loadNewData() {
+        // 请求详情数据
+        getPartyDetail()
+        // 请求参与人数据
+        getParticipateList()
+        // 获取评论
+        getComments(pageNum: 1, pageSize: commentData.pageSize, uniqueCode: uniCode, parentId: 0)
+    }
+    
+    @objc func clickQrCodeBtn(_ sender:UIButton) {
+        
+    }
+    
+    func updateComment(_ item:CommentItem) {
+//        var newIndexPath:IndexPath?
+        if (item.id == 0) {
+            if let indexPath = selectedIndexPath {
+                if (indexPath.row == 0) {
+                    commentData.comments.insert(item, at: indexPath.section)
+                } else {
+                    commentData.comments[indexPath.section].childComments.insert(item, at: indexPath.row-1)
+                }
+//                newIndexPath = IndexPath(row: selectedIndexPath?.row + 1, section: selectedIndexPath?.section)
+            } else {
+                commentData.comments.insert(item, at: 0)
+//                newIndexPath = IndexPath(row: 0, section: 0)
+            }
+            
+        } else {
+            var isExist = false
+            for i in 0 ..< commentData.comments.count {
+                let comment = commentData.comments[i]
+                if (comment.id == 0) {
+                    isExist = true
+                    commentData.comments[i] = item
+                } else {
+                    for j in 0 ..< comment.childComments.count {
+                        let subComment = comment.childComments[j]
+                        if (subComment.id == 0) {
+                            isExist = true
+                            commentData.comments[i].childComments[j] = item
+                            break
+                        }
+                    }
+                }
+                
+                if (isExist) {
+                    break
+                }
+            }
+        }
+        
+        commentTableView.reloadData()
+    }
+    
+    func handleCommentsData(parentId:Int64, data:CommentListModel) {
+        
+        if (parentId == 0) {
+            if (data.pageNum == 1) {
+                commentData = data
+            } else {
+                commentData.pageNum = data.pageNum
+                commentData.comments.append(contentsOf: data.comments)
+            }
+            
+        } else {
+            let len = commentData.comments.count
+            
+            for i in 0 ..< len {
+                let item = commentData.comments[i]
+                if (item.id == parentId) {
+                    if (data.pageNum == 1) {
+                        item.childComments = data.comments
+                    } else {
+                        item.childComments.append(contentsOf: data.comments)
+                    }
+                    break
+                }
+            }
+        }
+        footLabel.isHidden = commentData.pageTotal <= commentData.pageNum
+        footerIcon.isHidden = commentData.pageTotal <= commentData.pageNum
+        commentTableView.reloadData()
+        if (self.commentTableView.mj_header.isRefreshing) {
+            self.commentTableView.mj_header.endRefreshing()
+        }
+    }
+    
+    @objc func handleFooterTap() {
+        LSLog("handleFooterTap pageTotal:\(commentData.pageTotal), pageNum:\(commentData.pageNum)")
+        // 加载更多评论
+        if (commentData.pageTotal > commentData.pageNum) {
+            getComments(pageNum: commentData.pageNum + 1, pageSize: commentData.pageSize, uniqueCode: uniCode, parentId: 0)
+        }
+    }
+    
+    @objc func clickCommentBtn(_ sender:UIButton) {
+        // 评论
+        selectedIndexPath = nil
+        chatKeyboard.showKeyBoard()
+    }
+    
+    @objc func clickJoinBtn(_ sender:UIButton) {
+        // 根据状态处理，加入、解散
+        if isOwner {
+            // 解散次桔
+            dismissParty()
+        } else if partyDetail?.joinState == 2 {
+            // 加入组局
+            joinParty()
+        } else {
+            // 无需处理
+        }
+        
+    }
+    
+    @objc func handleAddPersonTap() {
+        // 邀请好友
+        let vc = FollowListController()
+        vc.followSelectedBlock = { [self] followItems in
+            LSLog("followSelectedBlock followItems:\(followItems)")
+            var peopleIds:[String] = []
+            for i in 0 ..< followItems.count {
+                let fItem = followItems[i]
+                peopleIds.append(fItem.userId)
+            }
+            // 邀请加入局
+            inviteJoinParty(peopleIds)
+        }
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc func handleDelPersonTap() {
+        // 移除好友
+        
+    }
+    
+    override func rightAction() {
+        // 分享
+        
+    }
+    
+    func scrollToIndexPath() {
+        
+        if let indexPath = selectedIndexPath {
+            // 跳转到指定位置
+            DispatchQueue.main.async { [self] in
+                // 在这里执行reloadData完成后的操作
+                commentTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            }
+        } else {
+            // 跳转到最底部
+            DispatchQueue.main.async { [self] in
+                // 在这里执行reloadData完成后的操作
+                let lastSection = commentTableView.numberOfSections - 1
+                if lastSection >= 0 {
+                    let lastRow = commentTableView.numberOfRows(inSection: lastSection) - 1
+
+                    if lastRow >= 0 {
+                        let indexPath = IndexPath(row: lastRow, section: lastSection)
+                        commentTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// UITableView 代理
+extension PartyDetailController: UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        LSLog("scrollViewWillBeginDragging")
+        if commentTableView.frame.height < (kScreenH - kTabBarHeight) {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .kChatTextKeyboardNeedHide, object: nil)
+            }
+        }
+    }
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return commentData.comments.count
+    }
+    
+    // 实现UITableViewDataSource方法
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return commentData.comments[section].childComments.count + 1
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if (indexPath.row == 0) {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CommentCell", for: indexPath) as! CommentCell
+            let item = commentData.comments[indexPath.section]
+            cell.configure(with: item)
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SubCommentCell", for: indexPath) as! SubCommentCell
+            cell.loadMoreBlock = { [self] citem, pitem in
+                LSLog("loadMoreBlock item:\(citem)")
+                let pageSize = 10
+                let pageNum = pitem.childComments.count/pageSize + 1
+                getComments(pageNum: Int64(pageNum), pageSize: Int64(pageSize), uniqueCode: uniCode, parentId: citem.parentId)
+            }
+            let pitem = commentData.comments[indexPath.section]
+            let item = pitem.childComments[indexPath.row-1]
+            cell.configure(with: item, pitem: pitem)
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedIndexPath = indexPath
+        // 拉起评论输入框
+        chatKeyboard.showKeyBoard()
+    }
+}
+
+// MARK: - ChatKeyboardViewDelegate
+extension PartyDetailController: ChatKeyboardViewDelegate {
+    
+    func keyboard(_ keyboard: ChatKeyboardView, DidFinish content: String) {
+        
+        if (content.isEmpty) {
+            return
+        }
+        
+        sendComment(uniCode, content: content)
+    }
+    
+    func keyboard(_ keyboard: ChatKeyboardView, DidBecome isBecome: Bool) {
+        
+    }
+    
+    func keyboard(_ keyboard: ChatKeyboardView, DidMoreMenu type: ChatMoreMenuType) {
+        
+    }
+    
+    func keyboard(_ keyboard: ChatKeyboardView, DidObserver offsetY: CGFloat) {
+        restChatKeyboardSafeTop(offsetY)
+    }
+    
+    private func restChatKeyboardSafeTop(_ offsetY: CGFloat) {
+        LSLog("restChatKeyboardSafeTop offsetY:\(offsetY)")
+        if (kScreenH - offsetY > kTabBarHeight) {
+            commentTableView.snp.remakeConstraints { (make) in
+                make.top.left.right.equalToSuperview()
+                make.bottom.equalToSuperview().offset(offsetY - kScreenH)
+            }
+            
+            view.layoutIfNeeded()
+            scrollToIndexPath()
+        } else {
+            
+            commentTableView.snp.remakeConstraints { (make) in
+                make.top.left.right.equalToSuperview()
+                make.bottom.equalTo(self.bottomView.snp.top)
+            }
+            
+            view.layoutIfNeeded()
+            scrollToIndexPath()
+        }
+    }
+}
+
+
+extension PartyDetailController {
+    
+    fileprivate func setupUI() {
+        
+        headerView.addSubview(topView)
+        topView.addSubview(cover)
+        topView.addSubview(creatorAvatar)
+        topView.addSubview(creatorTipView)
+        creatorTipView.addSubview(creatorTipLabel)
+        topView.addSubview(qrCodeBtn)
+        headerView.addSubview(detailView)
+        detailView.addSubview(timeLabel)
+        detailView.addSubview(feeLabel)
+        detailView.addSubview(introductionView)
+        introductionView.addSubview(introductionTitleLabel)
+        introductionView.addSubview(introductionLabel)
+        detailView.addSubview(gameView)
+        gameView.addSubview(gameTitleLabel)
+        gameView.addSubview(gameLabel)
+        gameView.addSubview(gameArrow)
+        detailView.addSubview(addressView)
+        addressView.addSubview(addressTitleLabel)
+        addressView.addSubview(addressMapView)
+        addressMapView.addSubview(addressLocalIcon)
+        addressMapView.addSubview(addressNameLabel)
+        addressMapView.addSubview(addressDetailLabel)
+        detailView.addSubview(personView)
+        personView.addSubview(personTitleLabel)
+        personView.addSubview(personContent)
+        footerView.addSubview(footLabel)
+        footerView.addSubview(footerIcon)
+        view.addSubview(bottomView)
+        bottomView.addSubview(commentBtn)
+        bottomView.addSubview(joinBtn)
+        view.addSubview(commentTableView)
+        view.addSubview(chatKeyboard)
+        
+        
+        footLabel.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(12)
+            make.centerX.equalToSuperview()
+        }
+        
+        footerIcon.snp.makeConstraints { (make) in
+            make.centerY.equalTo(footLabel)
+            make.left.equalTo(footLabel.snp.right).offset(2)
+            make.size.equalTo(CGSize(width: 10, height: 10))
+        }
+        
+        headerView.snp.makeConstraints { (make) in
+            make.top.equalToSuperview()
+            make.width.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(detailView).offset(10)
+        }
+        
+        topView.snp.makeConstraints { (make) in
+            make.top.equalToSuperview()
+            make.width.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.height.equalTo(topHeight)
+        }
+
+        cover.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
+        creatorAvatar.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.bottom.equalToSuperview().offset(-26)
+            make.size.equalTo(CGSize(width: creatorAvatarWidth, height: creatorAvatarWidth))
+        }
+        
+        creatorTipView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(creatorAvatar)
+            make.centerY.equalTo(creatorAvatar.snp.bottom)
+            make.size.equalTo(CGSize(width: creatorAvatarWidth, height: 18))
+        }
+        
+        creatorTipLabel.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
+        }
+        
+        qrCodeBtn.snp.makeConstraints { (make) in
+            make.centerY.equalTo(creatorAvatar)
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.size.equalTo(CGSize(width: 16, height: 16))
+        }
+        
+        detailView.snp.makeConstraints { (make) in
+            make.top.equalTo(topView.snp.bottom).offset(-8)
+            make.width.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(personView)
+        }
+        
+        timeLabel.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(20)
+            make.left.equalToSuperview().offset(leftMargin)
+        }
+        
+        feeLabel.snp.makeConstraints { (make) in
+            make.centerY.equalTo(timeLabel)
+            make.right.equalToSuperview().offset(-leftMargin)
+        }
+        
+        introductionView.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.top.equalTo(timeLabel.snp.bottom)
+            make.width.equalToSuperview()
+            make.bottom.equalTo(introductionLabel).offset(10)
+        }
+        
+        introductionTitleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalToSuperview().offset(20)
+        }
+        
+        introductionLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalTo(introductionTitleLabel.snp.bottom).offset(10)
+        }
+        
+        gameView.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.top.equalTo(introductionView.snp.bottom)
+            make.width.equalToSuperview()
+            make.bottom.equalTo(gameLabel).offset(10)
+        }
+        
+        gameTitleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalToSuperview().offset(10)
+        }
+        
+        gameLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalTo(gameTitleLabel.snp.bottom).offset(10)
+        }
+        
+        gameArrow.snp.makeConstraints { (make) in
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.centerY.equalTo(gameLabel)
+            make.size.equalTo(CGSize(width: 14, height: 14))
+        }
+        
+        addressView.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.top.equalTo(gameView.snp.bottom)
+            make.width.equalToSuperview()
+            make.bottom.equalTo(addressMapView).offset(10)
+        }
+        
+        addressTitleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalToSuperview().offset(10)
+        }
+
+        addressMapView.snp.makeConstraints { (make) in
+            make.top.equalTo(addressTitleLabel.snp.bottom).offset(10)
+            make.left.equalToSuperview().offset(leftMargin)
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.height.equalTo(66)
+        }
+
+        addressLocalIcon.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(16)
+            make.centerY.equalToSuperview()
+            make.size.equalTo(CGSize(width: 24, height: 24))
+        }
+
+        addressNameLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(addressLocalIcon.snp.right).offset(12)
+            make.top.equalToSuperview().offset(14)
+            make.right.equalToSuperview().offset(-16)
+        }
+
+        addressDetailLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(addressNameLabel)
+            make.top.equalTo(addressNameLabel.snp.bottom).offset(4)
+            make.right.equalToSuperview().offset(-16)
+        }
+        
+        personView.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.top.equalTo(addressView.snp.bottom)
+            make.width.equalToSuperview()
+            make.bottom.equalTo(personContent).offset(10)
+        }
+        
+        personTitleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalToSuperview().offset(10)
+        }
+        
+        personContent.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.top.equalTo(personTitleLabel.snp.bottom).offset(14)
+            make.height.equalTo(111)
+        }
+        
+        bottomView.snp.makeConstraints { (make) in
+            make.left.right.bottom.equalToSuperview()
+            make.height.equalTo(kTabBarHeight)
+        }
+        
+        commentBtn.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(10)
+            make.left.equalToSuperview().offset(leftMargin)
+            make.width.equalTo(112)
+            make.height.equalTo(40)
+        }
+        
+        joinBtn.snp.makeConstraints { (make) in
+            make.centerY.equalTo(commentBtn)
+            make.left.equalTo(commentBtn.snp.right).offset(10)
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.height.equalTo(40)
+        }
+        
+        commentTableView.snp.makeConstraints { (make) in
+            make.top.left.right.equalToSuperview()
+            make.bottom.equalTo(bottomView.snp.top)
+        }
+    }
+    
+    fileprivate func resetNavigation() {
+        
+        navigationView.backgroundColor = UIColor.clear
+        navigationView.backView.backgroundColor = UIColor.clear
+        
+        let leftImg = UIImage(named: "icon_back_white")
+        let backImg = leftImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.leftButton.setImage(backImg, for: .normal)
+        let rightImg = UIImage(named: "icon_share_detail")
+        let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.rightButton.setImage(shareImg, for: .normal)
+    }
+}

@@ -1,0 +1,286 @@
+//
+//  CommentCell.swift
+//  constellation
+//
+//  Created by Lee on 2020/4/10.
+//  Copyright © 2020 Constellation. All rights reserved.
+//
+
+import UIKit
+import SnapKit
+import AVFoundation
+
+
+class SubCommentCell: UITableViewCell {
+    
+    let leftMargin: CGFloat = 60.0
+    let rightMargin: CGFloat = 16.0
+    let avatarWidth: CGFloat = 28.0
+    
+    /// 回调闭包
+    public var loadMoreBlock: ((_ item:CommentItem,_ pitem:CommentItem) -> ())?
+    var item: CommentItem = CommentItem()
+    var parentItem: CommentItem = CommentItem()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
+        accessoryType = .none
+        setupUI()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    // 用户头像
+    fileprivate lazy var avatar: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.layer.cornerRadius = 18
+        iv.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderAvatar)
+        return iv
+    }()
+    
+    // 昵称
+    fileprivate lazy var nick: UILabel = {
+        let label = UILabel()
+        label.font = kFontMedium14
+        label.textColor = UIColor.ls_color("#999999")
+        label.text = ""
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 点赞数
+    fileprivate lazy var likeCntLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer12
+        label.textColor = UIColor.ls_color("#999999")
+        label.text = ""
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var likeIcon: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.image = UIImage(named: "icon_like")
+        return iv
+    }()
+    
+    // 内容
+    fileprivate lazy var contentLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer13
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = ""
+        label.numberOfLines = 0
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 时间
+    fileprivate lazy var timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer10
+        label.textColor = UIColor.ls_color("#5C5C5C")
+        label.text = ""
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var replyTipLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer10
+        label.textColor = UIColor.ls_color("#FE9C5B")
+        label.text = "回复TA"
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 展开更多回复
+    fileprivate lazy var loadMoreView: UIView = {
+        let view = UIView()
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(singleTapAction(_:)))
+        view.addGestureRecognizer(singleTap)
+        return view
+    }()
+    
+    fileprivate lazy var loadMoreLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer12
+        label.textColor = UIColor.ls_color("#FE9C5B")
+        label.text = "展开更多回复"
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var loadMoreIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "icon_expand")
+        return imageView
+    }()
+}
+
+extension SubCommentCell {
+    
+    func configure(with citem: CommentItem, pitem: CommentItem) {
+        LSLog("configure citem:\(String(describing: citem))")
+        item = citem
+        parentItem = pitem
+        
+        // 游戏封面
+        avatar.kf.setImage(with: URL(string: item.from.portrait), placeholder: PlaceHolderAvatar)
+        
+        // 昵称
+        nick.text = item.from.nick
+        nick.sizeToFit()
+        
+        // 点赞数
+        likeCntLabel.text = "\(item.likeCnt)"
+        likeCntLabel.sizeToFit()
+        
+        // 内容
+        contentLabel.text = item.content
+        contentLabel.sizeToFit()
+        
+        // 时间
+        let inputDateFormatter = DateFormatter()
+        inputDateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        if let inputDate = inputDateFormatter.date(from: item.commentTime ) {
+            timeLabel.text = inputDate.ls_formatStr()
+            timeLabel.sizeToFit()
+        }
+        
+        // 展开更多
+        var hasMore = false
+        var str = ""
+        if (parentItem.childTotalCount > parentItem.childComments.count && parentItem.childComments.count > 0) {
+            let lastItem = parentItem.childComments[parentItem.childComments.count-1]
+            if (item.id == lastItem.id) {
+                hasMore = true
+                if (parentItem.childComments.count <= 10) {
+                    str = "展开\(parentItem.childTotalCount - 2)条回复"
+                } else {
+                    str = "展开更多回复"
+                }
+            }
+        }
+        
+        if (hasMore) {
+            loadMoreView.isHidden = false
+            loadMoreLabel.text = str
+            loadMoreLabel.sizeToFit()
+            
+            loadMoreView.snp.remakeConstraints { make in
+                make.left.equalTo(timeLabel)
+                make.top.equalTo(timeLabel.snp.bottom).offset(14)
+                make.height.equalTo(20)
+                make.right.equalTo(loadMoreIcon).offset(5)
+                make.bottom.equalTo(contentView).offset(-10)
+            }
+            timeLabel.snp.remakeConstraints { make in
+                make.top.equalTo(contentLabel.snp.bottom).offset(10)
+                make.left.equalTo(nick)
+                make.bottom.equalTo(loadMoreView.snp.top).offset(-14)
+            }
+        } else {
+            loadMoreView.isHidden = true
+            loadMoreView.snp.remakeConstraints { make in
+                make.left.equalTo(timeLabel)
+                make.top.equalTo(timeLabel.snp.bottom).offset(14)
+                make.height.equalTo(20)
+                make.right.equalTo(loadMoreIcon).offset(5)
+            }
+            timeLabel.snp.remakeConstraints { make in
+                make.top.equalTo(contentLabel.snp.bottom).offset(10)
+                make.left.equalTo(nick)
+                make.bottom.equalTo(contentView).offset(-10)
+            }
+        }
+    }
+    
+    @objc private func singleTapAction(_ tap: UITapGestureRecognizer) {
+        if let loadMoreBlock = loadMoreBlock {
+            loadMoreBlock(item, parentItem)
+        }
+    }
+}
+
+extension SubCommentCell{
+    fileprivate func setupUI(){
+        
+        contentView.addSubview(avatar)
+        contentView.addSubview(nick)
+        contentView.addSubview(likeCntLabel)
+        contentView.addSubview(likeIcon)
+        contentView.addSubview(contentLabel)
+        contentView.addSubview(timeLabel)
+        contentView.addSubview(replyTipLabel)
+        contentView.addSubview(loadMoreView)
+        loadMoreView.addSubview(loadMoreLabel)
+        loadMoreView.addSubview(loadMoreIcon)
+        
+        avatar.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(leftMargin)
+            make.top.equalToSuperview().offset(10)
+            make.size.equalTo(CGSize(width: avatarWidth, height: avatarWidth))
+        }
+        
+        nick.snp.makeConstraints { (make) in
+            make.left.equalTo(avatar.snp.right).offset(8)
+            make.top.equalTo(avatar)
+        }
+        
+        likeCntLabel.snp.makeConstraints { (make) in
+            make.right.equalToSuperview().offset(-rightMargin)
+            make.centerY.equalTo(nick)
+        }
+        
+        likeIcon.snp.makeConstraints { (make) in
+            make.right.equalTo(likeCntLabel.snp.left).offset(-2)
+            make.centerY.equalTo(nick)
+            make.size.equalTo(CGSize(width: 22, height: 22))
+        }
+        
+        contentLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(nick.snp.bottom).offset(5)
+            make.left.equalTo(nick)
+            make.right.equalToSuperview().offset(-rightMargin)
+        }
+        
+        timeLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(contentLabel.snp.bottom).offset(10)
+            make.left.equalTo(nick)
+            make.bottom.equalTo(contentView).offset(-10)
+        }
+        
+        replyTipLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(timeLabel.snp.right).offset(8)
+            make.centerY.equalTo(timeLabel)
+        }
+        
+        loadMoreView.snp.makeConstraints { (make) in
+            make.left.equalTo(timeLabel)
+            make.top.equalTo(timeLabel.snp.bottom).offset(14)
+            make.height.equalTo(20)
+            make.right.equalTo(loadMoreIcon).offset(5)
+        }
+        
+        loadMoreLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.centerY.equalToSuperview()
+        }
+        
+        loadMoreIcon.snp.makeConstraints { (make) in
+            make.left.equalTo(loadMoreLabel.snp.right).offset(2)
+            make.centerY.equalToSuperview()
+            make.size.equalTo(CGSize(width: 10, height: 10))
+        }
+    }
+}
+
