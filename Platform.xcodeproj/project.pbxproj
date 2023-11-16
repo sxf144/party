@@ -145,6 +145,7 @@
 		0FEBF59C2AA07E7800CB43BF /* HomeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF59B2AA07E7700CB43BF /* HomeController.swift */; };
 		0FEBF5A02AA07F3F00CB43BF /* ModifyUserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF59F2AA07F3F00CB43BF /* ModifyUserController.swift */; };
 		0FF39BAD2AF78BA5007BCA63 /* ChatDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF39BAC2AF78BA5007BCA63 /* ChatDelegate.swift */; };
+		0FFDBB882B060F8B0022E94B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FFDBB872B060F8B0022E94B /* StoreKit.framework */; };
 		49FBBF25268D9A11000C851E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBF24268D9A11000C851E /* AppDelegate.swift */; };
 		49FBBF29268D9A11000C851E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBF28268D9A11000C851E /* ViewController.swift */; };
 		49FBBF2C268D9A11000C851E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49FBBF2A268D9A11000C851E /* Main.storyboard */; };
@@ -350,6 +351,7 @@
 		0FEBF59B2AA07E7700CB43BF /* HomeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeController.swift; sourceTree = "<group>"; };
 		0FEBF59F2AA07F3F00CB43BF /* ModifyUserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModifyUserController.swift; sourceTree = "<group>"; };
 		0FF39BAC2AF78BA5007BCA63 /* ChatDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatDelegate.swift; sourceTree = "<group>"; };
+		0FFDBB872B060F8B0022E94B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		49FBBF21268D9A11000C851E /* Platform.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Platform.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49FBBF24268D9A11000C851E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		49FBBF28268D9A11000C851E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6CA8A5C8C9589044F901F643 /* Pods_Platform.framework in Frameworks */,
+				0FFDBB882B060F8B0022E94B /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -577,6 +580,13 @@
 				0F4F3EF52AA8740E000AF5BD /* RecommendCell.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		0F56FDF72B06128400B68586 /* Purchase */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Purchase;
 			sourceTree = "<group>";
 		};
 		0F6138212AA6DA1700E5DB1A /* Recommend */ = {
@@ -1245,6 +1255,7 @@
 		49FBBF6C268DA665000C851E /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				0F56FDF72B06128400B68586 /* Purchase */,
 				0FF39BAE2AF79E83007BCA63 /* Libs */,
 				0FEBF58F2A9D8F3C00CB43BF /* UI */,
 				49FBBF94268DA6D2000C851E /* Manager */,
@@ -1400,6 +1411,7 @@
 		B2857F35CC6E37F558BD1A5E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0FFDBB872B060F8B0022E94B /* StoreKit.framework */,
 				FB09720A8B6DE857232B3CC3 /* Pods_Platform.framework */,
 			);
 			name = Frameworks;

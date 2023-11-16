@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import StoreKit
 
 // RechargeView 高度
 private let CONTENT_HEIGHT: CGFloat = 446
@@ -33,8 +34,10 @@ class RechargeView: UIView {
     
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        // 获取充值商品列表
-        getRechargeList()
+//        // 获取充值商品列表
+//        getRechargeList()
+        // 获取内购商品列表
+        requestProductInfo()
     }
     
     /// 遮幕
@@ -244,6 +247,34 @@ extension RechargeView {
                 }
                 self.rechargeCollectionView.reloadData()
             }
+        }
+    }
+    
+    // 获取内购商品列表
+    func requestProductInfo() {
+        let productIdentifiers: Set<String> = ["juzitang_coin_test_60"]
+        let productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
+        productsRequest.delegate = self
+        productsRequest.start()
+    }
+}
+
+extension RechargeView: SKPaymentTransactionObserver, SKProductsRequestDelegate {
+    
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        
+    }
+    
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        if response.products.count > 0 {
+            for product in response.products {
+                print("Product ID: \(product.productIdentifier)")
+                print("Product Title: \(product.localizedTitle)")
+                print("Product Description: \(product.localizedDescription)")
+                print("Product Price: \(product.price)")
+            }
+        } else {
+            print("No products found.")
         }
     }
 }
