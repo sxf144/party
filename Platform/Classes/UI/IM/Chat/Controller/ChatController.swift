@@ -26,6 +26,7 @@ class ChatController: BaseController {
     var partyDetail: PartyDetailModel?
     var isLoading: Bool = false
     var hasMore: Bool = true
+    let myUserInfo:UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
 
     override func viewDidLoad() {
         title = ""
@@ -166,7 +167,13 @@ extension ChatController {
             if resp.status == .success {
                 LSLog("getPartyDetail data:\(resp.data)")
                 self.partyDetail = resp.data
+                self.handleOtherData()
                 self.bottomView.setPartyDetail(self.partyDetail)
+                // 刷新界面
+                DispatchQueue.main.async {
+                    // 在这里执行reloadData完成后的操作
+                    self.tableView.reloadData()
+                }
             } else {
                 LSLog("getPartyDetail fail")
             }
@@ -248,14 +255,32 @@ extension ChatController {
             return
         }
         
-        for i in 0 ..< dataList.count {
+        // 判断游戏是否已结束
+        var gameEnded = false
+        
+        // 从dataList.count-1倒序到0，步长为1
+        for i in stride(from: dataList.count-1, through: 0, by: -1) {
             
             let item = dataList[i]
             
-            // 最后一条消息，如果是红包、卡牌任务，置为未完成
-            if i == dataList.count-1, item.elemType == .LIMElemGameStatusSync, partyDetail?.state != 2, partyDetail?.state != 3 {
-                if (item.gameElem?.action.actionId == .LIMGameStatusCard || item.gameElem?.action.actionId == .LIMGameStatusRedPacket) {
-                    item.gameElem?.status = 0
+            // 游戏消息
+            if item.elemType == .LIMElemGameStatusSync {
+                if gameEnded {
+                    item.gameElem?.status = 1
+                } else {
+                    if item.gameElem?.action.actionId == .LIMGameStatusEnd {
+                        gameEnded = true
+                    }
+                    // 如果是红包、卡牌任务、剧情故事（时间为0），置为未完成
+                    if partyDetail?.state != 2, partyDetail?.state != 3 {
+                        if (item.gameElem?.action.actionId == .LIMGameStatusCard || item.gameElem?.action.actionId == .LIMGameStatusRedPacket || (item.gameElem?.action.actionId == .LIMGameStatusStory && item.gameElem?.action.roundInfo.showSeconds == 0)) {
+                            item.gameElem?.status = 0
+                        } else {
+                            item.gameElem?.status = 1
+                        }
+                    } else {
+                        item.gameElem?.status = 1
+                    }
                 }
             }
             
@@ -291,6 +316,7 @@ extension ChatController {
                         case .LIMGameStatusCard:
                             if let userIds = item.gameElem?.action.teamUserIds, userIds.count > 0, memberDic.count > 0
                             {
+                                item.isSelf = item.gameElem?.action.teamUserIds.contains(myUserInfo.userId)
                                 item.nickName = ""
                                 for i in 0 ..< userIds.count {
                                     let uid = userIds[i]
@@ -396,12 +422,6 @@ extension ChatController {
     
     func addNewMessage(_ msg:V2TIMMessage) {
         let limMsg:LIMMessage = LIMModel.TIMMsgToLIMMsg(msg)
-        // 最新的一个task任务，游戏未结束前，状态为未完成
-        if limMsg.elemType == .LIMElemGameStatusSync {
-            if (limMsg.gameElem?.action.actionId == .LIMGameStatusCard || limMsg.gameElem?.action.actionId == .LIMGameStatusRedPacket) {
-                limMsg.gameElem?.status = 0
-            }
-        }
         dataList.append(limMsg)
         
         // 处理其他数据
@@ -686,6 +706,20 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     case .LIMGameStatusStory:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameStoryMessageCell", for: indexPath) as! GameStoryMessageCell
                         tempCell.configure(with: item)
+                        // 主持人确认完成任务
+                        tempCell.confirmBlock = {
+                            LSLog("confirmBlock")
+                            NetworkManager.shared.doneTask(item.gameElem?.taskId ?? 0) { resp in
+                                if resp.status == .success {
+                                    LSLog("doneTask succ")
+                                        item.gameElem?.status = 1
+    //                                    tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+                                } else {
+                                    LSLog("doneTask fail")
+                                    LSHUD.showError(resp.msg)
+                                }
+                            }
+                        }
                         cell = tempCell
                     
                     case .LIMGameStatusCard:
@@ -697,7 +731,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                             NetworkManager.shared.doneTask(item.gameElem?.taskId ?? 0) { resp in
                                 if resp.status == .success {
                                     LSLog("doneTask succ")
-//                                    item.gameElem?.status = 1
+                                    item.gameElem?.status = 1
 //                                    tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
                                 } else {
                                     LSLog("doneTask fail")

@@ -57,7 +57,7 @@ class PhoneLoginController: BaseController {
         textField.layer.borderColor = UIColor.ls_color("#FE9C5B").cgColor
         textField.layer.borderWidth = 1
         textField.placeholder = "请输入验证码"
-        textField.keyboardType = .numbersAndPunctuation
+        textField.keyboardType = .phonePad
         // 将按钮设置为rightView
         textField.rightView = getCodeButton
         textField.rightViewMode = .always
@@ -80,13 +80,19 @@ class PhoneLoginController: BaseController {
 extension PhoneLoginController {
     
     @objc func startCountdown() {
+        
+        guard let phoneNum = phoneNumberTextField.text else {
+            LSHUD.showError("请输入电话号码")
+            return
+        }
+        
         // 禁用按钮以防止多次点击
         verificationCodeTextField.rightView?.isUserInteractionEnabled = false
         
         // 启动倒计时
         countdownTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCountdown), userInfo: nil, repeats: true)
         
-        let mobile = "+86" + phoneNumberTextField.text!
+        let mobile = "+86" + phoneNum
         //发起请求获取验证码
         NetworkManager.shared.getVerifyCode(mobile) { (resp) in
             if resp.status == .success {
@@ -125,7 +131,7 @@ extension PhoneLoginController {
         let source = "mobile"
         
         //发起授权登录
-        NetworkManager.shared.authorize(mobile, smsCode: smsCode, code: "", grantType: grantType, source: source, refreshToken: "") { (resp) in
+        NetworkManager.shared.authorize(mobile, smsCode: smsCode, code: "", grantType: grantType, source: source, refreshToken: "", identityToken: "") { (resp) in
             if resp.status == .success {
                 // 保存token
                 LoginManager.shared.saveUserToken(resp.data)

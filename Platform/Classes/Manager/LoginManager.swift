@@ -218,7 +218,7 @@ extension LoginManager {
             let grantType = GrantType.refreshToken.rawValue
             let refreshToken = token.refreshToken
             // 发起授权登录，刷新token
-            NetworkManager.shared.authorize("", smsCode: "", code: "", grantType: grantType, source: "", refreshToken: refreshToken) { [self] (resp) in
+            NetworkManager.shared.authorize("", smsCode: "", code: "", grantType: grantType, source: "", refreshToken: refreshToken, identityToken: "") { [self] (resp) in
                 if resp.status == .success {
                     // 保存token
                     LoginManager.shared.saveUserToken(resp.data)

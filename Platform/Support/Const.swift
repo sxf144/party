@@ -87,3 +87,7 @@ let LUIKit_File_Path = LUIKit_DB_Path.appendingPathComponent("file")
 
 /// 红包领取记录
 let REDPACKET_RECORD = "redpacket_record"
+
+/// 微信appid
+let WX_APPID = "wx72781ac3ee6155d0"
+let UNIVERSAL_LINK = "https://static.juzitang.net/app/"

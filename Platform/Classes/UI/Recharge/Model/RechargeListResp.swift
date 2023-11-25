@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftyJSON
+import StoreKit
 
 class RechargeListResp: RespModel {
     var data = RechargeListModel()
@@ -42,6 +43,7 @@ struct RechargeItem {
     var coinAmount: Int64 = 0
     var cashAmount: Int64 = 0
     var selected: Bool = false
+    var product: SKProduct = SKProduct()
     
     init(_ json:JSON) {
         id = json["id"].int64Value

@@ -40,8 +40,8 @@ class PageManager: NSObject {
     }
     
     /// 完善资料
-    func pushToModifyUser() {
-        let vc = ModifyUserController()
+    func pushToSupplyUser() {
+        let vc = SupplyUserController()
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -141,10 +141,32 @@ class PageManager: NSObject {
         currentNav()?.pushViewController(vc, animated: true)
     }
     
-    /// 聊天页
+    /// 发红包
     func pushToSendRedPacketController(_ uniCode:String, personCount:Int, userId:String, taskId:Int64) {
         let vc = SendRedPacketController()
         vc.setData(uniCode, personCount: personCount, userId: userId, taskId: taskId)
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 我的钱包
+    func pushToMyBagController(_ userPageData:UserPageModel) {
+        let vc = MyBagController()
+        vc.setData(userPageData)
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 编辑资料
+    func pushToEditUserController() {
+        let vc = EditUserController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 收支记录
+    func pushToCoinListController() {
+        let vc = CoinListController()
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }

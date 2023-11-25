@@ -40,7 +40,7 @@ class UserPageController: BaseController {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderAvatar)
+        iv.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderBig)
         return iv
     }()
     

@@ -12,6 +12,8 @@ import ImSDK_Plus_Swift
 
 class GameStoryMessageCell: UITableViewCell {
     
+    /// 回调闭包
+    public var confirmBlock: (() -> ())?
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 10.0
     var item: LIMMessage = LIMMessage()
@@ -52,6 +54,20 @@ class GameStoryMessageCell: UITableViewCell {
         label.sizeToFit()
         return label
     }()
+    
+    // 主持人确认按钮
+    fileprivate lazy var confirmBtn: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = UIColor.ls_color("#FE9C5B")
+        button.setTitle("下一关", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = kFontMedium14
+        button.layer.cornerRadius = 16
+        button.clipsToBounds = true
+        button.isHidden = true
+        button.addTarget(self, action: #selector(clickConfirmBtn(_:)), for: .touchUpInside)
+        return button
+    }()
 }
 
 extension GameStoryMessageCell {
@@ -67,6 +83,66 @@ extension GameStoryMessageCell {
         // 消息内容
         messageLabel.text = item.gameElem?.action.roundInfo.introduction
         messageLabel.sizeToFit()
+        
+        
+        // 是否展示确认按钮
+        if item.gameElem?.action.roundInfo.showSeconds == 0 {
+            // 判断主持人是否自己
+            let userInfo = LoginManager.shared.getUserInfo()
+            if item.gameElem?.adminUserId == userInfo?.userId {
+                // 展示时间为0，需要主持人确认，时间不为零，等待系统下发后续的消息
+                if item.gameElem?.status == 1 {
+                    confirmBtn.isHidden = true
+                } else {
+                    confirmBtn.isHidden = false
+                }
+            } else {
+                confirmBtn.isHidden = true
+            }
+        } else {
+            confirmBtn.isHidden = true
+        }
+        
+        if confirmBtn.isHidden {
+            
+            // 先重置confirmBtn的约束，为先取消底部跟superview的约束，否则约束要报错
+            confirmBtn.snp.remakeConstraints { (make) in
+                make.top.equalTo(messageLabel.snp.bottom).offset(20)
+                make.centerX.equalToSuperview()
+                make.size.equalTo(CGSize(width: 114, height: 32))
+            }
+            
+            messageLabel.snp.remakeConstraints { (make) in
+                make.top.equalTo(titleBg.snp.bottom).offset(xMargin)
+                make.left.equalToSuperview().offset(xMargin)
+                make.right.equalToSuperview().offset(-xMargin)
+                make.bottom.equalToSuperview().offset(-yMargin)
+            }
+            
+        } else {
+            
+            // 先重置messageLabel的约束，为先取消底部跟superview的约束，否则约束要报错
+            messageLabel.snp.remakeConstraints { (make) in
+                make.top.equalTo(titleBg.snp.bottom).offset(xMargin)
+                make.left.equalToSuperview().offset(xMargin)
+                make.right.equalToSuperview().offset(-xMargin)
+            }
+            
+            confirmBtn.snp.remakeConstraints { (make) in
+                make.top.equalTo(messageLabel.snp.bottom).offset(20)
+                make.centerX.equalToSuperview()
+                make.size.equalTo(CGSize(width: 114, height: 32))
+                make.bottom.equalToSuperview().offset(-yMargin)
+            }
+        }
+    }
+    
+    // 主持人确认
+    @objc func clickConfirmBtn(_ sender:UIButton) {
+        LSLog("clickConfirmBtn")
+        if let confirmBlock = confirmBlock {
+            confirmBlock()
+        }
     }
 }
 
@@ -77,6 +153,7 @@ extension GameStoryMessageCell{
         contentView.addSubview(titleBg)
         titleBg.addSubview(titleLabel)
         contentView.addSubview(messageLabel)
+        contentView.addSubview(confirmBtn)
         
         titleBg.snp.makeConstraints { (make) in
             make.top.equalToSuperview().offset(yMargin)
@@ -91,9 +168,15 @@ extension GameStoryMessageCell{
         
         messageLabel.snp.makeConstraints { (make) in
             make.top.equalTo(titleBg.snp.bottom).offset(xMargin)
-            make.bottom.equalToSuperview().offset(-yMargin)
             make.left.equalToSuperview().offset(xMargin)
             make.right.equalToSuperview().offset(-xMargin)
+            make.bottom.equalToSuperview().offset(-yMargin)
+        }
+        
+        confirmBtn.snp.makeConstraints { (make) in
+            make.top.equalTo(messageLabel.snp.bottom).offset(20)
+            make.centerX.equalToSuperview()
+            make.size.equalTo(CGSize(width: 114, height: 32))
         }
     }
 }

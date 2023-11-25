@@ -27,22 +27,29 @@ target 'Platform' do
   pod 'AliyunOSSiOS'  #阿里云
   pod 'ZLPhotoBrowser'
   pod 'JXSegmentedView'
-  #   pod 'WechatOpenSDK'
+#  pod 'WechatOpenSDK'
   pod 'AMap3DMap-NO-IDFA'
   pod 'AMapSearch-NO-IDFA'
   pod 'AMapLocation-NO-IDFA'
   pod 'TXIMSDK_Plus_Swift_iOS'
+  pod 'WechatOpenSDK-XCFramework'
   # *********************************************** Objective-C ***********************************************
 
 end
 
+#post_install do |installer|
+#    installer.generated_projects.each do |project|
+#          project.targets.each do |target|
+#              target.build_configurations.each do |config|
+#                  config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+#               end
+#          end
+#   end
+#end
+
 post_install do |installer|
-    installer.generated_projects.each do |project|
-          project.targets.each do |target|
-              target.build_configurations.each do |config|
-                  config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-               end
-          end
-   end
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+  end
 end
 

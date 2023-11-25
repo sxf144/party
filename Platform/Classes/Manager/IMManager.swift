@@ -15,6 +15,8 @@ class IMManager: NSObject {
     // 初始化 config 对象
     let config: V2TIMSDKConfig = V2TIMSDKConfig()
     let sdkAppID: Int32 = 1400826865
+    let businessID: Int = 40576
+    var deviceToken: Data?
     
     private override init() {
         
@@ -42,6 +44,7 @@ class IMManager: NSObject {
         if let userInfo = LoginManager.shared.getUserInfo() {
             V2TIMManager.shared.login(userID: userInfo.userId, userSig: userInfo.userSig) {
                 LSLog("loginIM succ")
+                self.uploadDeviceTokenToIM()
             } fail: { code, desc in
                 // 如果返回以下错误码，表示使用 UserSig 已过期，请您使用新签发的 UserSig 进行再次登录。
                 // 1. ERR_USER_SIG_EXPIRED（6206）
@@ -54,6 +57,23 @@ class IMManager: NSObject {
 //                    self.loginIM()
                     
                 }
+            }
+        }
+    }
+    
+    func setDeviceToken(_ deviceToken:Data) {
+        self.deviceToken = deviceToken
+    }
+    
+    func uploadDeviceTokenToIM() {
+        if let deviceToken = deviceToken {
+            let apnsConfig:V2TIMAPNSConfig = V2TIMAPNSConfig()
+            apnsConfig.token = deviceToken
+            apnsConfig.businessID = businessID
+            V2TIMManager.shared.setAPNS(config: apnsConfig) {
+                LSLog("setAPNS succ")
+            } fail: { code, desc in
+                LSLog("setAPNS fail code:\(code), desc:\(desc)")
             }
         }
     }

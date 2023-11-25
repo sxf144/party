@@ -345,6 +345,10 @@ extension ChatKeyboardView {
     func showKeyBoard() {
         chatTextView.becomeFirstResponder()
     }
+    
+    func setPlaceHolder(_ placeHolder:String) {
+        chatTextView.placeholder = placeHolder
+    }
 }
 
 

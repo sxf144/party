@@ -1,5 +1,5 @@
 //
-//  ModifyUserController.swift
+//  SupplyUserController.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -11,7 +11,7 @@ import SnapKit
 import ZLPhotoBrowser
 import Kingfisher
 
-class ModifyUserController: BaseController, UITextFieldDelegate {
+class SupplyUserController: BaseController {
     
 
     let maxCharacterCount = 20
@@ -23,14 +23,11 @@ class ModifyUserController: BaseController, UITextFieldDelegate {
         super.viewDidLoad()
         setupUI()
         
-//        let tapGes = UITapGestureRecognizer(target: self, action: #selector(cancelTextField))
-//        view.addGestureRecognizer(tapGes)
-        
         // 初始化条件
         var sender = maleSelectBtn
         if userInfo?.sex == 1 {
             sender = maleSelectBtn
-        }else if userInfo?.sex == 2 {
+        } else if userInfo?.sex == 2 {
             sender = femaleSelectBtn
         }
         
@@ -117,7 +114,7 @@ class ModifyUserController: BaseController, UITextFieldDelegate {
     }()
 }
 
-extension ModifyUserController {
+extension SupplyUserController: UITextFieldDelegate {
     
     @objc func cancelTextField() {
         nickTextField.resignFirstResponder()
@@ -231,8 +228,10 @@ extension ModifyUserController {
 }
 
 
-extension ModifyUserController{
-    fileprivate func setupUI(){
+extension SupplyUserController {
+    
+    fileprivate func setupUI() {
+        
         view.addSubview(avatar)
         view.addSubview(nickTextField)
         view.addSubview(maleSelectBtn)

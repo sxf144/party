@@ -56,7 +56,7 @@ public enum LIMGameStatus: Int {
 }
 
 /// 系统消息
-public struct LIMSysElem {
+public class LIMSysElem {
     
     /// content
     var content:String = ""
@@ -76,7 +76,7 @@ public struct LIMSysElem {
 }
 
 /// 礼物消息
-public struct LIMGiftElem {
+public class LIMGiftElem {
     
     /// id
     var giftId:Int64 = 0
@@ -115,7 +115,7 @@ public struct LIMGiftElem {
 }
 
 /// 红包消息
-public struct LIMRedPacketElem {
+public class LIMRedPacketElem {
     
     /// id
     var id:Int64 = 0
@@ -161,7 +161,7 @@ public struct LIMRedPacketElem {
 }
 
 /// 邀请消息
-public struct LIMInviteElem {
+public class LIMInviteElem {
     
     /// 发起人ID
     var userId:String = ""
@@ -210,7 +210,7 @@ public struct LIMInviteElem {
 }
 
 /// 游戏消息
-public struct LIMGameElem {
+public class LIMGameElem {
     
     /// 现场ID
     var sceneId:Int64 = 0
@@ -244,7 +244,7 @@ public struct LIMGameElem {
 }
 
 /// 游戏行为
-public struct GameActionInfo {
+public class GameActionInfo {
     /// 行为ID
     var actionId:LIMGameStatus = .LIMGameStatusNone
     /// 卡牌信息
@@ -297,7 +297,7 @@ public struct GameActionInfo {
 }
 
 /// 卡牌信息
-public struct CardInfo {
+public class CardInfo {
     /// 卡牌ID
     var id:Int64 = 0
     /// 名称
@@ -344,7 +344,7 @@ public struct CardInfo {
 }
 
 /// 轮次信息
-public struct RoundInfo {
+public class RoundInfo {
     /// 标题
     var title:String = ""
     /// 介绍
@@ -539,6 +539,7 @@ class LIMModel: NSObject {
                     let json:JSON = JSON(msg.customElem?.data ?? "")
                     let subType:String = json["type"].rawValue as! String
                     switch subType {
+                        
                         case LIMElemType.LIMElemGift.rawValue:
                             limMessage.elemType = LIMElemType.LIMElemGift
                             limMessage.giftElem = LIMGiftElem(json["data"])
@@ -558,14 +559,14 @@ class LIMModel: NSObject {
                         case LIMElemType.LIMElemGameStatusSync.rawValue:
                             limMessage.elemType = LIMElemType.LIMElemGameStatusSync
                             limMessage.gameElem = LIMGameElem(json["data"])
-                        
                             break
+                        
                         default:
                             break
                     }
                     
                     break
-                    
+                
                 default:
                     break
             }

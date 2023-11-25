@@ -24,8 +24,8 @@ class PublishPartyController: BaseController {
     var endTime: String = ""
     // 创建一个闭包属性来处理时间选择器的值变化
     var timePickerHandler: ((Date) -> Void)?
-    var maleCnt: Int = 0
-    var femaleCnt: Int = 0
+    var maleCnt: Int = 5
+    var femaleCnt: Int = 5
     var selectGameItem: GameItem?
     var coverImage: UIImage!
     var coverUrl: String = ""
@@ -448,7 +448,7 @@ extension PublishPartyController {
             gameLabel.sizeToFit()
         }
         vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
     }
     
     // 点击发布按钮
@@ -544,12 +544,6 @@ extension PublishPartyController {
         if (maleCnt == 0 || femaleCnt == 0) {
             LSLog("checkParam maleCnt err")
             LSHUD.showError("请设置人数")
-            return false
-        }
-        
-        if (feeTextField.text!.isEmpty) {
-            LSHUD.showError("请设置费用")
-            LSLog("checkParam feeTextField err")
             return false
         }
         

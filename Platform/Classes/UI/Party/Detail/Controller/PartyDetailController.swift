@@ -462,10 +462,13 @@ extension PartyDetailController {
     
     // 加入组局
     func joinParty() {
+        LSHUD.showLoading()
         NetworkManager.shared.joinParty(uniCode) { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("joinParty data:\(resp.data)")
                 self.joinData = resp.data
+                
                 // 加入成功后，刷新数据
                 self.loadNewData()
             } else {
@@ -474,16 +477,37 @@ extension PartyDetailController {
         }
     }
     
-    // 加入组局
+    // 解散组局
     func dismissParty() {
+        LSHUD.showLoading()
         NetworkManager.shared.dismissParty(uniCode) { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("dismissParty succ")
                 self.partyDetail?.state = 2
                 self.pop()
             } else {
                 LSLog("dismissParty fail")
+                LSHUD.showInfo(resp.msg)
             }
+        }
+    }
+    
+    func payForParty() {
+        // 判断是否需要付费
+        if let orderId = self.joinData?.orderId, !orderId.isEmpty {
+            let channel = self.joinData?.channel ?? 1
+            NetworkManager.shared.prePayJoinOrder(orderId, channel: channel) { resp in
+                if resp.status == .success {
+                    LSLog("prePayJoinOrder succ")
+                    
+                } else {
+                    LSLog("prePayJoinOrder fail")
+                    LSHUD.showInfo(resp.msg)
+                }
+            }
+        } else {
+            
         }
     }
     
@@ -730,20 +754,16 @@ extension PartyDetailController {
     }
     
     func updateComment(_ item:CommentItem) {
-//        var newIndexPath:IndexPath?
         if (item.id == 0) {
             if let indexPath = selectedIndexPath {
                 if (indexPath.row == 0) {
-                    commentData.comments.insert(item, at: indexPath.section)
+                    commentData.comments[indexPath.section].childComments.insert(item, at: 0)
                 } else {
                     commentData.comments[indexPath.section].childComments.insert(item, at: indexPath.row-1)
                 }
-//                newIndexPath = IndexPath(row: selectedIndexPath?.row + 1, section: selectedIndexPath?.section)
             } else {
                 commentData.comments.insert(item, at: 0)
-//                newIndexPath = IndexPath(row: 0, section: 0)
             }
-            
         } else {
             var isExist = false
             for i in 0 ..< commentData.comments.count {
@@ -819,11 +839,12 @@ extension PartyDetailController {
     }
     
     @objc func clickJoinBtn(_ sender:UIButton) {
+        LSLog("clickJoinBtn joinState:\(partyDetail?.joinState ?? -1)")
         // 根据状态处理，加入、解散
         if isOwner {
             // 解散次桔
             dismissParty()
-        } else if partyDetail?.joinState == 2 {
+        } else if (partyDetail?.joinState == 0 || partyDetail?.joinState == 2) {
             // 加入组局
             joinParty()
         } else {
@@ -846,7 +867,7 @@ extension PartyDetailController {
             inviteJoinParty(peopleIds)
         }
         vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
     }
     
     @objc func handleDelPersonTap() {
@@ -929,7 +950,18 @@ extension PartyDetailController: UITableViewDataSource, UITableViewDelegate, UIS
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedIndexPath = indexPath
+        
+        var placeHolder:String = "说点什么"
+        if (indexPath.row == 0) {
+            let item = commentData.comments[indexPath.section]
+            placeHolder = "@\(item.from.nick)"
+        } else {
+            let pitem = commentData.comments[indexPath.section]
+            let item = pitem.childComments[indexPath.row-1]
+            placeHolder = "@\(item.from.nick)"
+        }
         // 拉起评论输入框
+        chatKeyboard.setPlaceHolder(placeHolder)
         chatKeyboard.showKeyBoard()
     }
 }

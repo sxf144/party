@@ -11,15 +11,15 @@ import AMapLocationKit
 import ImSDK_Plus_Swift
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, WXApiDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // app initialize
         appInitializes()
-        // 添加监听
-        addObservers()
+//        // 添加监听
+//        addObservers()
         // 注册通知
         registNotification()
         // Override point for customization after application launch.
@@ -50,30 +50,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         LSLog("didRegisterForRemoteNotificationsWithDeviceToken")
         
-//        // 将 deviceToken 转换为字符串，通常是将其转换为十六进制字符串
-//        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-//
-//        // 输出模拟的设备令牌
-//        LSLog("Simulated Device Token: \(token)")
-        
-        let apnsConfig:V2TIMAPNSConfig = V2TIMAPNSConfig()
-        apnsConfig.token = deviceToken
-        apnsConfig.businessID = 40576
-        V2TIMManager.shared.setAPNS(config: apnsConfig) {
-            LSLog("setAPNS succ")
-        } fail: { code, desc in
-            LSLog("setAPNS fail code:\(code), desc:\(desc)")
-        }
+        // 把deviceToken传给IM，待IM登录后上传deviceToken
+        IMManager.shared.setDeviceToken(deviceToken)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         LSLog("register remote notification failed: \(error)")
     }
     
+    /*********************************************  微信SDK begin *********************************************/
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        let handleUrlStr = url.absoluteString
+        LSLog("handleOpen options handleUrlStr:\(handleUrlStr)")
+        if let handleUrl = URL(string: handleUrlStr) {
+            return WXApi.handleOpen(handleUrl, delegate: self)
+        }
+        return false
+    }
+    
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        let handleUrlStr = url.absoluteString
+        LSLog("handleOpen sourceApplication handleUrlStr:\(handleUrlStr)")
+        if let handleUrl = URL(string: handleUrlStr) {
+            return WXApi.handleOpen(handleUrl, delegate: self)
+        }
+        return false
+    }
+    
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        return WXApi.handleOpenUniversalLink(userActivity, delegate: self)
+    }
+    /*********************************************  微信SDK end  *********************************************/
+    
     @objc func handleLogin(_ notification: Notification) {
+        LSLog("---- AppDelegate handleLogin ----")
         // 登录成功
         resetRootViewController()
-        judgeToModifyUserController()
+        judgeToSupplyUserController()
         // 发起IM登录
         IMManager.shared.loginIM()
     }
@@ -95,7 +108,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().requestAuthorization(options: [.badge, .sound, .alert]) { granted, error in
                 if granted {
-                UIApplication.shared.registerForRemoteNotifications()
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
                 }
             }
         } else {
@@ -163,7 +178,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                           completion: nil)
     }
     
-    func judgeToModifyUserController() {
+    func judgeToSupplyUserController() {
+        LSLog("---- judgeToSupplyUserController ----")
         if let rootController = self.window?.rootViewController {
             let className = String(describing: TabBarController.self)
             let rootClassName = String(describing: type(of: rootController))
@@ -172,7 +188,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let userInfo = LoginManager.shared.getUserInfo()
                 // 如果没有头像就跳转入完善资料
                 if (userInfo?.portrait == nil || userInfo?.portrait == "") {
-                    PageManager.shared.pushToModifyUser()
+                    PageManager.shared.pushToSupplyUser()
                 }
             }
         }

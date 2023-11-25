@@ -33,7 +33,7 @@ class NetworkManager: NSObject {
     }
     
     /// 授权登录
-    func authorize(_ mobile: String,smsCode: String,code: String,grantType: String,source: String,refreshToken: String,_ response: @escaping((MobileLoginResp) -> ()) ){
+    func authorize(_ mobile: String, smsCode: String, code: String, grantType: String, source: String, refreshToken: String, identityToken: String,_ response: @escaping((MobileLoginResp) -> ()) ){
         var para:[String:Any] = ["grant_type": grantType]
         if grantType.isEqual(GrantType.authorizationCode.rawValue) {
             para["source"] = source
@@ -42,6 +42,8 @@ class NetworkManager: NSObject {
             } else if source.isEqual("mobile") {
                 para["mobile"] = mobile
                 para["sms_code"] = smsCode
+            } else if source.isEqual("apple") {
+                para["identity_token"] = identityToken
             }
         } else if grantType.isEqual(GrantType.refreshToken.rawValue) {
             para["refresh_token"] = refreshToken
@@ -78,10 +80,19 @@ class NetworkManager: NSObject {
         }
     }
     
-    /// 编辑昵称
+    /// 编辑性别
     func editSex(_ sex: Int64,_ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["sex": sex]
         Network.shared.httpPostRequest(path: "/user/edit_sex", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 编辑个性签名
+    func editIntro(_ intro: String,_ response: @escaping((RespModel) -> ()) ){
+        let para:[String:Any] = ["intro": intro]
+        Network.shared.httpPostRequest(path: "/user/edit_intro", para: para) { (json) in
             let resp = RespModel(json)
             response(resp)
         }
@@ -158,6 +169,16 @@ class NetworkManager: NSObject {
         let para:[String:Any] = ["unique_code": uniqueCode]
         Network.shared.httpPostRequest(path: "/play/dismiss", para: para) { (json) in
             let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 预付款局订单
+    func prePayJoinOrder(_ orderId:String = "", channel:Int64 = 1, _ response: @escaping((WxOrderResp) -> ()) ){
+        var para:[String:Any] = ["order_id": orderId]
+        para["channel"] = channel
+        Network.shared.httpPostRequest(path: "/play/pre_pay_join_order", para: para) { (json) in
+            let resp = WxOrderResp(json)
             response(resp)
         }
     }
@@ -309,6 +330,17 @@ class NetworkManager: NSObject {
         let para:[String:Any] = ["task_id": taskId]
         Network.shared.httpPostRequest(path: "/play/finish_task", para: para) { (json) in
             let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 收支记录
+    func getCoinLogs(_ pageNum:Int64 = 1, pageSize:Int64 = 10, month:String = "2023-01", _ response: @escaping((CoinListResp) -> ()) ){
+        var para:[String:Any] = ["page_num": pageNum]
+        para["page_size"] = pageSize
+        para["month"] = month
+        Network.shared.httpGetRequest(path: "/settings/get_coin_logs", para: para) { (json) in
+            let resp = CoinListResp(json)
             response(resp)
         }
     }

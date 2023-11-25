@@ -19,8 +19,10 @@ class RechargeView: UIView {
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
     let CollectionSpace: CGFloat = 10
+    var selectedIndex = 0
     var dataList: [RechargeItem] = []
     var userPageInfo: UserPageModel? = LoginManager.shared.getUserPageInfo()
+    var dataLoaded: Bool = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,10 +36,22 @@ class RechargeView: UIView {
     
     override func didMoveToWindow() {
         super.didMoveToWindow()
-//        // 获取充值商品列表
-//        getRechargeList()
-        // 获取内购商品列表
-        requestProductInfo()
+        LSLog("RechargeView didMoveToWindow")
+        
+        if SKPaymentQueue.canMakePayments() {
+            if !dataLoaded {
+                // 获取充值商品列表
+                getRechargeList()
+            }
+        } else {
+            // 用户禁用了应用内购买
+            LSHUD.showInfo("请打开应用内购权限")
+        }
+    }
+    
+    // 在视图销毁时移除观察者
+    deinit {
+        SKPaymentQueue.default().remove(self)
     }
     
     /// 遮幕
@@ -144,7 +158,10 @@ class RechargeView: UIView {
 extension RechargeView {
     
     func addObservers() {
+        LSLog("addObservers")
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserPageInfoChange(_:)), name: NotificationName.userPageInfoChange, object: nil)
+        // 设置观察者以监听购买事务
+        SKPaymentQueue.default().add(self)
     }
     
     @objc func handleUserPageInfoChange(_ notification: Notification) {
@@ -170,50 +187,33 @@ extension RechargeView {
     @objc fileprivate func clickRechargeBtn(_ sender:UIButton){
         LSLog("clickRechargeBtn")
         
+        if selectedIndex >= 0, selectedIndex < dataList.count {
+            LSHUD.showLoading()
+            // 启动购买
+            let item = dataList[selectedIndex]
+            let payment = SKPayment(product: item.product)
+            SKPaymentQueue.default().add(payment)
+        }
     }
-    
-    
-    
-    
-//    func sendGift(_ item:GiftItem) {
-//
-//        let peopleId:String = userId.isEmpty ? self.participateItem.userId : userId
-//        if (peopleId.isEmpty) {
-//            LSHUD.showInfo("请选择成员")
-//            return
-//        }
-//
-//        NetworkManager.shared.sendGift(uniqueCode, peopleId:peopleId, giftId:item.id) { resp in
-//            LSLog("sendGift resp:\(String(describing: resp))")
-//
-//            if resp.status == .success {
-//                LSLog("sendGift succ")
-//                self.userPageInfo?.user.coinBalance = resp.data.coinBalance
-//                if let userPageInfo = self.userPageInfo {
-//                    LoginManager.shared.saveUserPageInfo(userPageInfo)
-//                }
-//
-//                self.removeGiftView()
-//            } else {
-//                LSLog("sendGift fail")
-//                LSHUD.showError(resp.msg)
-//            }
-//        }
-//    }
     
     /// 显示 view
     func showInWindow() {
         let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow })
         keyWindow!.addSubview(self)
         keyWindow!.bringSubviewToFront(self)
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.3, animations: {
             self.contentView.frame = CGRect(x: 0, y: kScreenH - CONTENT_HEIGHT, width: kScreenW, height: CONTENT_HEIGHT)
             self.coverView.alpha = 0.6
+        }) { (suc) in
+            LSLog("checkForUnfinishedTransactions")
+            // 检查未完成的交易
+            self.checkForUnfinishedTransactions()
         }
     }
     
     /// 移除 view
     func removeRechargeView() {
+        LSHUD.hide()
         UIView.animate(withDuration: 0.3, animations: {
             self.contentView.frame = CGRect(x: 0, y: kScreenH, width: kScreenW, height: CONTENT_HEIGHT)
             self.coverView.alpha = 0.2
@@ -225,56 +225,162 @@ extension RechargeView {
     
     // 拉取数据
     func getRechargeList() {
+        
+        LSHUD.showLoading()
         NetworkManager.shared.getRechargeList { resp in
             LSLog("getRechargeList data:\(String(describing: resp.data))")
-            
             if resp.status == .success {
                 LSLog("getRechargeList succ")
-                self.dataList = resp.data.items
-                self.rechargeCollectionView.reloadData()
+                self.requestProductInfo(resp.data.items)
             } else {
+                LSHUD.hide()
                 LSLog("getRechargeList fail")
-                // 模拟数据
-                self.dataList = []
-                for i in 0 ..< 10 {
-                    var item = RechargeItem()
-                    item.id = Int64(i)
-                    item.productId = String(i)
-                    item.title = String(i)
-                    item.coinAmount = Int64(10*i)
-                    item.cashAmount = Int64(i)
-                    self.dataList.append(item)
-                }
-                self.rechargeCollectionView.reloadData()
             }
         }
     }
     
     // 获取内购商品列表
-    func requestProductInfo() {
-        let productIdentifiers: Set<String> = ["juzitang_coin_test_60"]
-        let productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
-        productsRequest.delegate = self
-        productsRequest.start()
+    func requestProductInfo(_ list:[RechargeItem]) {
+        
+        self.dataList = list
+        
+        var productIdentifiers: Set<String> = []
+        for i in 0 ..< self.dataList.count {
+            let item = self.dataList[i]
+            productIdentifiers.insert(item.productId)
+        }
+        
+        if productIdentifiers.count > 0 {
+            let productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
+            productsRequest.delegate = self
+            productsRequest.start()
+        }
+    }
+    
+    func refreshSelected() {
+        
+        for i in 0 ..< dataList.count {
+            dataList[i].selected = selectedIndex == i
+        }
+        
+        rechargeCollectionView.reloadData()
+        
+        if selectedIndex >= 0, selectedIndex < dataList.count {
+            let confirmBtnTitle: String = "立即充值\(dataList[selectedIndex].product.price)元"
+            rechargeBtn.setTitle(confirmBtnTitle, for: .normal)
+        }
     }
 }
 
 extension RechargeView: SKPaymentTransactionObserver, SKProductsRequestDelegate {
     
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        
+        LSLog("------ paymentQueue updatedTransactions ------")
+        for transaction in transactions {
+            
+            switch transaction.transactionState {
+            case .purchased:
+                // 购买成功
+                completeTransaction(transaction: transaction)
+            case .failed:
+                // 购买失败
+                failTransaction(transaction: transaction)
+            case .restored:
+                // 恢复购买
+                restoreTransaction(transaction: transaction)
+            case .deferred:
+                // 交易延迟
+                LSLog("交易延迟")
+            case .purchasing:
+                // 正在购买
+                LSLog("正在购买")
+            @unknown default:
+                SKPaymentQueue.default().finishTransaction(transaction)
+                break
+            }
+        }
+    }
+    
+    func paymentQueue(_ queue: SKPaymentQueue, shouldAddStorePayment payment: SKPayment, for product: SKProduct) -> Bool {
+        return true
     }
     
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        
         if response.products.count > 0 {
+            dataLoaded = true
             for product in response.products {
-                print("Product ID: \(product.productIdentifier)")
-                print("Product Title: \(product.localizedTitle)")
-                print("Product Description: \(product.localizedDescription)")
-                print("Product Price: \(product.price)")
+//                print("Product ID: \(product.productIdentifier)")
+//                print("Product Title: \(product.localizedTitle)")
+//                print("Product Description: \(product.localizedDescription)")
+//                print("Product Price: \(product.price)")
+                
+                for i in 0 ..< dataList.count {
+                    if dataList[i].productId == product.productIdentifier {
+                        dataList[i].product = product
+                        break
+                    }
+                }
             }
+            
         } else {
-            print("No products found.")
+            LSLog("No products found.")
+        }
+        
+        DispatchQueue.main.async {
+            LSHUD.hide()
+            self.refreshSelected()
+        }
+    }
+    
+    // 处理购买成功的交易
+    func completeTransaction(transaction: SKPaymentTransaction) {
+        // 处理购买成功的逻辑
+        // 比如：解锁功能，提供内容等
+        LSLog("购买成功")
+        LSHUD.hide()
+        SKPaymentQueue.default().finishTransaction(transaction)
+    }
+
+    // 处理购买失败的交易
+    func failTransaction(transaction: SKPaymentTransaction) {
+        LSHUD.hide()
+        if let error = transaction.error as? SKError {
+            if error.code == .paymentCancelled {
+                // 用户取消购买
+                LSLog("用户取消购买")
+            } else {
+                // 非用户取消的购买失败
+                LSLog("购买失败: \(error.localizedDescription), code:\(error.code)")
+            }
+        }
+        SKPaymentQueue.default().finishTransaction(transaction)
+    }
+
+    // 处理恢复购买的交易
+    func restoreTransaction(transaction: SKPaymentTransaction) {
+        // 处理恢复购买的逻辑
+        LSLog("恢复购买")
+        LSHUD.hide()
+        SKPaymentQueue.default().finishTransaction(transaction)
+    }
+    
+    // 检查是否有未完成的订单
+    func checkForUnfinishedTransactions() {
+        for transaction in SKPaymentQueue.default().transactions {
+            switch transaction.transactionState {
+            case .purchased, .failed, .restored:
+                // 处理已完成的交易
+                SKPaymentQueue.default().finishTransaction(transaction)
+                break
+            case .deferred, .purchasing:
+                // 存在未完成的交易
+                LSLog("存在未完成的交易")
+                SKPaymentQueue.default().finishTransaction(transaction)
+            @unknown default:
+                SKPaymentQueue.default().finishTransaction(transaction)
+                break
+            }
         }
     }
 }
@@ -303,10 +409,10 @@ extension RechargeView: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        for i in 0 ..< dataList.count {
-            dataList[i].selected = indexPath.row == i
-        }
-        collectionView.reloadData()
+        selectedIndex = indexPath.row
+        
+        // 刷新状态
+        refreshSelected()
     }
 }
 

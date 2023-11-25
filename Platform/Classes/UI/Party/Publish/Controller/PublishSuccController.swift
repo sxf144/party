@@ -54,7 +54,7 @@ class PublishSuccController: BaseController {
     // 邀请好友
     fileprivate lazy var inviteIV: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "invite")
+        imageView.image = UIImage(named: "icon_invite")
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 28
         return imageView

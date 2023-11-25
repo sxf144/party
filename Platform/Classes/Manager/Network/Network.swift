@@ -35,7 +35,7 @@ fileprivate let kServerHost = "http://114.55.54.174/api"
 #endif
 
 fileprivate let APP_TYPE = "mobile-ios"
-fileprivate let APP_NAME = "con"
+fileprivate let APP_NAME = "juzitang"
 
 class Network: NSObject {
     
@@ -70,7 +70,7 @@ class Network: NSObject {
     
     /// 请求头http header
     private var httpHeader: HTTPHeaders {
-        // let iosVersion : NSString = UIDevice.currentDevice().systemVersion
+        let iosVersion : String = UIDevice.current.systemVersion
         let version:String = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
         //UIDevice.current.systemVersion
 //        let deviceUUID:String! =  UIDevice.current.identifierForVendor?.uuidString
@@ -84,7 +84,7 @@ class Network: NSObject {
         if let token = LoginManager.shared.getUserToken() {
             header["Authorization"] = token.tokenType + " " + token.accessToken
         }
-        header["User-Agent"] = "party_fun;1.0.0;iOS;14.0.0;iPhone;channel"
+        header["User-Agent"] = "party_fun;\(version);iOS;\(iosVersion);default"
         header["timestamp"] = timestamp
         header["Content-Type"] = "application/json"
         return header
@@ -237,20 +237,23 @@ fileprivate extension Network {
     }
     
     func getHttpHeader(_ timestamp:String) -> HTTPHeaders {
-        // let iosVersion : NSString = UIDevice.currentDevice().systemVersion
-
-        //UIDevice.current.systemVersion
         //        let deviceUUID:String! =  UIDevice.current.identifierForVendor?.uuidString
+        let iosVersion : String = UIDevice.current.systemVersion
+        let shortVersion: String = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let deviceName: String = UIDevice.current.model
+//        let version:String = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        let channel = "AppStore"
         var header = HTTPHeaders()
         header["apptype"] = APP_TYPE
         header["appname"] = APP_NAME
         header["versioncode"] = kAppBuildVersion
         //        header["imei"] = deviceUUID
-        header["channel"] = "AppStore"
+        header["channel"] = channel
         if let token = LoginManager.shared.getUserToken() {
             header["Authorization"] = token.tokenType + " " + token.accessToken
         }
-        header["User-Agent"] = "party_fun;1.0.0;iOS;14.0.0;iPhone;channel"
+        // UA格式"party_fun;1.1;android;12;HUAWEI;default"
+        header["User-Agent"] = "party_fun;\(shortVersion);ios;\(iosVersion);\(deviceName);\(channel)"
         header["timestamp"] = String(format: "%@",timestamp)
         header["Content-Type"] = "application/json"
         return header

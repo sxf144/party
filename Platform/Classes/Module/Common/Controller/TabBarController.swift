@@ -38,7 +38,7 @@ extension TabBarController {
         addSingleChildVC(MyPartyController(), title: Localized(""), iconName: "tab_game_")
         addSingleChildVC(BaseController(), title: Localized(""), iconName: "tab_add")
         addSingleChildVC(ConversationListController(), title: Localized(""), iconName: "tab_message_")
-        addSingleChildVC(BaseController(), title: Localized(""), iconName: "tab_mine_")
+        addSingleChildVC(MyUserPageController(), title: Localized(""), iconName: "tab_mine_")
     }
     
     private func addSingleChildVC(_ childVC: UIViewController, title: String, iconName: String) {

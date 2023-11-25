@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import StoreKit
 
 class RechargeCell: UICollectionViewCell {
     
@@ -79,11 +80,12 @@ extension RechargeCell {
         }
         
         // 代币价值
+//        coinLabel.text = String(item.product.localizedTitle)
         coinLabel.text = String(item.coinAmount)
         coinLabel.sizeToFit()
         
         // 购买所需货币
-        cashLabel.text = String(item.cashAmount) + "元"
+        cashLabel.text = item.product.price.stringValue + "元"
         cashLabel.sizeToFit()
     }
 }
@@ -101,15 +103,16 @@ extension RechargeCell {
             make.edges.equalToSuperview()
         }
         
-        coinIV.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(14)
-            make.centerX.equalToSuperview().offset(-16)
-            make.size.equalTo(CGSize(width: 16, height: 16))
+        coinLabel.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(12)
+            make.centerY.equalTo(coinIV)
+            make.centerX.equalToSuperview().offset(10)
         }
         
-        coinLabel.snp.makeConstraints { (make) in
-            make.centerY.equalTo(coinIV)
-            make.left.equalTo(coinIV.snp.right).offset(4)
+        coinIV.snp.makeConstraints { (make) in
+            make.centerY.equalTo(coinLabel)
+            make.right.equalTo(coinLabel.snp.left).offset(-4)
+            make.size.equalTo(CGSize(width: 16, height: 16))
         }
         
         cashLabel.snp.makeConstraints { (make) in

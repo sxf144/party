@@ -145,7 +145,7 @@ extension SubCommentCell {
         likeCntLabel.sizeToFit()
         
         // 内容
-        contentLabel.text = item.content
+        contentLabel.text = "@\(item.to.nick)：\(item.content)"
         contentLabel.sizeToFit()
         
         // 时间

@@ -106,7 +106,7 @@ extension RecommendController {
     }
     
     @objc func clickModifyBtn(_ sender:UIButton) {
-        PageManager.shared.pushToModifyUser()
+        PageManager.shared.pushToSupplyUser()
     }
     
     @objc func goingPartyDidClick() {

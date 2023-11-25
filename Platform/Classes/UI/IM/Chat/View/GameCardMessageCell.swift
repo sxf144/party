@@ -104,6 +104,8 @@ extension GameCardMessageCell {
     func configure(with citem: LIMMessage) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
+        
+        // 判断是否是自己
         if item.isSelf ?? false {
             avatar.isHidden = true
             nameLabel.isHidden = true
