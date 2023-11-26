@@ -61,6 +61,7 @@ class PublishPartyController: BaseController {
         let placeHolder = UIImage(named: "default_small")
         let iv = UIImageView()
         iv.layer.cornerRadius = 8
+        iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         iv.isUserInteractionEnabled = true
         iv.kf.setImage(with: URL(string: ""), placeholder: placeHolder)
@@ -294,7 +295,7 @@ class PublishPartyController: BaseController {
     
     fileprivate lazy var personTitle: UILabel = {
         let label = UILabel()
-        label.text = "总人数（0）"
+        label.text = "总人数（\(femaleCnt + maleCnt)）"
         label.textColor = UIColor.ls_color("#333333")
         label.font = UIFont.ls_mediumFont(14)
         label.sizeToFit()
@@ -304,24 +305,28 @@ class PublishPartyController: BaseController {
     // 女人数
     fileprivate lazy var femaleView: StepView = {
         let view = StepView()
+        view.count = femaleCnt
         view.iconName = "icon_female"
+        view.initUI()
         view.actionBlock = { count in
             self.femaleCnt = count
             self.personTitle.text = "总人数（\(self.femaleCnt + self.maleCnt)）"
         }
-        view.initUI()
+        
         return view
     }()
     
     // 男人数
     fileprivate lazy var maleView: StepView = {
         let view = StepView()
+        view.count = maleCnt
         view.iconName = "icon_male"
+        view.initUI()
         view.actionBlock = { count in
             self.maleCnt = count
             self.personTitle.text = "总人数（\(self.femaleCnt + self.maleCnt)）"
         }
-        view.initUI()
+        
         return view
     }()
     
@@ -455,8 +460,10 @@ extension PublishPartyController {
     @objc func clickPublishBtn(_ sender:UIButton) {
         // 取消聚焦
         resignResponders()
+        LSHUD.showLoading()
         // 检查各个字段是否有效
         if !checkParam() {
+            LSHUD.hide()
             return
         }
         
@@ -470,6 +477,8 @@ extension PublishPartyController {
                 
                 // 发布
                 publishParty()
+            } else {
+                LSHUD.hide()
             }
         }
     }
@@ -493,6 +502,7 @@ extension PublishPartyController {
         para["fee"] = Int64(feeTextField.text ?? "")
         
         NetworkManager.shared.publishParty(para) { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("createPlay succ")
                 // 跳转到发布成功界面

@@ -165,8 +165,29 @@ class PageManager: NSObject {
     }
     
     /// 收支记录
-    func pushToCoinListController() {
-        let vc = CoinListController()
+    func pushToCoinLogController() {
+        let vc = CoinLogController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 礼物记录
+    func pushToGiftLogController() {
+        let vc = GiftLogController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 设置
+    func pushToSettingController() {
+        let vc = SettingController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 账号管理
+    func pushToAccountManagerController() {
+        let vc = AccountManagerController()
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }

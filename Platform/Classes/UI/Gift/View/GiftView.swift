@@ -293,7 +293,7 @@ extension GiftView {
             
             if resp.status == .success {
                 LSLog("getGiftList succ")
-                self.dataList = resp.data.items
+                self.dataList = resp.data?.items ?? []
                 self.giftCollectionView.reloadData()
             } else {
                 LSLog("getGiftList fail")

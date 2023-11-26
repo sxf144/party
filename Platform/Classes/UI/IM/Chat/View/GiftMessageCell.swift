@@ -63,6 +63,7 @@ class GiftMessageCell: UITableViewCell {
     
     fileprivate lazy var iconIV: UIImageView = {
         let imageView = UIImageView()
+        imageView.backgroundColor = .white
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true

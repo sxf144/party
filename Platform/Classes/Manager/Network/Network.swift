@@ -70,21 +70,20 @@ class Network: NSObject {
     
     /// 请求头http header
     private var httpHeader: HTTPHeaders {
+        let platformName: String = UIDevice.current.systemName.lowercased()
         let iosVersion : String = UIDevice.current.systemVersion
-        let version:String = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        //UIDevice.current.systemVersion
+        let deviceName: String = UIDevice.current.model.lowercased()
+        let channel = "appstore"
 //        let deviceUUID:String! =  UIDevice.current.identifierForVendor?.uuidString
         let timestamp = Date().ls_timeStamp
         var header = HTTPHeaders()
         header["apptype"] = APP_TYPE
         header["appname"] = APP_NAME
-        header["versioncode"] = String(format: "%@",version)
-//        header["imei"] = deviceUUID
-//        header["channel"] = "AppStore"
+        header["versioncode"] = String(format: "%@",kAppBuildVersion)
         if let token = LoginManager.shared.getUserToken() {
             header["Authorization"] = token.tokenType + " " + token.accessToken
         }
-        header["User-Agent"] = "party_fun;\(version);iOS;\(iosVersion);default"
+        header["User-Agent"] = "party_fun;\(kAppVersion);\(platformName);\(iosVersion);\(deviceName);\(channel)"
         header["timestamp"] = timestamp
         header["Content-Type"] = "application/json"
         return header
@@ -238,11 +237,10 @@ fileprivate extension Network {
     
     func getHttpHeader(_ timestamp:String) -> HTTPHeaders {
         //        let deviceUUID:String! =  UIDevice.current.identifierForVendor?.uuidString
+        let platformName: String = UIDevice.current.systemName.lowercased()
         let iosVersion : String = UIDevice.current.systemVersion
-        let shortVersion: String = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        let deviceName: String = UIDevice.current.model
-//        let version:String = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-        let channel = "AppStore"
+        let deviceName: String = UIDevice.current.model.lowercased()
+        let channel = "appstore"
         var header = HTTPHeaders()
         header["apptype"] = APP_TYPE
         header["appname"] = APP_NAME
@@ -253,7 +251,7 @@ fileprivate extension Network {
             header["Authorization"] = token.tokenType + " " + token.accessToken
         }
         // UA格式"party_fun;1.1;android;12;HUAWEI;default"
-        header["User-Agent"] = "party_fun;\(shortVersion);ios;\(iosVersion);\(deviceName);\(channel)"
+        header["User-Agent"] = "party_fun;\(kAppVersion);\(platformName);\(iosVersion);\(deviceName);\(channel)"
         header["timestamp"] = String(format: "%@",timestamp)
         header["Content-Type"] = "application/json"
         return header

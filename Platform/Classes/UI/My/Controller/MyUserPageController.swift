@@ -316,6 +316,7 @@ extension MyUserPageController {
     // 设置
     @objc func clickSettingBtn(_ sender:UIButton) {
         LSLog("clickSettingBtn")
+        PageManager.shared.pushToSettingController()
     }
 }
 

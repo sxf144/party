@@ -1,5 +1,5 @@
 //
-//  CoinListController.swift
+//  CoinLogController.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -10,10 +10,10 @@ import UIKit
 import SnapKit
 import MJRefresh
 
-class CoinListController: BaseController {
+class CoinLogController: BaseController {
     
     let CellHeight = 72.0
-    var dataList: CoinListModel = CoinListModel()
+    var dataList: CoinLogModel = CoinLogModel()
     var currentDate: Date = Date()
 
     override func viewDidLoad() {
@@ -25,7 +25,7 @@ class CoinListController: BaseController {
         tableView.mj_header?.beginRefreshing()
     }
     
-    // 创建底部View
+    // 创建顶部View
     fileprivate lazy var topBtn: UIButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(clickDateBtn(_:)), for: .touchUpInside)
@@ -71,12 +71,12 @@ class CoinListController: BaseController {
         })
         
         // 注册UITableViewCell类
-        tableView.register(CoinItemCell.self, forCellReuseIdentifier: "CoinItemCell")
+        tableView.register(CoinLogCell.self, forCellReuseIdentifier: "CoinLogCell")
         return tableView
     }()
 }
 
-extension CoinListController {
+extension CoinLogController {
     
     func getCoinLogs(pageNum:Int64, pageSize:Int64) {
         let monthStr = currentDate.ls_formatterStr("yyyy-MM")
@@ -92,7 +92,7 @@ extension CoinListController {
             
             if resp.status == .success {
                 LSLog("getGameList succ")
-                self.dataList = resp.data ?? CoinListModel()
+                self.dataList = resp.data ?? CoinLogModel()
                 self.tableView.reloadData()
                 if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
                     self.tableView.mj_footer.endRefreshingWithNoMoreData()
@@ -140,7 +140,7 @@ extension CoinListController {
 }
 
 // UITableView 代理
-extension CoinListController: UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
+extension CoinLogController: UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
     
     // 实现UITableViewDataSource方法
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -148,7 +148,7 @@ extension CoinListController: UITableViewDataSource, UITableViewDelegate, UIScro
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CoinItemCell", for: indexPath) as! CoinItemCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CoinLogCell", for: indexPath) as! CoinLogCell
         let item = dataList.items[indexPath.row]
         cell.configure(with: item)
         return cell
@@ -160,7 +160,7 @@ extension CoinListController: UITableViewDataSource, UITableViewDelegate, UIScro
     }
 }
 
-extension CoinListController {
+extension CoinLogController {
     fileprivate func setupUI(){
         
         view.addSubview(topBtn)

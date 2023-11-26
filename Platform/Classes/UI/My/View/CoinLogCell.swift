@@ -1,5 +1,5 @@
 //
-//  CoinItemCell.swift
+//  CoinLogCell.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 
 
-class CoinItemCell: UITableViewCell {
+class CoinLogCell: UITableViewCell {
     
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 14.0
@@ -42,7 +42,7 @@ class CoinItemCell: UITableViewCell {
         let label = UILabel()
         label.font = kFontRegualer12
         label.textColor = UIColor.ls_color("#999999")
-        label.text = item.time
+        label.text = ""
         label.sizeToFit()
         return label
     }()
@@ -52,13 +52,13 @@ class CoinItemCell: UITableViewCell {
         let label = UILabel()
         label.font = kFontBold18
         label.textColor = UIColor.ls_color("#FE5B5B")
-        label.text = String(item.amount)
+        label.text = ""
         label.sizeToFit()
         return label
     }()
 }
 
-extension CoinItemCell {
+extension CoinLogCell {
     
     func configure(with citem: CoinItem) {
         LSLog("configure citem:\(String(describing: citem))")
@@ -84,8 +84,9 @@ extension CoinItemCell {
     }
 }
 
-extension CoinItemCell {
-    fileprivate func setupUI(){
+extension CoinLogCell {
+    
+    fileprivate func setupUI() {
         
         contentView.addSubview(nameLabel)
         contentView.addSubview(timeLabel)

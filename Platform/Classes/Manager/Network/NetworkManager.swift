@@ -345,6 +345,35 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 礼物记录
+    func getGiftLogs(_ pageNum:Int64 = 1, pageSize:Int64 = 10, month:String = "2023-01", _ response: @escaping((GiftLogResp) -> ()) ){
+        var para:[String:Any] = ["page_num": pageNum]
+        para["page_size"] = pageSize
+        para["month"] = month
+        Network.shared.httpGetRequest(path: "/settings/get_gift_logs", para: para) { (json) in
+            let resp = GiftLogResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 绑定手机
+    func bindMobile(_ mobile:String, code:String,_ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["mobile": mobile]
+        para["code"] = code
+        Network.shared.httpPostRequest(path: "/setting/bind_mobile", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 绑定微信
+    func bindWx(_ code:String,_ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["code": code]
+        Network.shared.httpPostRequest(path: "/setting/bind_wx", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
     
     /**************************************************** 废弃接口 ****************************************************/
     /// QQ登录

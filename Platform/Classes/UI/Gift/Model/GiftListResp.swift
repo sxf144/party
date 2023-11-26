@@ -10,7 +10,7 @@ import UIKit
 import SwiftyJSON
 
 class GiftListResp: RespModel {
-    var data = GiftListModel()
+    var data:GiftListModel?
     
     override init(_ json: JSON) {
         super.init(json)

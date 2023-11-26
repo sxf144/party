@@ -1,6 +1,6 @@
 //
 //
-//  CoinListResp.swift
+//  GiftLogResp.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/27.
@@ -12,16 +12,16 @@ import SwiftyJSON
 
 
 /// 获取收支记录
-class CoinListResp: RespModel {
-    var data:CoinListModel?
+class GiftLogResp: RespModel {
+    var data:GiftLogModel?
     
     override init(_ json: JSON) {
         super.init(json)
-        data = CoinListModel(json["data"])
+        data = GiftLogModel(json["data"])
     }
 }
 
-class CoinListModel {
+class GiftLogModel {
     
     ///
     var pageNum:Int64 = 1
@@ -32,7 +32,7 @@ class CoinListModel {
     ///
     var totalCount:Int64 = 0
     ///
-    var items:[CoinItem] = []
+    var items:[GiftItem] = []
     
     init(_ json: JSON) {
         pageNum = json["page_num"].int64Value
@@ -41,29 +41,8 @@ class CoinListModel {
         totalCount = json["total_count"].int64Value
         items = []
         for (_, subJson) in json["items"] {
-            items.append(CoinItem(subJson))
+            items.append(GiftItem(subJson))
         }
-    }
-    
-    init() {}
-}
-
-class CoinItem {
-    
-    ///
-    var amount:Int64 = 0
-    ///
-    var description:String = ""
-    ///
-    var id:Int64 = 0
-    ///
-    var time:String = ""
-    
-    init(_ json: JSON) {
-        amount = json["amount"].int64Value
-        description = json["description"].stringValue
-        id = json["id"].int64Value
-        time = json["time"].stringValue
     }
     
     init() {}

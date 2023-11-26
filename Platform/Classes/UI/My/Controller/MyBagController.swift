@@ -123,12 +123,17 @@ extension MyBagController {
     // options
     @objc func clickOptionBtn(_ sender:UIButton) {
         LSLog("clickOptionBtn")
+        /**
+         * optionValue
+         * 1、收支记录
+         * 2、收到的礼物
+         * 3、提现
+         */
         let optionValue:Int = sender.layer.value(forKey: optionKey) as! Int
-        // optionValue 1、2、3分别是收支记录、收到的礼物、提现
         if optionValue == 1 {
-            PageManager.shared.pushToCoinListController()
+            PageManager.shared.pushToCoinLogController()
         } else if optionValue == 2 {
-            
+            PageManager.shared.pushToGiftLogController()
         } else if optionValue == 3 {
             
         }

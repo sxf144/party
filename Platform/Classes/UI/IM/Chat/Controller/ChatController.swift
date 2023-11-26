@@ -255,22 +255,18 @@ extension ChatController {
             return
         }
         
-        // 判断游戏是否已结束
-        var gameEnded = false
+        // 判断是否是最后一条游戏消息
+        var lastGameElemExist = false
         
         // 从dataList.count-1倒序到0，步长为1
         for i in stride(from: dataList.count-1, through: 0, by: -1) {
-            
             let item = dataList[i]
             
             // 游戏消息
             if item.elemType == .LIMElemGameStatusSync {
-                if gameEnded {
+                if lastGameElemExist {
                     item.gameElem?.status = 1
                 } else {
-                    if item.gameElem?.action.actionId == .LIMGameStatusEnd {
-                        gameEnded = true
-                    }
                     // 如果是红包、卡牌任务、剧情故事（时间为0），置为未完成
                     if partyDetail?.state != 2, partyDetail?.state != 3 {
                         if (item.gameElem?.action.actionId == .LIMGameStatusCard || item.gameElem?.action.actionId == .LIMGameStatusRedPacket || (item.gameElem?.action.actionId == .LIMGameStatusStory && item.gameElem?.action.roundInfo.showSeconds == 0)) {
@@ -282,6 +278,7 @@ extension ChatController {
                         item.gameElem?.status = 1
                     }
                 }
+                lastGameElemExist = true
             }
             
             // 处理用户信息
@@ -432,6 +429,17 @@ extension ChatController {
         
         // 跳转到最底部
         scrollToBottom()
+        
+        // 判断是否是自己抽到了卡牌
+        if limMsg.isSelf ?? false, limMsg.elemType == .LIMElemGameStatusSync, limMsg.gameElem?.action.actionId == .LIMGameStatusCard {
+            if let gameElem = limMsg.gameElem {
+                TaskView.shared.showInWindow(gameElem)
+                TaskView.shared.redPacketBlock = {
+                    // 发红包逃避任务
+                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: 0)
+                }
+            }
+        }
     }
     
     func updateMessage(_ msg:V2TIMMessage) {

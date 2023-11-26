@@ -10,9 +10,15 @@
 		0F07B9042AD187C7009B5FFB /* IMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F07B9032AD187C7009B5FFB /* IMManager.swift */; };
 		0F0D428B2AD4211600E65306 /* LIMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0D428A2AD4211600E65306 /* LIMModel.swift */; };
 		0F37438E2B11F378008F6B31 /* WxOrderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438D2B11F378008F6B31 /* WxOrderModel.swift */; };
-		0F3743902B11FE7C008F6B31 /* CoinListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438F2B11FE7C008F6B31 /* CoinListModel.swift */; };
-		0F3743922B1200A9008F6B31 /* CoinListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743912B1200A9008F6B31 /* CoinListController.swift */; };
-		0F3743942B120502008F6B31 /* CoinItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743932B120502008F6B31 /* CoinItemCell.swift */; };
+		0F3743902B11FE7C008F6B31 /* CoinLogModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438F2B11FE7C008F6B31 /* CoinLogModel.swift */; };
+		0F3743922B1200A9008F6B31 /* CoinLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743912B1200A9008F6B31 /* CoinLogController.swift */; };
+		0F3743942B120502008F6B31 /* CoinLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743932B120502008F6B31 /* CoinLogCell.swift */; };
+		0F3743982B123051008F6B31 /* GiftLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743972B123051008F6B31 /* GiftLogController.swift */; };
+		0F37439A2B123160008F6B31 /* GiftLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743992B123160008F6B31 /* GiftLogCell.swift */; };
+		0F37439C2B12320E008F6B31 /* GiftLogModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439B2B12320E008F6B31 /* GiftLogModel.swift */; };
+		0F37439E2B1317F7008F6B31 /* SettingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439D2B1317F7008F6B31 /* SettingController.swift */; };
+		0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */; };
+		0F3743A22B132FC8008F6B31 /* TaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743A12B132FC8008F6B31 /* TaskView.swift */; };
 		0F4338F72ACC8C320014F0C5 /* SubCommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */; };
 		0F4DFE772AEBD6EF00DD158A /* GiftListResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */; };
 		0F4DFE792AECD6BF00DD158A /* GiftCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DFE782AECD6BF00DD158A /* GiftCell.swift */; };
@@ -223,9 +229,15 @@
 		0F07B9032AD187C7009B5FFB /* IMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMManager.swift; sourceTree = "<group>"; };
 		0F0D428A2AD4211600E65306 /* LIMModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LIMModel.swift; sourceTree = "<group>"; };
 		0F37438D2B11F378008F6B31 /* WxOrderModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WxOrderModel.swift; sourceTree = "<group>"; };
-		0F37438F2B11FE7C008F6B31 /* CoinListModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinListModel.swift; sourceTree = "<group>"; };
-		0F3743912B1200A9008F6B31 /* CoinListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinListController.swift; sourceTree = "<group>"; };
-		0F3743932B120502008F6B31 /* CoinItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinItemCell.swift; sourceTree = "<group>"; };
+		0F37438F2B11FE7C008F6B31 /* CoinLogModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinLogModel.swift; sourceTree = "<group>"; };
+		0F3743912B1200A9008F6B31 /* CoinLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinLogController.swift; sourceTree = "<group>"; };
+		0F3743932B120502008F6B31 /* CoinLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinLogCell.swift; sourceTree = "<group>"; };
+		0F3743972B123051008F6B31 /* GiftLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftLogController.swift; sourceTree = "<group>"; };
+		0F3743992B123160008F6B31 /* GiftLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftLogCell.swift; sourceTree = "<group>"; };
+		0F37439B2B12320E008F6B31 /* GiftLogModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftLogModel.swift; sourceTree = "<group>"; };
+		0F37439D2B1317F7008F6B31 /* SettingController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingController.swift; sourceTree = "<group>"; };
+		0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManagerController.swift; sourceTree = "<group>"; };
+		0F3743A12B132FC8008F6B31 /* TaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskView.swift; sourceTree = "<group>"; };
 		0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubCommentCell.swift; sourceTree = "<group>"; };
 		0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftListResp.swift; sourceTree = "<group>"; };
 		0F4DFE782AECD6BF00DD158A /* GiftCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftCell.swift; sourceTree = "<group>"; };
@@ -1089,6 +1101,7 @@
 		0FBDBAC42ADFEB8100E0A0CB /* View */ = {
 			isa = PBXGroup;
 			children = (
+				0F3743A12B132FC8008F6B31 /* TaskView.swift */,
 				0FA9406C2AEA646D009A10C9 /* ChatBottomView.swift */,
 				0FA9406A2AE94C84009A10C9 /* GameEndMessageCell.swift */,
 				0FA940682AE94443009A10C9 /* GameRedPacketMessageCell.swift */,
@@ -1187,7 +1200,10 @@
 		0FFF00022B07561F0072FCFA /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				0F3743912B1200A9008F6B31 /* CoinListController.swift */,
+				0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */,
+				0F37439D2B1317F7008F6B31 /* SettingController.swift */,
+				0F3743972B123051008F6B31 /* GiftLogController.swift */,
+				0F3743912B1200A9008F6B31 /* CoinLogController.swift */,
 				0FFF00092B08B22F0072FCFA /* MyBagController.swift */,
 				0FFF00032B07561F0072FCFA /* MyUserPageController.swift */,
 			);
@@ -1197,7 +1213,8 @@
 		0FFF00042B07561F0072FCFA /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				0F37438F2B11FE7C008F6B31 /* CoinListModel.swift */,
+				0F37439B2B12320E008F6B31 /* GiftLogModel.swift */,
+				0F37438F2B11FE7C008F6B31 /* CoinLogModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1205,7 +1222,8 @@
 		0FFF00062B07561F0072FCFA /* View */ = {
 			isa = PBXGroup;
 			children = (
-				0F3743932B120502008F6B31 /* CoinItemCell.swift */,
+				0F3743992B123160008F6B31 /* GiftLogCell.swift */,
+				0F3743932B120502008F6B31 /* CoinLogCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1729,7 +1747,7 @@
 				49FBBF83268DA6A5000C851E /* NSString+LSAdd.m in Sources */,
 				0FA0B0472ACD5C54001F20DB /* FollowListController.swift in Sources */,
 				0F4DFE912AEF94B200DD158A /* RechargeView.swift in Sources */,
-				0F3743922B1200A9008F6B31 /* CoinListController.swift in Sources */,
+				0F3743922B1200A9008F6B31 /* CoinLogController.swift in Sources */,
 				0FBDBAC82ADFEB8100E0A0CB /* TextMessageCell.swift in Sources */,
 				49FBBFA1268DA6D2000C851E /* PageManager.swift in Sources */,
 				0FB10E702AF88BEE00E64777 /* ChatEmojiListView.swift in Sources */,
@@ -1751,14 +1769,17 @@
 				0F8E1B9F2AC7DA3400C67D62 /* GameListResp.swift in Sources */,
 				0FA9406B2AE94C84009A10C9 /* GameEndMessageCell.swift in Sources */,
 				49FBBF8E268DA6BF000C851E /* ConfigFont.swift in Sources */,
+				0F37439E2B1317F7008F6B31 /* SettingController.swift in Sources */,
 				0F4DFE962AEF9A9500DD158A /* RechargeCell.swift in Sources */,
 				0FFF00102B0B778F0072FCFA /* SupplyUserController.swift in Sources */,
+				0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */,
 				0FB10E742AF88BEE00E64777 /* ChatKeyboardView.swift in Sources */,
 				49FBBF7C268DA6A5000C851E /* UIFont+Extension.swift in Sources */,
 				0FA940672AE9432F009A10C9 /* DefaultMessageCell.swift in Sources */,
 				49FBBF81268DA6A5000C851E /* UIView+Extension.swift in Sources */,
 				0F9EC3292AB87E980079B763 /* MapSearchController.swift in Sources */,
 				0FB10E6F2AF88BEE00E64777 /* ChatMoreMenuView.swift in Sources */,
+				0F37439C2B12320E008F6B31 /* GiftLogModel.swift in Sources */,
 				0FF39BAD2AF78BA5007BCA63 /* ChatDelegate.swift in Sources */,
 				49FBBFA3268DA6D2000C851E /* OSSManager.swift in Sources */,
 				0F8E1BB82AC9230300C67D62 /* PartyDetailController.swift in Sources */,
@@ -1769,6 +1790,7 @@
 				0FB10E752AF88BEE00E64777 /* ChatEmoticon.swift in Sources */,
 				0FBDBACA2AE00B7900E0A0CB /* SysMessageCell.swift in Sources */,
 				49FBBFD8268DA77A000C851E /* RateView.swift in Sources */,
+				0F37439A2B123160008F6B31 /* GiftLogCell.swift in Sources */,
 				0F4DFE9C2AF0B23800DD158A /* GameRoundListResp.swift in Sources */,
 				49FBBFA5268DA6D2000C851E /* LSNotification.swift in Sources */,
 				49FBBFB9268DA772000C851E /* LoginController.swift in Sources */,
@@ -1791,6 +1813,7 @@
 				49FBBFD3268DA77A000C851E /* DatePickerController.swift in Sources */,
 				0F37438E2B11F378008F6B31 /* WxOrderModel.swift in Sources */,
 				0F8E1BBD2ACBA54C00C67D62 /* CommentResp.swift in Sources */,
+				0F3743982B123051008F6B31 /* GiftLogController.swift in Sources */,
 				0F4F3EF82AAB2176000AF5BD /* MyLocationManager.swift in Sources */,
 				0FB10ECB2AF89B3500E64777 /* FYLightTheme.swift in Sources */,
 				49FBBFBD268DA772000C851E /* LoginTextFieldView.swift in Sources */,
@@ -1801,6 +1824,7 @@
 				0F4DFE9A2AEFB37900DD158A /* WebViewController.swift in Sources */,
 				49FBBFD9268DA77A000C851E /* DashedView.swift in Sources */,
 				0F76D9F02AD05FBD0031DADE /* MyHistoryPartyCell.swift in Sources */,
+				0F3743A22B132FC8008F6B31 /* TaskView.swift in Sources */,
 				0FAAB0CB2AE6837C003B8DE4 /* GiftMessageCell.swift in Sources */,
 				0F76D9EC2ACFBB4F0031DADE /* MyPartyController.swift in Sources */,
 				0F4338F72ACC8C320014F0C5 /* SubCommentCell.swift in Sources */,
@@ -1812,7 +1836,7 @@
 				49FBBFD4268DA77A000C851E /* TabBarController.swift in Sources */,
 				0FB10ECA2AF89B3500E64777 /* FYThemeColors.swift in Sources */,
 				0FDD98282AF0FA1300EBA619 /* GameCardCell.swift in Sources */,
-				0F3743902B11FE7C008F6B31 /* CoinListModel.swift in Sources */,
+				0F3743902B11FE7C008F6B31 /* CoinLogModel.swift in Sources */,
 				0FBDBABC2ADFEB1D00E0A0CB /* ConversationListController.swift in Sources */,
 				0F8E1BBB2AC9AC7300C67D62 /* PartyDetailResp.swift in Sources */,
 				49FBBFD1268DA77A000C851E /* BaseController.swift in Sources */,
@@ -1852,7 +1876,7 @@
 				0F4DFE8D2AEF8E6900DD158A /* GiftGiveResp.swift in Sources */,
 				0F4DFE8B2AEEA68700DD158A /* UserPageResp.swift in Sources */,
 				0FFF000F2B0B778F0072FCFA /* EditUserController.swift in Sources */,
-				0F3743942B120502008F6B31 /* CoinItemCell.swift in Sources */,
+				0F3743942B120502008F6B31 /* CoinLogCell.swift in Sources */,
 				0F8028652ABC600F00324720 /* PoiCell.swift in Sources */,
 				49FBBF7E268DA6A5000C851E /* Date+Extension.swift in Sources */,
 			);
