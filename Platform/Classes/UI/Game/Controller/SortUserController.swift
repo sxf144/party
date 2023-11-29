@@ -22,7 +22,7 @@ class SortUserController: BaseController {
     var dataList: [[SimpleUserInfo]] = []
 
     override func viewDidLoad() {
-        self.title = "调整玩家顺序"
+        title = "调整玩家顺序"
         super.viewDidLoad()
         setupUI()
         

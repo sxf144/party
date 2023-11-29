@@ -127,7 +127,7 @@ extension OSSManager{
             return
         }
         LSLog("updateClient oss:\(oss)")
-        let credentialsProvider = OSSAuthCredentialProvider(authServerUrl: "http://114.55.54.174/api/open/get_oss_sts_token")
+        let credentialsProvider = OSSAuthCredentialProvider(authServerUrl: "https://api.juzitang.net/party/open/get_oss_sts_token")
         client = OSSClient(endpoint: oss.endPoint, credentialProvider: credentialsProvider)
     }
 }

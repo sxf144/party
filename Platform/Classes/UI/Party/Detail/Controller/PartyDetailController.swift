@@ -26,6 +26,7 @@ class PartyDetailController: BaseController {
     var participateData: ParticipateModel?
     var commentData: CommentListModel = CommentListModel()
     var joinData: JoinModel?
+    var tempIndexPath: IndexPath?
     var selectedIndexPath: IndexPath?
     var isOwner = false
 
@@ -39,6 +40,12 @@ class PartyDetailController: BaseController {
         commentTableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据
             self?.loadNewData()
+        })
+        
+        // 设置上拉加载更多
+        commentTableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
+            // 在这里执行上拉加载更多的操作，例如加载更多数据
+            self?.loadMoreData()
         })
         
         commentTableView.mj_header?.beginRefreshing()
@@ -65,8 +72,8 @@ class PartyDetailController: BaseController {
     
     // TopView
     fileprivate lazy var topView: UIView = {
-        let v = UIView()
-        return v
+        let view = UIView()
+        return view
     }()
     
     // 游戏封面
@@ -216,12 +223,15 @@ class PartyDetailController: BaseController {
         let view = UIView()
         view.layer.cornerRadius = 8
         view.backgroundColor = UIColor.ls_color("#F9F9F9")
+        // 添加点击手势识别器
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleLocationTap))
+        view.addGestureRecognizer(tapGesture)
         return view
     }()
     
     fileprivate lazy var addressLocalIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_local")
+        imageView.image = UIImage(named: "icon_location1")
         return imageView
     }()
     
@@ -302,7 +312,7 @@ class PartyDetailController: BaseController {
         tableView.backgroundColor = .white
         tableView.separatorStyle = .none
         tableView.tableHeaderView = headerView
-        tableView.tableFooterView = footerView
+//        tableView.tableFooterView = footerView
         tableView.estimatedRowHeight = CellHeight
         tableView.rowHeight = UITableView.automaticDimension
         
@@ -389,16 +399,22 @@ extension PartyDetailController {
     
     // 获取评论
     func getComments(pageNum:Int64, pageSize:Int64, uniqueCode:String , parentId:Int64) {
+        
         NetworkManager.shared.getComments(pageNum, pageSize: pageSize, uniqueCode: uniqueCode, parentId: parentId ) { resp in
+            
+            if (self.commentTableView.mj_header.isRefreshing) {
+                self.commentTableView.mj_header.endRefreshing()
+            }
+            
+            if (self.commentTableView.mj_footer.isRefreshing) {
+                self.commentTableView.mj_footer.endRefreshing()
+            }
             
             if resp.status == .success {
                 LSLog("getComments succ")
                 self.handleCommentsData(parentId: parentId, data: resp.data)
             } else {
                 LSLog("getComments fail")
-                if (self.commentTableView.mj_header.isRefreshing) {
-                    self.commentTableView.mj_header.endRefreshing()
-                }
             }
         }
     }
@@ -437,10 +453,12 @@ extension PartyDetailController {
             if resp.status == .success {
                 LSLog("sendComment succ")
                 self.selectedIndexPath = nil
+                self.tempIndexPath = nil
                 tempComment.id = resp.data.commentId
                 self.updateComment(tempComment)
             } else {
                 self.selectedIndexPath = nil
+                self.tempIndexPath = nil
                 LSLog("sendComment fail")
                 
             }
@@ -469,8 +487,27 @@ extension PartyDetailController {
                 LSLog("joinParty data:\(resp.data)")
                 self.joinData = resp.data
                 
-                // 加入成功后，刷新数据
-                self.loadNewData()
+                // 判断是否需要支付
+                if let orderId = self.joinData?.orderId, !orderId.isEmpty {
+                    self.payForParty(orderId)
+                } else {
+                    self.joinStatusChanged()
+                    self.showSuccAlert()
+                }
+            } else {
+                LSLog("joinParty fail")
+            }
+        }
+    }
+    
+    // 退出局
+    func leaveParty() {
+        LSHUD.showLoading()
+        NetworkManager.shared.leaveParty(uniCode) { resp in
+            LSHUD.hide()
+            if resp.status == .success {
+                LSLog("leaveParty succ")
+                self.joinStatusChanged()
             } else {
                 LSLog("joinParty fail")
             }
@@ -485,6 +522,9 @@ extension PartyDetailController {
             if resp.status == .success {
                 LSLog("dismissParty succ")
                 self.partyDetail?.state = 2
+                // 发送局状态变更通知
+                LSNotification.postPartyStatusChange()
+                // 返回
                 self.pop()
             } else {
                 LSLog("dismissParty fail")
@@ -493,22 +533,48 @@ extension PartyDetailController {
         }
     }
     
-    func payForParty() {
-        // 判断是否需要付费
-        if let orderId = self.joinData?.orderId, !orderId.isEmpty {
-            let channel = self.joinData?.channel ?? 1
-            NetworkManager.shared.prePayJoinOrder(orderId, channel: channel) { resp in
-                if resp.status == .success {
-                    LSLog("prePayJoinOrder succ")
-                    
-                } else {
-                    LSLog("prePayJoinOrder fail")
-                    LSHUD.showInfo(resp.msg)
+    func payForParty(_ orderId:String) {
+        // 需要付费
+        LSHUD.showLoading()
+        // 渠道号1是微信，默认为1
+        NetworkManager.shared.prePayJoinOrder(orderId) { resp in
+            LSLog("prePayJoinOrder resp:\(resp)")
+            LSHUD.hide()
+            if resp.status == .success {
+                LSLog("prePayJoinOrder succ")
+                if let order = resp.data {
+                    WXApiManager.shared.payBlock = { oId, status in
+                        LSLog("payBlock oId:\(oId), status:\(status)")
+                        if oId == orderId {
+                            self.joinStatusChanged()
+                            self.showSuccAlert()
+                        }
+                    }
+                    WXApiManager.shared.sendPayRequest(order, orderId: orderId)
                 }
+            } else {
+                LSLog("prePayJoinOrder fail")
+                LSHUD.showInfo(resp.msg)
             }
-        } else {
+        }
+    }
+    
+    func joinStatusChanged() {
+        // 加入成功后，刷新数据
+        self.loadNewData()
+        // 发送局状态变更通知
+        LSNotification.postPartyStatusChange()
+    }
+    
+    func showSuccAlert() {
+        // 提示成功加入
+        let alertController = UIAlertController(title: "", message: "加入成功，请准时赴约。", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
             
         }
+        
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
     }
     
     func refreshData() {
@@ -521,13 +587,14 @@ extension PartyDetailController {
             creatorAvatar.kf.setImage(with: URL(string: detail.portrait ?? ""), placeholder: PlaceHolderAvatar)
             
             // 时间
-//            timeLabel.text = formatDate(startTime: detail.startTime, endTime: detail.endTime)
             timeLabel.text = Date.formatDate(startTime: detail.startTime, endTime: detail.endTime)
             timeLabel.sizeToFit()
             
             // 费用
+            
             if let fee = detail.fee, fee != 0 {
-                feeLabel.text = "费用：¥" + String(fee)
+                let newFee = String(format: "%.2f", Float(fee)/100)
+                feeLabel.text = "费用：¥" + String(newFee)
             } else {
                 feeLabel.text = "费用免费"
             }
@@ -561,12 +628,11 @@ extension PartyDetailController {
                 joinBtn.setTitle("解散此桔", for: .normal)
                 
             } else if (detail.joinState == 1) {
-                // 已参与
-                joinBtn.isEnabled = false
+                // 已加入
                 joinBtn.layer.borderWidth = 0
                 joinBtn.backgroundColor = UIColor.ls_color("#eeeeee")
                 joinBtn.setTitleColor(UIColor.ls_color("#999999"), for: .disabled)
-                joinBtn.setTitle("已参与", for: .normal)
+                joinBtn.setTitle("已加入", for: .normal)
             } else if (detail.maleRemainCount == 0 && detail.femaleRemainCount == 0) {
                 // 空余位置为0，已满员
                 joinBtn.isEnabled = false
@@ -749,6 +815,11 @@ extension PartyDetailController {
         getComments(pageNum: 1, pageSize: commentData.pageSize, uniqueCode: uniCode, parentId: 0)
     }
     
+    func loadMoreData() {
+        // 获取评论
+        getComments(pageNum: commentData.pageNum+1, pageSize: commentData.pageSize, uniqueCode: uniCode, parentId: 0)
+    }
+    
     @objc func clickQrCodeBtn(_ sender:UIButton) {
         
     }
@@ -758,11 +829,13 @@ extension PartyDetailController {
             if let indexPath = selectedIndexPath {
                 if (indexPath.row == 0) {
                     commentData.comments[indexPath.section].childComments.insert(item, at: 0)
+                    tempIndexPath = IndexPath(row: 1, section: indexPath.section)
                 } else {
                     commentData.comments[indexPath.section].childComments.insert(item, at: indexPath.row-1)
                 }
             } else {
                 commentData.comments.insert(item, at: 0)
+                tempIndexPath = IndexPath(row: 0, section: 0)
             }
         } else {
             var isExist = false
@@ -800,7 +873,9 @@ extension PartyDetailController {
                 commentData.pageNum = data.pageNum
                 commentData.comments.append(contentsOf: data.comments)
             }
-            
+            if (commentData.totalCount <= commentData.pageNum * commentData.pageSize) {
+                commentTableView.mj_footer.endRefreshingWithNoMoreData()
+            }
         } else {
             let len = commentData.comments.count
             
@@ -816,12 +891,10 @@ extension PartyDetailController {
                 }
             }
         }
+        
         footLabel.isHidden = commentData.pageTotal <= commentData.pageNum
         footerIcon.isHidden = commentData.pageTotal <= commentData.pageNum
         commentTableView.reloadData()
-        if (self.commentTableView.mj_header.isRefreshing) {
-            self.commentTableView.mj_header.endRefreshing()
-        }
     }
     
     @objc func handleFooterTap() {
@@ -847,8 +920,22 @@ extension PartyDetailController {
         } else if (partyDetail?.joinState == 0 || partyDetail?.joinState == 2) {
             // 加入组局
             joinParty()
-        } else {
-            // 无需处理
+        } else if (partyDetail?.joinState == 1) {
+            // 已经加入的局，弹窗提示是否退出
+            let alertController = UIAlertController(title: "", message: "确定要退出此桔吗？", preferredStyle: .alert)
+                    
+            let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
+                // 退出桔
+                self.leaveParty()
+            }
+            
+            let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
+                // 处理取消按钮点击后的操作
+            }
+            
+            alertController.addAction(okAction)
+            alertController.addAction(cancelAction)
+            present(alertController, animated: true, completion: nil)
         }
         
     }
@@ -856,6 +943,7 @@ extension PartyDetailController {
     @objc func handleAddPersonTap() {
         // 邀请好友
         let vc = FollowListController()
+        vc.setData(true)
         vc.followSelectedBlock = { [self] followItems in
             LSLog("followSelectedBlock followItems:\(followItems)")
             var peopleIds:[String] = []
@@ -875,33 +963,27 @@ extension PartyDetailController {
         
     }
     
+    // 查看位置
+    @objc func handleLocationTap() {
+        
+        if let lat = partyDetail?.latitude, let lon = partyDetail?.longitude {
+            PageManager.shared.pushToMapNavigationController(partyDetail?.landmark ?? "", address: partyDetail?.address ?? "", lat: lat, lon: lon)
+        } else {
+            LSHUD.showInfo("地址有误，无法定位")
+        }
+    }
+    
     override func rightAction() {
         // 分享
         
     }
     
-    func scrollToIndexPath() {
+    func scrollToIndexPath(_ indexPath:IndexPath) {
         
-        if let indexPath = selectedIndexPath {
-            // 跳转到指定位置
-            DispatchQueue.main.async { [self] in
-                // 在这里执行reloadData完成后的操作
-                commentTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-            }
-        } else {
-            // 跳转到最底部
-            DispatchQueue.main.async { [self] in
-                // 在这里执行reloadData完成后的操作
-                let lastSection = commentTableView.numberOfSections - 1
-                if lastSection >= 0 {
-                    let lastRow = commentTableView.numberOfRows(inSection: lastSection) - 1
-
-                    if lastRow >= 0 {
-                        let indexPath = IndexPath(row: lastRow, section: lastSection)
-                        commentTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-                    }
-                }
-            }
+        // 跳转到指定位置
+        DispatchQueue.main.async { [self] in
+            // 在这里执行reloadData完成后的操作
+            commentTableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
         }
     }
 }
@@ -999,16 +1081,17 @@ extension PartyDetailController: ChatKeyboardViewDelegate {
             }
             
             view.layoutIfNeeded()
-            scrollToIndexPath()
+            if let indexPath = tempIndexPath {
+                scrollToIndexPath(indexPath)
+            } else if let indexPath = selectedIndexPath {
+                scrollToIndexPath(indexPath)
+            }
         } else {
             
             commentTableView.snp.remakeConstraints { (make) in
                 make.top.left.right.equalToSuperview()
                 make.bottom.equalTo(self.bottomView.snp.top)
             }
-            
-            view.layoutIfNeeded()
-            scrollToIndexPath()
         }
     }
 }
@@ -1043,8 +1126,8 @@ extension PartyDetailController {
         detailView.addSubview(personView)
         personView.addSubview(personTitleLabel)
         personView.addSubview(personContent)
-        footerView.addSubview(footLabel)
-        footerView.addSubview(footerIcon)
+//        footerView.addSubview(footLabel)
+//        footerView.addSubview(footerIcon)
         view.addSubview(bottomView)
         bottomView.addSubview(commentBtn)
         bottomView.addSubview(joinBtn)
@@ -1052,16 +1135,16 @@ extension PartyDetailController {
         view.addSubview(chatKeyboard)
         
         
-        footLabel.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(12)
-            make.centerX.equalToSuperview()
-        }
-        
-        footerIcon.snp.makeConstraints { (make) in
-            make.centerY.equalTo(footLabel)
-            make.left.equalTo(footLabel.snp.right).offset(2)
-            make.size.equalTo(CGSize(width: 10, height: 10))
-        }
+//        footLabel.snp.makeConstraints { (make) in
+//            make.top.equalToSuperview().offset(12)
+//            make.centerX.equalToSuperview()
+//        }
+//        
+//        footerIcon.snp.makeConstraints { (make) in
+//            make.centerY.equalTo(footLabel)
+//            make.left.equalTo(footLabel.snp.right).offset(2)
+//            make.size.equalTo(CGSize(width: 10, height: 10))
+//        }
         
         headerView.snp.makeConstraints { (make) in
             make.top.equalToSuperview()

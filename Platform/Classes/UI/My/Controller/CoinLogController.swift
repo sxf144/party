@@ -17,7 +17,7 @@ class CoinLogController: BaseController {
     var currentDate: Date = Date()
 
     override func viewDidLoad() {
-        self.title = "收支记录"
+        title = "收支记录"
         super.viewDidLoad()
         setupUI()
         
@@ -81,7 +81,7 @@ extension CoinLogController {
     func getCoinLogs(pageNum:Int64, pageSize:Int64) {
         let monthStr = currentDate.ls_formatterStr("yyyy-MM")
         NetworkManager.shared.getCoinLogs(pageNum, pageSize: pageSize, month: monthStr) { resp in
-            LSLog("getGameList data:\(String(describing: resp.data))")
+            LSLog("getCoinLogs data:\(String(describing: resp.data))")
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
@@ -91,20 +91,34 @@ extension CoinLogController {
             }
             
             if resp.status == .success {
-                LSLog("getGameList succ")
-                self.dataList = resp.data ?? CoinLogModel()
-                self.tableView.reloadData()
-                if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
-                    self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                LSLog("getCoinLogs succ")
+                
+                if let data = resp.data {
+                    if pageNum == 1 {
+                        self.dataList = data
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageSize = pageSize
+                    } else {
+                        self.dataList.items.append(contentsOf: data.items)
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageTotal = data.pageTotal
+                        self.dataList.totalCount = data.totalCount
+                    }
+                    
+                    self.tableView.reloadData()
+                    if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
+                        self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                    }
                 }
             } else {
-                LSLog("getGameList fail")
+                LSLog("getCoinLogs fail")
             }
         }
     }
 
     func loadNewData() {
         // 在这里执行下拉刷新的操作
+        self.tableView.mj_footer.resetNoMoreData()
         getCoinLogs(pageNum: 1, pageSize: dataList.pageSize)
     }
 

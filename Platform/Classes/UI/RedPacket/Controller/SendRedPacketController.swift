@@ -21,9 +21,9 @@ class SendRedPacketController: BaseController {
     var taskId: Int64 = 0
 
     override func viewDidLoad() {
+        title = "发红包"
         super.viewDidLoad()
         view.backgroundColor = UIColor.ls_color("#F6F6F6")
-        title = "发红包"
         setupUI()
     }
     
@@ -251,7 +251,7 @@ extension SendRedPacketController {
             count = Int64(countTextField.text?.trim() ?? "") ?? 0
         }
         
-        let amount = Int64(amountTextField.text?.trim() ?? "") ?? 0
+        var amount = (Int64(amountTextField.text?.trim() ?? "") ?? 0)*100
         NetworkManager.shared.sendRedPacket(taskId, uniqueCode: uniqueCode, toUserId: userId, count: count, amount: amount, getType: type) { resp in
             
             if resp.status == .success {

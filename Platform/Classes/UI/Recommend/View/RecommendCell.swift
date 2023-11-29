@@ -245,7 +245,12 @@ extension RecommendCell {
     }
     
     @objc func clickAddressBtn(_ sender:UIButton) {
-        
+        LSLog("clickAddressBtn")
+        if let lat = item?.latitude, let lon = item?.longitude {
+            PageManager.shared.pushToMapNavigationController(item?.landmark ?? "", address: item?.address ?? "", lat: lat, lon: lon)
+        } else {
+            LSHUD.showInfo("地址有误，无法定位")
+        }
     }
     
     func activity() {
@@ -273,8 +278,8 @@ extension RecommendCell {
     }
 }
 
-extension RecommendCell{
-    fileprivate func setupUI(){
+extension RecommendCell {
+    fileprivate func setupUI() {
         
         contentView.layer.addSublayer(avPlayerLayer)
         contentView.addSubview(videoImageView)

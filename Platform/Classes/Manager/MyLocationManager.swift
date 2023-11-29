@@ -1,5 +1,5 @@
 //
-//  LocationManager.swift
+//  MyLocationManager.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/27.

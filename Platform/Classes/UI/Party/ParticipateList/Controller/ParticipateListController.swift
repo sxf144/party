@@ -31,6 +31,7 @@ class ParticipateListController: BaseController {
         
         tableView.mj_header?.beginRefreshing()
     }
+    
     override func pop() {
         self.dismiss(animated: true, completion: nil)
     }

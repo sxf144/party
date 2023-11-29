@@ -65,31 +65,19 @@ class LoginController: BaseController {
 
 extension LoginController {
     
+    // 点击手机登录
     @objc func clickPhoneLoginBtn(_ sender:UIButton) {
         LSLog("clickPhoneLoginBtn")
-        PageManager.shared.pushToPhoneLogin()
+        PageManager.shared.pushToPhoneLogin(.ActionLogin)
     }
     
+    // 点击微信登录
     @objc func clickWxLoginBtn(_ sender:UIButton) {
         LSLog("clickWxLoginBtn")
-        sendAuthRequest()
+        WXApiManager.shared.sendAuthRequest()
     }
     
-    func sendAuthRequest() {
-        //构造SendAuthReq结构体
-        let req: SendAuthReq = SendAuthReq()
-        req.scope = "snsapi_userinfo"
-        req.state = "123"
-        //第三方向微信终端发送一个SendAuthReq消息结构
-        WXApi.send(req)
-//        //构造SendAuthReq结构体
-//        SendAuthReq* req =[[[SendAuthReq alloc]init]autorelease];
-//        req.scope = @"snsapi_userinfo"; // 只能填 snsapi_userinfo
-//        req.state = @"123";
-//        //第三方向微信终端发送一个SendAuthReq消息结构
-//        [WXApi sendReq:req];
-    }
-    
+    // 点击苹果登录
     @objc func clickAppleLoginBtn(_ sender:UIButton) {
         LSLog("clickAppleLoginBtn")
         let appleIDProvider = ASAuthorizationAppleIDProvider()

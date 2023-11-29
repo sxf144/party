@@ -12,6 +12,7 @@ import SnapKit
 class MyUserPageController: BaseController {
     
     let infoWidth = 80.0
+    let infoHeight = 60.0
     var userInfo:UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
     let leftMargin = 16.0
     let detailViewCornerRadius: CGFloat = 24
@@ -28,8 +29,7 @@ class MyUserPageController: BaseController {
         super.viewDidLoad()
         setupUI()
         addObservers()
-//        // 获取个人主页信息
-//        getUserHomePage()
+        
         // 获取个人主页信息
         LoginManager.shared.getUserPage()
     }
@@ -92,6 +92,13 @@ class MyUserPageController: BaseController {
     }()
     
     // 关注
+    fileprivate lazy var followView: UIView = {
+        let view = UIView()
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(followTapAction(_:)))
+        view.addGestureRecognizer(singleTap)
+        return view
+    }()
+    
     fileprivate lazy var followNumLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.ls_boldFont(18)
@@ -112,6 +119,13 @@ class MyUserPageController: BaseController {
     }()
     
     // 粉丝
+    fileprivate lazy var fansView: UIView = {
+        let view = UIView()
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(fansTapAction(_:)))
+        view.addGestureRecognizer(singleTap)
+        return view
+    }()
+    
     fileprivate lazy var fansNumLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.ls_boldFont(18)
@@ -132,6 +146,13 @@ class MyUserPageController: BaseController {
     }()
     
     // 礼物
+    fileprivate lazy var giftView: UIView = {
+        let view = UIView()
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(giftTapAction(_:)))
+        view.addGestureRecognizer(singleTap)
+        return view
+    }()
+    
     fileprivate lazy var giftNumLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.ls_boldFont(18)
@@ -248,19 +269,6 @@ extension MyUserPageController {
         self.refreshData()
     }
     
-    // 获取详情
-    func getUserHomePage() {
-        NetworkManager.shared.getUserPage  { resp in
-            if resp.status == .success {
-                LSLog("getUserPage data:\(resp.data)")
-                self.userPageData = resp.data
-                self.refreshData()
-            } else {
-                LSLog("getUserPage fail")
-            }
-        }
-    }
-    
     // 刷新界面
     func refreshData() {
         // 头像
@@ -318,6 +326,21 @@ extension MyUserPageController {
         LSLog("clickSettingBtn")
         PageManager.shared.pushToSettingController()
     }
+    
+    // 关注
+    @objc private func followTapAction(_ tap: UITapGestureRecognizer) {
+        PageManager.shared.pushToFollowListController()
+    }
+    
+    // 粉丝
+    @objc private func fansTapAction(_ tap: UITapGestureRecognizer) {
+//        PageManager.shared.pushTo
+    }
+    
+    // 礼物
+    @objc private func giftTapAction(_ tap: UITapGestureRecognizer) {
+        PageManager.shared.pushToGiftLogController()
+    }
 }
 
 extension MyUserPageController {
@@ -330,12 +353,15 @@ extension MyUserPageController {
         topView.addSubview(nickLabel)
         topView.addSubview(sexIcon)
         topView.addSubview(editBtn)
-        topView.addSubview(followNumLabel)
-        topView.addSubview(followTipLabel)
-        topView.addSubview(fansNumLabel)
-        topView.addSubview(fansTipLabel)
-        topView.addSubview(giftNumLabel)
-        topView.addSubview(giftTipLabel)
+        topView.addSubview(followView)
+        followView.addSubview(followNumLabel)
+        followView.addSubview(followTipLabel)
+        topView.addSubview(fansView)
+        fansView.addSubview(fansNumLabel)
+        fansView.addSubview(fansTipLabel)
+        topView.addSubview(giftView)
+        giftView.addSubview(giftNumLabel)
+        giftView.addSubview(giftTipLabel)
         view.addSubview(detailView)
         detailView.addSubview(accountBtn)
         accountBtn.addSubview(accountTipLabel)
@@ -379,10 +405,15 @@ extension MyUserPageController {
             make.bottom.equalTo(avatarSmall).offset(-10)
         }
         
-        followNumLabel.snp.makeConstraints { (make) in
+        followView.snp.makeConstraints { (make) in
             make.top.equalTo(avatarSmall.snp.bottom).offset(20)
             make.left.equalToSuperview().offset(4)
-            make.width.equalTo(infoWidth)
+            make.size.equalTo(CGSize(width: infoWidth, height: infoHeight))
+        }
+        
+        followNumLabel.snp.makeConstraints { (make) in
+            make.top.equalToSuperview()
+            make.centerX.equalToSuperview()
         }
         
         followTipLabel.snp.makeConstraints { (make) in
@@ -390,10 +421,15 @@ extension MyUserPageController {
             make.centerX.equalTo(followNumLabel)
         }
         
+        fansView.snp.makeConstraints { (make) in
+            make.top.equalTo(followView)
+            make.left.equalTo(followView.snp.right)
+            make.size.equalTo(CGSize(width: infoWidth, height: infoHeight))
+        }
+        
         fansNumLabel.snp.makeConstraints { (make) in
-            make.top.equalTo(followNumLabel)
-            make.left.equalTo(followNumLabel.snp.right)
-            make.width.equalTo(infoWidth)
+            make.top.equalToSuperview()
+            make.centerX.equalToSuperview()
         }
         
         fansTipLabel.snp.makeConstraints { (make) in
@@ -401,10 +437,15 @@ extension MyUserPageController {
             make.centerX.equalTo(fansNumLabel)
         }
         
+        giftView.snp.makeConstraints { (make) in
+            make.top.equalTo(fansView)
+            make.left.equalTo(fansView.snp.right)
+            make.size.equalTo(CGSize(width: infoWidth, height: infoHeight))
+        }
+        
         giftNumLabel.snp.makeConstraints { (make) in
-            make.top.equalTo(followNumLabel)
-            make.left.equalTo(fansNumLabel.snp.right)
-            make.width.equalTo(infoWidth)
+            make.top.equalToSuperview()
+            make.centerX.equalToSuperview()
         }
         
         giftTipLabel.snp.makeConstraints { (make) in

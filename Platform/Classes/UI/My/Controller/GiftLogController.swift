@@ -17,7 +17,7 @@ class GiftLogController: BaseController {
     var currentDate: Date = Date()
 
     override func viewDidLoad() {
-        self.title = "礼物记录"
+        title = "礼物记录"
         super.viewDidLoad()
         setupUI()
         
@@ -91,20 +91,33 @@ extension GiftLogController {
             }
             
             if resp.status == .success {
-                LSLog("getGameList succ")
-                self.dataList = resp.data ?? GiftLogModel()
-                self.tableView.reloadData()
-                if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
-                    self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                LSLog("getGiftLogs succ")
+                if let data = resp.data {
+                    if pageNum == 1 {
+                        self.dataList = data
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageSize = pageSize
+                    } else {
+                        self.dataList.items.append(contentsOf: data.items)
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageTotal = data.pageTotal
+                        self.dataList.totalCount = data.totalCount
+                    }
+                    
+                    self.tableView.reloadData()
+                    if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
+                        self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                    }
                 }
             } else {
-                LSLog("getGameList fail")
+                LSLog("getGiftLogs fail")
             }
         }
     }
 
     func loadNewData() {
         // 在这里执行下拉刷新的操作
+        self.tableView.mj_footer.resetNoMoreData()
         getGiftLogs(pageNum: 1, pageSize: dataList.pageSize)
     }
 

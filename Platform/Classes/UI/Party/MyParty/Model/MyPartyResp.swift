@@ -67,7 +67,7 @@ struct PartyItem {
     var femaleRemainCount: Int64 = 0
     var latitude: Double = 0
     var longitude: Double = 0
-    var state: Int64 = 0
+    var state: Int64 = 0    //局状态 1正常 2解散 3结束
     var firstInvalid:Bool = false
     
     init(_ json:JSON) {

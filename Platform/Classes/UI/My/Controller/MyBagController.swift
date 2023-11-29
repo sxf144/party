@@ -21,10 +21,9 @@ class MyBagController: BaseController {
     
 
     override func viewDidLoad() {
-        
+        title = "我的钱包"
         super.viewDidLoad()
         view.backgroundColor = UIColor.ls_color("#F8F8F8")
-        title = "我的钱包"
         // 重置Navigation
         resetNavigation()
         setupUI()

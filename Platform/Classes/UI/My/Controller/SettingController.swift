@@ -18,7 +18,7 @@ class SettingController: BaseController {
     let optionKey = "OptionKey"
 
     override func viewDidLoad() {
-        self.title = "设置"
+        title = "设置"
         super.viewDidLoad()
         setupUI()
     }

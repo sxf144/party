@@ -19,7 +19,7 @@ class SupplyUserController: BaseController {
     var currAvatarUrl:String = ""
     
     override func viewDidLoad() {
-        self.title = "完善资料"
+        title = "完善资料"
         super.viewDidLoad()
         setupUI()
         

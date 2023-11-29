@@ -8,7 +8,7 @@
 
 import UIKit
 import SnapKit
-import MAMapKit
+import AMapNaviKit
 import AMapFoundationKit
 import AMapSearchKit
 

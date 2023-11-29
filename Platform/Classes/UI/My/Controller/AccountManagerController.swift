@@ -19,7 +19,7 @@ class AccountManagerController: BaseController {
     let optionKey = "OptionKey"
 
     override func viewDidLoad() {
-        self.title = "账号管理"
+        title = "账号管理"
         super.viewDidLoad()
         setupUI()
     }
@@ -44,7 +44,7 @@ extension AccountManagerController {
          */
         let optionValue:Int = sender.layer.value(forKey: optionKey) as! Int
         if optionValue == 1 {
-            
+            PageManager.shared.pushToPhoneLogin(.ActionBind)
         } else if optionValue == 2 {
             
         }

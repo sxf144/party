@@ -45,7 +45,7 @@ extension AppDelegate {
         addObservers()
         keyboardManager()
         appearanceSetting()
-        WXApi.registerApp(WX_APPID, universalLink: UNIVERSAL_LINK)
+        _ = WXApiManager.shared.registerApp()
     }
 }
 

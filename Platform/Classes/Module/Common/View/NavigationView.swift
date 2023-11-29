@@ -72,7 +72,7 @@ class NavigationView: UIView {
     
 }
 
-extension NavigationView{
+extension NavigationView {
     func changeStyle(_ style: NavigationViewStyle){
         switch style {
         case .defalut:
@@ -88,8 +88,8 @@ extension NavigationView{
     }
 }
 
-fileprivate extension NavigationView{
-    func setupView(){
+fileprivate extension NavigationView {
+    func setupView() {
         self.addSubview(backView)
         backView.snp.makeConstraints { (make) in
             make.left.equalToSuperview()

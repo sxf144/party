@@ -11,7 +11,7 @@ import SwiftyJSON
 
 
 class FollowListResp: RespModel {
-    var data = FollowListModel()
+    var data: FollowListModel?
     
     override init(_ json: JSON) {
         super.init(json)
@@ -19,7 +19,7 @@ class FollowListResp: RespModel {
     }
 }
 
-struct FollowListModel {
+class FollowListModel {
     
     /// 页数
     var pageNum: Int64 = 1
@@ -47,7 +47,7 @@ struct FollowListModel {
     init() {}
 }
 
-struct FollowItem {
+class FollowItem {
     
     var userId: String = ""
     var nick: String = ""
@@ -56,6 +56,7 @@ struct FollowItem {
     var sex: Int64 = 0
     var coinBalance: Int64 = 0
     var selected: Bool = false
+    var needSelect: Bool = false
     
     init(_ json:JSON) {
         userId = json["user_id"].stringValue

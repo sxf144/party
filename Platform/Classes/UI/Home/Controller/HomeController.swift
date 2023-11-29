@@ -51,8 +51,6 @@ extension HomeController: JXSegmentedViewDelegate {
     }
 }
 
-
-
 extension HomeController: JXSegmentedListContainerViewDataSource {
     
     func numberOfLists(in listContainerView: JXSegmentedListContainerView) -> Int {
@@ -60,10 +58,16 @@ extension HomeController: JXSegmentedListContainerViewDataSource {
     }
     
     func listContainerView(_ listContainerView: JXSegmentedListContainerView, initListAt index: Int) -> JXSegmentedListContainerViewListDelegate {
-        return RecommendController()
+        
+        switch index {
+        case 0:
+            return RecommendController()
+        case 1:
+            return FollowedController()
+        default:
+            return RecommendController()
+        }
     }
-   
-    
 }
 
 extension HomeController {

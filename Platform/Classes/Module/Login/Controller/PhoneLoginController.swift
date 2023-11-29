@@ -10,11 +10,19 @@ import UIKit
 
 class PhoneLoginController: BaseController {
     
+    public enum ActionType: Int {
+        
+        case ActionLogin = 1
+        
+        case ActionBind = 2
+    }
+    
     var countdownTimer: Timer?
     var secondsLeft = 60
+    var type: ActionType = .ActionLogin
     
     override func viewDidLoad() {
-        self.title = "手机登录"
+        title = "手机登录"
         super.viewDidLoad()
         setupUI()
     }
@@ -79,6 +87,19 @@ class PhoneLoginController: BaseController {
 
 extension PhoneLoginController {
     
+    func setType(_ type:ActionType) {
+        
+        self.type = type
+        
+        if type == .ActionLogin {
+            navigationView.titleLabel.text = "手机登录"
+            loginBtn.setTitle("登录", for: .normal)
+        } else {
+            navigationView.titleLabel.text = "绑定手机"
+            loginBtn.setTitle("绑定", for: .normal)
+        }
+    }
+    
     @objc func startCountdown() {
         
         guard let phoneNum = phoneNumberTextField.text else {
@@ -98,7 +119,7 @@ extension PhoneLoginController {
             if resp.status == .success {
                 
             } else {
-                
+                LSHUD.showInfo(resp.msg)
             }
         }
     }
@@ -130,16 +151,30 @@ extension PhoneLoginController {
         let grantType = GrantType.authorizationCode.rawValue
         let source = "mobile"
         
-        //发起授权登录
-        NetworkManager.shared.authorize(mobile, smsCode: smsCode, code: "", grantType: grantType, source: source, refreshToken: "", identityToken: "") { (resp) in
-            if resp.status == .success {
-                // 保存token
-                LoginManager.shared.saveUserToken(resp.data)
-                LSLog("authorize data:\(resp.data)")
-                LoginManager.shared.login()
-            } else {
-                //错误提示
-                LSHUD.showError(resp.msg)
+        if type == .ActionLogin {
+            //发起授权登录
+            NetworkManager.shared.authorize(mobile, smsCode: smsCode, code: "", grantType: grantType, source: source, refreshToken: "", identityToken: "") { (resp) in
+                if resp.status == .success {
+                    // 保存token
+                    LoginManager.shared.saveUserToken(resp.data)
+                    LSLog("authorize data:\(resp.data)")
+                    LoginManager.shared.login()
+                } else {
+                    //错误提示
+                    LSHUD.showError(resp.msg)
+                }
+            }
+        } else {
+            // 发起绑定请求
+            NetworkManager.shared.bindMobile(mobile, code: smsCode) { (resp) in
+                if resp.status == .success {
+                    // 绑定成功
+                    LSHUD.showInfo("绑定成功")
+                    self.pop()
+                } else {
+                    //错误提示
+                    LSHUD.showError(resp.msg)
+                }
             }
         }
     }

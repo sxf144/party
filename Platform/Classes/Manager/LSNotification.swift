@@ -23,12 +23,8 @@ struct NotificationName {
     static let userInfoChange = NSNotification.Name("kNotification_userInfoChange")
     /// 用户主页信息更新
     static let userPageInfoChange = NSNotification.Name("kNotification_userPageInfoChange")
-    /// 会员信息变化
-    static let vipInfoChange = NSNotification.Name("kNotification_vipInfoChange")
-    /// 会员时运势信息变化
-    static let vipHourFortuneChange = NSNotification.Name("kNotification_vipHourFortuneChange")
-    /// 星座信息变化
-    static let constellationChange = NSNotification.Name("kNotification_constellationChange")
+    /// 局状态变化
+    static let partyStatusChange = NSNotification.Name("kNotification_partyStatusChange")
 }
 
 class LSNotification: NSObject {
@@ -61,18 +57,23 @@ class LSNotification: NSObject {
         NotificationCenter.default.post(name: NotificationName.tabbarBadgeChange, object: dic)
     }
     /// 登录成功
-    static func postLoginSuccess(){
+    static func postLoginSuccess() {
         let user = LoginManager.shared.userInfo
         NotificationCenter.default.post(name: NotificationName.loginSuccess, object: user)
     }
     /// 退出登录成功
-    static func postLogoutSuccess(){
+    static func postLogoutSuccess() {
         NotificationCenter.default.post(name: NotificationName.logoutSuccess, object: nil)
     }
     
     /// 用户主页信息更新
-    static func postUserPageInfoChange(){
+    static func postUserPageInfoChange() {
         NotificationCenter.default.post(name: NotificationName.userPageInfoChange, object: nil)
+    }
+    
+    /// 局状态信息更新
+    static func postPartyStatusChange() {
+        NotificationCenter.default.post(name: NotificationName.partyStatusChange, object: nil)
     }
     
 }

@@ -46,6 +46,24 @@ class MyPartyCell: UITableViewCell {
         return imageView
     }()
     
+    // 蒙层
+    fileprivate lazy var coverMask: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.ls_color("#000000", alpha: 0.6)
+        view.isHidden = true
+        return view
+    }()
+    
+    // 蒙层内容
+    fileprivate lazy var maskLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer14
+        label.textColor = .white
+        label.text = "已解散"
+        label.sizeToFit()
+        return label
+    }()
+    
     // 桔名称
     fileprivate lazy var nameLabel: UILabel = {
         let label = UILabel()
@@ -79,7 +97,7 @@ class MyPartyCell: UITableViewCell {
     // 桔地址
     fileprivate lazy var localIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_local")
+        imageView.image = UIImage(named: "icon_location1")
         return imageView
     }()
     
@@ -136,6 +154,9 @@ extension MyPartyCell {
         // 是否隐藏进入游戏按钮
         if (item.state == 2 || item.state == 3) {
             toGameBtn.isHidden = true
+            coverMask.isHidden = false
+            maskLabel.text = item.state == 2 ? "已解散" : "已结束"
+            maskLabel.sizeToFit()
             addressLabel.snp.remakeConstraints { (make) in
                 make.left.equalTo(localIcon.snp.right).offset(2)
                 make.centerY.equalTo(localIcon)
@@ -143,6 +164,7 @@ extension MyPartyCell {
             }
         } else {
             toGameBtn.isHidden = false
+            coverMask.isHidden = true
             addressLabel.snp.remakeConstraints { (make) in
                 make.left.equalTo(localIcon.snp.right).offset(2)
                 make.centerY.equalTo(localIcon)
@@ -168,6 +190,8 @@ extension MyPartyCell{
         
         contentView.addSubview(bgView)
         bgView.addSubview(cover)
+        cover.addSubview(coverMask)
+        coverMask.addSubview(maskLabel)
         bgView.addSubview(nameLabel)
         bgView.addSubview(personLabel)
         bgView.addSubview(timeLabel)
@@ -188,6 +212,14 @@ extension MyPartyCell{
             make.left.equalToSuperview().offset(15)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSizeMake(75, 100))
+        }
+        
+        coverMask.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
+        maskLabel.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
         }
         
         nameLabel.snp.makeConstraints { (make) in

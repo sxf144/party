@@ -16,6 +16,7 @@ class FollowListController: BaseController {
     var followList: FollowListModel = FollowListModel()
     /// 回调闭包
     public var followSelectedBlock: ((_ followItems:[FollowItem]) -> ())?
+    var needSelect:Bool = false
 
     override func viewDidLoad() {
         title = "邀请好友"
@@ -49,10 +50,16 @@ class FollowListController: BaseController {
         tv.register(FollowCell.self, forCellReuseIdentifier: "FollowCell")
         return tv
     }()
-    
 }
 
 extension FollowListController {
+    
+    func setData(_ needSelect:Bool) {
+        self.needSelect = needSelect
+        
+        // 重置导航栏
+        resetNavigation()
+    }
     
     func getFollowList(pageNum:Int64, pageSize:Int64) {
         NetworkManager.shared.getFollowList(pageNum, pageSize: pageSize) { resp in
@@ -67,10 +74,23 @@ extension FollowListController {
             
             if resp.status == .success {
                 LSLog("getFollowList succ")
-                self.followList = resp.data
-                self.tableView.reloadData()
-                if (self.followList.totalCount <= self.followList.pageNum * self.followList.pageSize) {
-                    self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                
+                if let data = resp.data {
+                    if pageNum == 1 {
+                        self.followList = data
+                        self.followList.pageNum = pageNum
+                        self.followList.pageSize = pageSize
+                    } else {
+                        self.followList.users.append(contentsOf: data.users)
+                        self.followList.pageNum = pageNum
+                        self.followList.pageTotal = data.pageTotal
+                        self.followList.totalCount = data.totalCount
+                    }
+                    
+                    self.tableView.reloadData()
+                    if (self.followList.totalCount <= self.followList.pageNum * self.followList.pageSize) {
+                        self.tableView.mj_footer.endRefreshingWithNoMoreData()
+                    }
                 }
             } else {
                 LSLog("getFollowList fail")
@@ -80,6 +100,7 @@ extension FollowListController {
 
     func loadNewData() {
         // 在这里执行下拉刷新的操作
+        self.tableView.mj_footer.resetNoMoreData()
         getFollowList(pageNum: 1, pageSize: followList.pageSize)
     }
 
@@ -128,7 +149,8 @@ extension FollowListController: UITableViewDataSource, UITableViewDelegate, UISc
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FollowCell", for: indexPath) as! FollowCell
-        let item = followList.users[indexPath.row]
+        var item = followList.users[indexPath.row]
+        item.needSelect = needSelect
         cell.configure(with: item)
         return cell
     }
@@ -141,15 +163,21 @@ extension FollowListController: UITableViewDataSource, UITableViewDelegate, UISc
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 选中cell
         let item = followList.users[indexPath.row]
-        followList.users[indexPath.row].selected = !item.selected
-        resetSelectedNum()
-        tableView.reloadRows(at: [indexPath], with: .fade)
+        // 如果需要选择，则处理选中或者取消的状态，否则跳转入此用户主页
+        if needSelect {
+            followList.users[indexPath.row].selected = !item.selected
+            resetSelectedNum()
+            tableView.reloadRows(at: [indexPath], with: .fade)
+        } else {
+            PageManager.shared.pushToUserPage(item.userId )
+        }
     }
 }
 
 
-extension FollowListController{
-    fileprivate func setupUI(){
+extension FollowListController {
+    
+    fileprivate func setupUI() {
         
         view.addSubview(tableView)
         
@@ -163,16 +191,18 @@ extension FollowListController{
     
     fileprivate func resetNavigation() {
         
-        navigationView.rightButton.setImage(nil, for: .normal)
-        navigationView.rightButton.setTitle("完成（0）", for: .normal)
-        navigationView.rightButton.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
-        navigationView.rightButton.titleLabel?.font = UIFont.ls_mediumFont(16)
-        
-        navigationView.rightButton.snp.updateConstraints { (make) in
-            make.right.equalTo(-16)
-            make.bottom.equalToSuperview()
-            make.width.greaterThanOrEqualTo(56)
-            make.height.equalTo(44)
+        if needSelect {
+            navigationView.rightButton.setImage(nil, for: .normal)
+            navigationView.rightButton.setTitle("完成（0）", for: .normal)
+            navigationView.rightButton.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
+            navigationView.rightButton.titleLabel?.font = UIFont.ls_mediumFont(16)
+            
+            navigationView.rightButton.snp.updateConstraints { (make) in
+                make.right.equalTo(-16)
+                make.bottom.equalToSuperview()
+                make.width.greaterThanOrEqualTo(56)
+                make.height.equalTo(44)
+            }
         }
     }
 }

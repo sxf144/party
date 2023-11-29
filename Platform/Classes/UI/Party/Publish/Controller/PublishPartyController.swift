@@ -26,15 +26,14 @@ class PublishPartyController: BaseController {
     var timePickerHandler: ((Date) -> Void)?
     var maleCnt: Int = 5
     var femaleCnt: Int = 5
-    var selectGameItem: GameItem?
+    var selectGameItem: GameItem = GameListResp.defaultGameItem()
     var coverImage: UIImage!
     var coverUrl: String = ""
     var publicType: Int64 = 1
     var locationItem: AMapPOI?
     
-    
     override func viewDidLoad() {
-        self.title = "组个桔"
+        title = "组个桔"
         super.viewDidLoad()
         setupUI()
         
@@ -221,7 +220,7 @@ class PublishPartyController: BaseController {
     
     fileprivate lazy var addressLocalIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_local")
+        imageView.image = UIImage(named: "icon_location1")
         return imageView
     }()
     
@@ -276,7 +275,7 @@ class PublishPartyController: BaseController {
     
     fileprivate lazy var gameLabel: UILabel = {
         let label = UILabel()
-        label.text = "请选择游戏"
+        label.text = selectGameItem.name
         label.textColor = UIColor.ls_color("#333333")
         label.font = UIFont.ls_font(14)
         label.isUserInteractionEnabled = true
@@ -449,7 +448,7 @@ extension PublishPartyController {
         vc.gameSelectedBlock = { [self] gameItem in
             LSLog("gameSelectedBlock gameItem:\(gameItem)")
             selectGameItem = gameItem
-            gameLabel.text = selectGameItem?.name
+            gameLabel.text = selectGameItem.name
             gameLabel.sizeToFit()
         }
         vc.hidesBottomBarWhenPushed = true
@@ -460,7 +459,7 @@ extension PublishPartyController {
     @objc func clickPublishBtn(_ sender:UIButton) {
         // 取消聚焦
         resignResponders()
-        LSHUD.showLoading()
+        
         // 检查各个字段是否有效
         if !checkParam() {
             LSHUD.hide()
@@ -468,6 +467,7 @@ extension PublishPartyController {
         }
         
         // 检查参数完毕，先上传图片到阿里oss
+        LSHUD.showLoading()
         OSSManager.shared.uploadData(coverImage) { [self] resp in
             LSLog("uploadData resp:\(resp)")
             if (resp.status == .success) {
@@ -496,7 +496,7 @@ extension PublishPartyController {
         para["address_code"] = Int64(locationItem?.adcode.prefix(6) ?? "")
         para["latitude"] = locationItem?.location.latitude
         para["longitude"] = locationItem?.location.longitude
-        para["relation_game_id"] = selectGameItem?.id
+        para["relation_game_id"] = selectGameItem.id
         para["male_cnt"] = maleCnt
         para["female_cnt"] = femaleCnt
         para["fee"] = Int64(feeTextField.text ?? "")
@@ -507,6 +507,8 @@ extension PublishPartyController {
                 LSLog("createPlay succ")
                 // 跳转到发布成功界面
                 PageManager.shared.pushToPublishSucc(resp.data.uniqueCode, startTime: resp.data.startTime, endTime: resp.data.endTime)
+                // 发送局状态变更通知
+                LSNotification.postPartyStatusChange()
             } else {
                 LSLog("createPlay fail")
                 LSHUD.showError(resp.msg)
@@ -542,12 +544,6 @@ extension PublishPartyController {
         if ((locationItem == nil) || (locationItem?.location == nil)) {
             LSLog("checkParam locationItem err")
             LSHUD.showError("请选择位置")
-            return false
-        }
-        
-        if ((selectGameItem == nil) || selectGameItem?.id == 0) {
-            LSLog("checkParam selectGameItem err")
-            LSHUD.showError("请选择游戏")
             return false
         }
         

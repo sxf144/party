@@ -22,6 +22,7 @@ class MyPartyController: BaseController {
         
         super.viewDidLoad()
         setupUI()
+        addObservers()
         
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
@@ -76,7 +77,17 @@ extension MyPartyController {
             
             if resp.status == .success {
                 LSLog("getMyParty succ")
-                self.partyList = resp.data
+                if pageNum == 1 {
+                    self.partyList = resp.data
+                    self.partyList.pageNum = pageNum
+                    self.partyList.pageSize = pageSize
+                } else {
+                    self.partyList.plays.append(contentsOf: resp.data.plays)
+                    self.partyList.pageNum = pageNum
+                    self.partyList.pageTotal = resp.data.pageTotal
+                    self.partyList.totalCount = resp.data.totalCount
+                }
+                
                 self.handleData()
                 self.tableView.reloadData()
                 if (self.partyList.totalCount <= self.partyList.pageNum * self.partyList.pageSize) {
@@ -90,6 +101,7 @@ extension MyPartyController {
 
     func loadNewData() {
         // 在这里执行下拉刷新的操作
+        self.tableView.mj_footer.resetNoMoreData()
         getMyParty(pageNum: 1, pageSize: partyList.pageSize)
     }
 
@@ -113,6 +125,15 @@ extension MyPartyController {
         }
         
         LSLog("partyList.plays:\(partyList.plays)")
+    }
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handlePartyStatusChange(_:)), name: NotificationName.partyStatusChange, object: nil)
+    }
+    
+    @objc func handlePartyStatusChange(_ notification: Notification) {
+        LSLog("---- MyPartyController handlePartyStatusChange ----")
+        loadNewData()
     }
 }
 

@@ -118,6 +118,15 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 首页关注列表
+    func followed(_ pageSize:Int64 = 10 ,_ response: @escaping((RecommendResp) -> ()) ){
+        let para:[String:Any] = ["page_size": pageSize]
+        Network.shared.httpPostRequest(path: "/play/followed", para: para) { (json) in
+            let resp = RecommendResp(json)
+            response(resp)
+        }
+    }
+    
     /// 获取关注列表
     func getFollowList(_ pageNum:Int64 = 1, pageSize:Int64 = 10, _ response: @escaping((FollowListResp) -> ()) ){
         var para:[String:Any] = ["page_num": pageNum]
@@ -183,6 +192,16 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 获取订单支付结果
+    func getOrderStatus(_ orderId:String = "", source:Int64 = 1, _ response: @escaping((OrderStatusResp) -> ()) ){
+        var para:[String:Any] = ["order_id": orderId]
+        para["source"] = source
+        Network.shared.httpGetRequest(path: "/pay/get_order_status", para: para) { (json) in
+            let resp = OrderStatusResp(json)
+            response(resp)
+        }
+    }
+    
     /// 查看局详情
     func getPartyDetail(_ uniqueCode:String = "",_ response: @escaping((PartyDetailResp) -> ()) ){
         let para:[String:Any] = ["unique_code": uniqueCode]
@@ -239,6 +258,15 @@ class NetworkManager: NSObject {
         let para:[String:Any] = ["unique_code": uniqueCode]
         Network.shared.httpPostRequest(path: "/play/join", para: para) { (json) in
             let resp = JoinResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 退出局
+    func leaveParty(_ uniqueCode:String = "",_ response: @escaping((RespModel) -> ()) ){
+        let para:[String:Any] = ["unique_code": uniqueCode]
+        Network.shared.httpPostRequest(path: "/play/leave", para: para) { (json) in
+            let resp = RespModel(json)
             response(resp)
         }
     }
@@ -325,6 +353,15 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 查询红包
+    func queryRedPacket(_ id:Int64 = 0, _ response: @escaping((QueryRedPacketResp) -> ()) ){
+        let para:[String:Any] = ["id": id]
+        Network.shared.httpGetRequest(path: "/play/red_packet/query", para: para) { (json) in
+            let resp = QueryRedPacketResp(json)
+            response(resp)
+        }
+    }
+    
     /// 完成任务
     func doneTask(_ taskId:Int64 = 0, _ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["task_id": taskId]
@@ -360,7 +397,7 @@ class NetworkManager: NSObject {
     func bindMobile(_ mobile:String, code:String,_ response: @escaping((RespModel) -> ()) ){
         var para:[String:Any] = ["mobile": mobile]
         para["code"] = code
-        Network.shared.httpPostRequest(path: "/setting/bind_mobile", para: para) { (json) in
+        Network.shared.httpPostRequest(path: "/settings/bind_mobile", para: para) { (json) in
             let resp = RespModel(json)
             response(resp)
         }
@@ -368,8 +405,8 @@ class NetworkManager: NSObject {
     
     /// 绑定微信
     func bindWx(_ code:String,_ response: @escaping((RespModel) -> ()) ){
-        var para:[String:Any] = ["code": code]
-        Network.shared.httpPostRequest(path: "/setting/bind_wx", para: para) { (json) in
+        let para:[String:Any] = ["code": code]
+        Network.shared.httpPostRequest(path: "/settings/bind_wx", para: para) { (json) in
             let resp = RespModel(json)
             response(resp)
         }

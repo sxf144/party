@@ -17,6 +17,12 @@ class GameListResp: RespModel {
         super.init(json)
         data = GameListModel(json["data"])
     }
+    
+    static func defaultGameItem() -> GameItem {
+        var gameItem = GameItem()
+        gameItem.name = "无游戏/稍后选择"
+        return gameItem
+    }
 }
 
 struct GameListModel {

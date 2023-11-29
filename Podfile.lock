@@ -1,11 +1,11 @@
 PODS:
   - Alamofire (5.8.1)
   - AliyunOSSiOS (2.10.18)
-  - AMap3DMap-NO-IDFA (9.7.0):
-    - AMapFoundation-NO-IDFA (>= 1.8.0)
   - AMapFoundation-NO-IDFA (1.8.2)
   - AMapLocation-NO-IDFA (2.10.0):
     - AMapFoundation-NO-IDFA (>= 1.8.0)
+  - AMapNavi-NO-IDFA (9.8.1):
+    - AMapFoundation-NO-IDFA (>= 1.8.2)
   - AMapSearch-NO-IDFA (9.7.0):
     - AMapFoundation-NO-IDFA (>= 1.8.0)
   - IQKeyboardManagerSwift (6.5.16)
@@ -55,6 +55,7 @@ PODS:
   - SwifterSwift/SwiftStdlib (6.0.0)
   - SwifterSwift/UIKit (6.0.0)
   - SwifterSwift/WebKit (6.0.0)
+  - swiftScan (1.2.1)
   - SwiftyAttributes (5.4.0)
   - SwiftyJSON (5.0.1)
   - TXIMSDK_Plus_Swift_iOS (7.6.5011)
@@ -66,8 +67,8 @@ PODS:
 DEPENDENCIES:
   - Alamofire
   - AliyunOSSiOS
-  - AMap3DMap-NO-IDFA
   - AMapLocation-NO-IDFA
+  - AMapNavi-NO-IDFA
   - AMapSearch-NO-IDFA
   - IQKeyboardManagerSwift
   - JXSegmentedView
@@ -77,6 +78,7 @@ DEPENDENCIES:
   - RxTheme
   - SnapKit
   - SwifterSwift
+  - swiftScan
   - SwiftyAttributes
   - SwiftyJSON
   - TXIMSDK_Plus_Swift_iOS
@@ -87,9 +89,9 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - AliyunOSSiOS
-    - AMap3DMap-NO-IDFA
     - AMapFoundation-NO-IDFA
     - AMapLocation-NO-IDFA
+    - AMapNavi-NO-IDFA
     - AMapSearch-NO-IDFA
     - IQKeyboardManagerSwift
     - JXSegmentedView
@@ -101,6 +103,7 @@ SPEC REPOS:
     - RxTheme
     - SnapKit
     - SwifterSwift
+    - swiftScan
     - SwiftyAttributes
     - SwiftyJSON
     - TXIMSDK_Plus_Swift_iOS
@@ -110,9 +113,9 @@ SPEC REPOS:
 SPEC CHECKSUMS:
   Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
   AliyunOSSiOS: e683c1b1faa0657b5cd02de733628cf996f4cd93
-  AMap3DMap-NO-IDFA: a3516859f2e82eda9fe9309c57d862f1543c2de4
   AMapFoundation-NO-IDFA: 6ce0ef596d4eb8d934ff498e56747b6de1247b05
   AMapLocation-NO-IDFA: 735791aeb1ba52dff666e4158b86caf4b68b5be7
+  AMapNavi-NO-IDFA: 76df64c91de56c4887d792dcd8eda23e2395fc25
   AMapSearch-NO-IDFA: 749f73d5a773758f01a24eb8872f8798c8b47cb4
   IQKeyboardManagerSwift: 12d89768845bb77b55cc092ecc2b1f9370f06b76
   JXSegmentedView: fec0d335355b6e019c494fe2e030bde8a36d2df6
@@ -124,12 +127,13 @@ SPEC CHECKSUMS:
   RxTheme: be60cb14e0544b3cbd574cc37fed35ba9d61aa1f
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   SwifterSwift: 66843dc594f8fb890f5543c22545921d44acc004
+  swiftScan: 0849e7d7c1c641384767a573ee8cb90b88d1ddd9
   SwiftyAttributes: 45fae22b22a246a0b7f0a8d2157a02bf89fb2e9a
   SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
   TXIMSDK_Plus_Swift_iOS: e47e53bf3116962b88233480866a58d4804a2c36
   WechatOpenSDK-XCFramework: acdeeda129efbef9532bca8a10c24e1b4b8c7d69
   ZLPhotoBrowser: 7724f2d5f75fcde3af952c846dbad44d28933446
 
-PODFILE CHECKSUM: 995491d793aa5eb55bd928bedd1671c05ee9a1a9
+PODFILE CHECKSUM: 18cf8d4ba4bb05d3424c7163da2ef8c5d5c4af90
 
 COCOAPODS: 1.12.1

@@ -89,7 +89,7 @@ class MyHistoryPartyCell: UITableViewCell {
     // 桔地址
     fileprivate lazy var localIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_local")
+        imageView.image = UIImage(named: "icon_location1")
         return imageView
     }()
     

@@ -28,10 +28,10 @@ fileprivate func NetLog<T>(message: T?,
 
 #if DEBUG
 /// 服务器域名：测试环境
-fileprivate let kServerHost = "http://114.55.54.174/api"
+fileprivate let kServerHost = "https://api.juzitang.net/party"
 #else
 /// 服务器域名：正式环境
-fileprivate let kServerHost = "http://114.55.54.174/api"
+fileprivate let kServerHost = "https://api.juzitang.net/party"
 #endif
 
 fileprivate let APP_TYPE = "mobile-ios"
@@ -51,8 +51,12 @@ class Network: NSObject {
         case vip_expired = 300
         /// 本地网络错误
         case local_error = -100
-        /// 已经存在
-        case exist = -10001
+        /// 红包已抢完
+        case redpacket_finished = -10001
+        /// 红包已过期
+        case redpacket_expired = -10002
+        /// 红包已领取过
+        case redpacket_fetched = -10003
     }
     
     static let shared = Network()

@@ -13,6 +13,7 @@ import MJRefresh
 class GameListController: BaseController {
     
     let CellHeight = 120.0
+    let defaultGameItem: GameItem = GameListResp.defaultGameItem()
     var gameList: GameListModel = GameListModel()
     var needBlock: Bool = true
     var uniqueCode: String = ""
@@ -22,7 +23,7 @@ class GameListController: BaseController {
     public var gameSelectedBlock: ((_ gameItem:GameItem) -> ())?
 
     override func viewDidLoad() {
-        self.title = "选择游戏"
+        title = "选择游戏"
         super.viewDidLoad()
         setupUI()
         
@@ -60,13 +61,13 @@ class GameListController: BaseController {
         return view
     }()
     
-    // 自定义卡牌
+    // 选择卡牌
     fileprivate lazy var cardBtn: UIButton = {
         let button = UIButton(frame: CGRectMake(0, 0, 112, 40))
         button.backgroundColor = UIColor.white
         button.layer.cornerRadius = 20
         button.clipsToBounds = true
-        button.setTitle("自定义卡牌", for: .normal)
+        button.setTitle("选择卡牌", for: .normal)
         button.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
         button.titleLabel?.font = kFontMedium14
         button.addTarget(self, action: #selector(clickCardBtn(_:)), for: .touchUpInside)
@@ -118,7 +119,20 @@ extension GameListController {
             
             if resp.status == .success {
                 LSLog("getGameList succ")
-                self.gameList = resp.data
+                
+                if pageNum == 1 {
+                    self.gameList = resp.data
+                    if self.needBlock {
+                        self.gameList.items.insert(self.defaultGameItem, at: 0)
+                    }
+                    self.gameList.pageSize = pageSize
+                } else {
+                    self.gameList.items.append(contentsOf: resp.data.items)
+                    self.gameList.pageNum = pageNum
+                    self.gameList.pageTotal = resp.data.pageTotal
+                    self.gameList.totalCount = resp.data.totalCount
+                }
+                
                 self.tableView.reloadData()
                 if (self.gameList.totalCount <= self.gameList.pageNum * self.gameList.pageSize) {
                     self.tableView.mj_footer.endRefreshingWithNoMoreData()
@@ -131,6 +145,7 @@ extension GameListController {
 
     func loadNewData() {
         // 在这里执行下拉刷新的操作
+        self.tableView.mj_footer.resetNoMoreData()
         getGameList(pageNum: 1, pageSize: gameList.pageSize)
     }
 
@@ -142,7 +157,7 @@ extension GameListController {
         }
     }
     
-    // 点击自定义卡牌
+    // 点击选择卡牌
     @objc func clickCardBtn(_ sender:UIButton) {
         LSLog("clickCardBtn")
         if (selectedIndex < 0 || selectedIndex >= gameList.items.count) {

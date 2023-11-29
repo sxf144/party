@@ -19,7 +19,7 @@ class RecommendController: BaseController {
     override func viewDidLoad() {
         self.slideBackEnabled = false
         self.showNavifationBar = false
-        self.title = "推荐"
+        title = "推荐"
         
         super.viewDidLoad()
         setupUI()
@@ -101,14 +101,6 @@ extension RecommendController {
         // 退出登录
     }
     
-    @objc func clickLogoutBtn(_ sender:UIButton) {
-        LoginManager.shared.logout()
-    }
-    
-    @objc func clickModifyBtn(_ sender:UIButton) {
-        PageManager.shared.pushToSupplyUser()
-    }
-    
     @objc func goingPartyDidClick() {
         LSLog("goingPartyDidClick")
         // 跳转到群聊
@@ -126,6 +118,14 @@ extension RecommendController {
             if resp.status == .success {
                 LSLog("getRecommend succ")
                 self.recommendData = resp.data
+                if cursor.isEmpty {
+                    self.recommendData = resp.data
+                } else {
+                    self.recommendData.items?.append(contentsOf: resp.data.items ?? [])
+                    self.recommendData.cursorTime = resp.data.cursorTime
+                    self.recommendData.hasMore = resp.data.hasMore
+                    self.recommendData.ongoing = resp.data.ongoing
+                }
                 self.handleOnGoingView()
                 self.tableView.reloadData()
                 DispatchQueue.main.async {
@@ -156,7 +156,19 @@ extension RecommendController {
                         lastIndexPath = indexPath
                         lastActiveCell = currCell
                     }
+                    
+                    preLoad(indexPath.row)
+                    break
                 }
+            }
+        }
+    }
+    
+    func preLoad(_ index:Int) {
+        // 判断是否需要去预加载
+        if self.recommendData.items?.count ?? 0 > 0, self.recommendData.hasMore, index > (self.recommendData.items?.count ?? 0) - 5 {
+            if !self.recommendData.cursorTime.isEmpty {
+                getRecommend(cursor: self.recommendData.cursorTime, cityCode: 5101)
             }
         }
     }
@@ -210,9 +222,9 @@ extension RecommendController: UITableViewDataSource, UITableViewDelegate, UIScr
 }
 
 
-extension RecommendController{
+extension RecommendController {
     
-    fileprivate func setupUI(){
+    fileprivate func setupUI() {
         
         view.addSubview(tableView)
         view.addSubview(onGoingView)
@@ -221,9 +233,7 @@ extension RecommendController{
         onGoingView.addSubview(onGoingIV)
         
         tableView.snp.makeConstraints { (make) in
-            make.top.equalToSuperview()
-            make.centerX.equalToSuperview()
-            make.size.equalToSuperview()
+            make.edges.equalToSuperview()
         }
         
         onGoingView.snp.makeConstraints { (make) in

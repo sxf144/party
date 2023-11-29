@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0F07B9042AD187C7009B5FFB /* IMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F07B9032AD187C7009B5FFB /* IMManager.swift */; };
 		0F0D428B2AD4211600E65306 /* LIMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0D428A2AD4211600E65306 /* LIMModel.swift */; };
+		0F2CBB2B2B16EC5600D976C0 /* QueryRedPacketResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2CBB2A2B16EC5600D976C0 /* QueryRedPacketResp.swift */; };
+		0F2CBB2D2B16F34800D976C0 /* RedPacketDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2CBB2C2B16F34800D976C0 /* RedPacketDetailController.swift */; };
 		0F37438E2B11F378008F6B31 /* WxOrderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438D2B11F378008F6B31 /* WxOrderModel.swift */; };
 		0F3743902B11FE7C008F6B31 /* CoinLogModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438F2B11FE7C008F6B31 /* CoinLogModel.swift */; };
 		0F3743922B1200A9008F6B31 /* CoinLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743912B1200A9008F6B31 /* CoinLogController.swift */; };
@@ -19,6 +21,7 @@
 		0F37439E2B1317F7008F6B31 /* SettingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439D2B1317F7008F6B31 /* SettingController.swift */; };
 		0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */; };
 		0F3743A22B132FC8008F6B31 /* TaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743A12B132FC8008F6B31 /* TaskView.swift */; };
+		0F3743A62B148856008F6B31 /* WXApiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743A52B148856008F6B31 /* WXApiManager.swift */; };
 		0F4338F72ACC8C320014F0C5 /* SubCommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */; };
 		0F4DFE772AEBD6EF00DD158A /* GiftListResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */; };
 		0F4DFE792AECD6BF00DD158A /* GiftCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DFE782AECD6BF00DD158A /* GiftCell.swift */; };
@@ -151,9 +154,14 @@
 		0FD8D0AB2AFF2E8500FB0915 /* SendRedPacketController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */; };
 		0FDD98262AF0F49200EBA619 /* GameRoundListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD98252AF0F49200EBA619 /* GameRoundListController.swift */; };
 		0FDD98282AF0FA1300EBA619 /* GameCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD98272AF0FA1300EBA619 /* GameCardCell.swift */; };
+		0FE2DB972B1764D300826222 /* RedPacketLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE2DB962B1764D200826222 /* RedPacketLogCell.swift */; };
 		0FEBF5942A9D978D00CB43BF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0FEBF5932A9D978D00CB43BF /* Images.xcassets */; };
 		0FEBF5962A9F3FA800CB43BF /* UserTokenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF5952A9F3FA700CB43BF /* UserTokenModel.swift */; };
 		0FEBF59C2AA07E7800CB43BF /* HomeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF59B2AA07E7700CB43BF /* HomeController.swift */; };
+		0FF066A02B14A2E500D6E844 /* FollowedController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF0669B2B14A2E500D6E844 /* FollowedController.swift */; };
+		0FF066A42B14AE4600D6E844 /* OrderStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF066A32B14AE4600D6E844 /* OrderStatusModel.swift */; };
+		0FF066A62B15FFF800D6E844 /* MapNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF066A52B15FFF800D6E844 /* MapNavigationController.swift */; };
+		0FF066A82B160BEE00D6E844 /* CustomAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF066A72B160BEE00D6E844 /* CustomAnnotationView.swift */; };
 		0FF39BAD2AF78BA5007BCA63 /* ChatDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF39BAC2AF78BA5007BCA63 /* ChatDelegate.swift */; };
 		0FFDBB882B060F8B0022E94B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FFDBB872B060F8B0022E94B /* StoreKit.framework */; };
 		0FFF00072B07561F0072FCFA /* MyUserPageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FFF00032B07561F0072FCFA /* MyUserPageController.swift */; };
@@ -228,6 +236,8 @@
 /* Begin PBXFileReference section */
 		0F07B9032AD187C7009B5FFB /* IMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMManager.swift; sourceTree = "<group>"; };
 		0F0D428A2AD4211600E65306 /* LIMModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LIMModel.swift; sourceTree = "<group>"; };
+		0F2CBB2A2B16EC5600D976C0 /* QueryRedPacketResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryRedPacketResp.swift; sourceTree = "<group>"; };
+		0F2CBB2C2B16F34800D976C0 /* RedPacketDetailController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedPacketDetailController.swift; sourceTree = "<group>"; };
 		0F37438D2B11F378008F6B31 /* WxOrderModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WxOrderModel.swift; sourceTree = "<group>"; };
 		0F37438F2B11FE7C008F6B31 /* CoinLogModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinLogModel.swift; sourceTree = "<group>"; };
 		0F3743912B1200A9008F6B31 /* CoinLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinLogController.swift; sourceTree = "<group>"; };
@@ -238,6 +248,7 @@
 		0F37439D2B1317F7008F6B31 /* SettingController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingController.swift; sourceTree = "<group>"; };
 		0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManagerController.swift; sourceTree = "<group>"; };
 		0F3743A12B132FC8008F6B31 /* TaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskView.swift; sourceTree = "<group>"; };
+		0F3743A52B148856008F6B31 /* WXApiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WXApiManager.swift; sourceTree = "<group>"; };
 		0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubCommentCell.swift; sourceTree = "<group>"; };
 		0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftListResp.swift; sourceTree = "<group>"; };
 		0F4DFE782AECD6BF00DD158A /* GiftCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftCell.swift; sourceTree = "<group>"; };
@@ -372,9 +383,14 @@
 		0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendRedPacketController.swift; sourceTree = "<group>"; };
 		0FDD98252AF0F49200EBA619 /* GameRoundListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameRoundListController.swift; sourceTree = "<group>"; };
 		0FDD98272AF0FA1300EBA619 /* GameCardCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameCardCell.swift; sourceTree = "<group>"; };
+		0FE2DB962B1764D200826222 /* RedPacketLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedPacketLogCell.swift; sourceTree = "<group>"; };
 		0FEBF5932A9D978D00CB43BF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0FEBF5952A9F3FA700CB43BF /* UserTokenModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserTokenModel.swift; sourceTree = "<group>"; };
 		0FEBF59B2AA07E7700CB43BF /* HomeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeController.swift; sourceTree = "<group>"; };
+		0FF0669B2B14A2E500D6E844 /* FollowedController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowedController.swift; sourceTree = "<group>"; };
+		0FF066A32B14AE4600D6E844 /* OrderStatusModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderStatusModel.swift; sourceTree = "<group>"; };
+		0FF066A52B15FFF800D6E844 /* MapNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapNavigationController.swift; sourceTree = "<group>"; };
+		0FF066A72B160BEE00D6E844 /* CustomAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAnnotationView.swift; sourceTree = "<group>"; };
 		0FF39BAC2AF78BA5007BCA63 /* ChatDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatDelegate.swift; sourceTree = "<group>"; };
 		0FFDBB872B060F8B0022E94B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		0FFF00032B07561F0072FCFA /* MyUserPageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyUserPageController.swift; sourceTree = "<group>"; };
@@ -676,6 +692,7 @@
 			children = (
 				0F8028642ABC600E00324720 /* PoiCell.swift */,
 				0F8E1B932AC6C61D00C67D62 /* ChooseLocationView.swift */,
+				0FF066A72B160BEE00D6E844 /* CustomAnnotationView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -825,6 +842,7 @@
 		0F9EC3272AB87DCC0079B763 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				0FF066A52B15FFF800D6E844 /* MapNavigationController.swift */,
 				0F9EC3282AB87E980079B763 /* MapSearchController.swift */,
 			);
 			path = Controller;
@@ -894,6 +912,7 @@
 		0FA9A9062B036CE9005D2780 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				0F2CBB2A2B16EC5600D976C0 /* QueryRedPacketResp.swift */,
 				0FA9A9072B036CE9005D2780 /* FetchRedPacketResp.swift */,
 			);
 			path = Model;
@@ -1124,6 +1143,7 @@
 			children = (
 				0FD8D0A92AFF2E8500FB0915 /* Controller */,
 				0FA9A9062B036CE9005D2780 /* Model */,
+				0FE2DB932B1764A200826222 /* View */,
 			);
 			path = RedPacket;
 			sourceTree = "<group>";
@@ -1131,9 +1151,18 @@
 		0FD8D0A92AFF2E8500FB0915 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				0F2CBB2C2B16F34800D976C0 /* RedPacketDetailController.swift */,
 				0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		0FE2DB932B1764A200826222 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				0FE2DB962B1764D200826222 /* RedPacketLogCell.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		0FEBF58F2A9D8F3C00CB43BF /* UI */ = {
@@ -1150,6 +1179,7 @@
 				0F8E1BA62AC9208F00C67D62 /* Party */,
 				0F8E1B972AC7DA3400C67D62 /* Game */,
 				0F9EC3262AB87DCC0079B763 /* Map */,
+				0FF066992B14A2E500D6E844 /* Followed */,
 				0F6138212AA6DA1700E5DB1A /* Recommend */,
 				0FEBF5972AA07DFF00CB43BF /* Home */,
 			);
@@ -1170,6 +1200,38 @@
 				0FEBF59B2AA07E7700CB43BF /* HomeController.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		0FF066992B14A2E500D6E844 /* Followed */ = {
+			isa = PBXGroup;
+			children = (
+				0FF0669A2B14A2E500D6E844 /* Controller */,
+				0FF0669C2B14A2E500D6E844 /* Model */,
+				0FF0669E2B14A2E500D6E844 /* View */,
+			);
+			path = Followed;
+			sourceTree = "<group>";
+		};
+		0FF0669A2B14A2E500D6E844 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				0FF0669B2B14A2E500D6E844 /* FollowedController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		0FF0669C2B14A2E500D6E844 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		0FF0669E2B14A2E500D6E844 /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		0FF39BAB2AF78BA5007BCA63 /* Delegate */ = {
@@ -1370,6 +1432,7 @@
 		49FBBF94268DA6D2000C851E /* Manager */ = {
 			isa = PBXGroup;
 			children = (
+				0F3743A52B148856008F6B31 /* WXApiManager.swift */,
 				0FA9A9092B03770E005D2780 /* RedPacketManager.swift */,
 				0F07B9032AD187C7009B5FFB /* IMManager.swift */,
 				0F4F3EF72AAB2176000AF5BD /* MyLocationManager.swift */,
@@ -1463,6 +1526,7 @@
 		49FBBFC8268DA77A000C851E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				0FF066A32B14AE4600D6E844 /* OrderStatusModel.swift */,
 				0F37438D2B11F378008F6B31 /* WxOrderModel.swift */,
 				0F0D428A2AD4211600E65306 /* LIMModel.swift */,
 				0FEBF5952A9F3FA700CB43BF /* UserTokenModel.swift */,
@@ -1754,6 +1818,7 @@
 				0F4DFE772AEBD6EF00DD158A /* GiftListResp.swift in Sources */,
 				0FA647102AF25EEC00AC5787 /* GameUserCell.swift in Sources */,
 				0F4F3EF62AA8740E000AF5BD /* RecommendCell.swift in Sources */,
+				0F3743A62B148856008F6B31 /* WXApiManager.swift in Sources */,
 				0F76D9EE2ACFBB4F0031DADE /* MyPartyCell.swift in Sources */,
 				0F8E1B922AC6BB8A00C67D62 /* SlideDownTransitionAnimator.swift in Sources */,
 				0F8E1B9E2AC7DA3400C67D62 /* GameListController.swift in Sources */,
@@ -1762,6 +1827,7 @@
 				49FBBF8D268DA6BF000C851E /* Config.swift in Sources */,
 				49FBBF29268D9A11000C851E /* ViewController.swift in Sources */,
 				0FD8D0AB2AFF2E8500FB0915 /* SendRedPacketController.swift in Sources */,
+				0FF066A82B160BEE00D6E844 /* CustomAnnotationView.swift in Sources */,
 				0FBDBAC62ADFEB8100E0A0CB /* ChatController.swift in Sources */,
 				0FAAB0C92AE679C5003B8DE4 /* RedPacketMessageCell.swift in Sources */,
 				0FB10E772AF88BEE00E64777 /* ChatKeyboard+Extensions.swift in Sources */,
@@ -1780,6 +1846,7 @@
 				0F9EC3292AB87E980079B763 /* MapSearchController.swift in Sources */,
 				0FB10E6F2AF88BEE00E64777 /* ChatMoreMenuView.swift in Sources */,
 				0F37439C2B12320E008F6B31 /* GiftLogModel.swift in Sources */,
+				0F2CBB2D2B16F34800D976C0 /* RedPacketDetailController.swift in Sources */,
 				0FF39BAD2AF78BA5007BCA63 /* ChatDelegate.swift in Sources */,
 				49FBBFA3268DA6D2000C851E /* OSSManager.swift in Sources */,
 				0F8E1BB82AC9230300C67D62 /* PartyDetailController.swift in Sources */,
@@ -1793,11 +1860,14 @@
 				0F37439A2B123160008F6B31 /* GiftLogCell.swift in Sources */,
 				0F4DFE9C2AF0B23800DD158A /* GameRoundListResp.swift in Sources */,
 				49FBBFA5268DA6D2000C851E /* LSNotification.swift in Sources */,
+				0F2CBB2B2B16EC5600D976C0 /* QueryRedPacketResp.swift in Sources */,
 				49FBBFB9268DA772000C851E /* LoginController.swift in Sources */,
 				0F8E1BC02ACBABE500C67D62 /* CommentCell.swift in Sources */,
 				0F07B9042AD187C7009B5FFB /* IMManager.swift in Sources */,
 				49FBBFD7268DA77A000C851E /* ConstelltionModel.swift in Sources */,
+				0FE2DB972B1764D300826222 /* RedPacketLogCell.swift in Sources */,
 				49FBBF7F268DA6A5000C851E /* UILabel+Extension.swift in Sources */,
+				0FF066A02B14A2E500D6E844 /* FollowedController.swift in Sources */,
 				0FA940712AEA6D4E009A10C9 /* GiftView.swift in Sources */,
 				49FBBFBA268DA772000C851E /* RegisterController.swift in Sources */,
 				49FBBF25268D9A11000C851E /* AppDelegate.swift in Sources */,
@@ -1859,7 +1929,9 @@
 				0F4F3EF32AA82836000AF5BD /* RecommendRespModel.swift in Sources */,
 				0FA940612AE90E4E009A10C9 /* InviteMessageCell.swift in Sources */,
 				49FBBF8F268DA6BF000C851E /* Const.swift in Sources */,
+				0FF066A62B15FFF800D6E844 /* MapNavigationController.swift in Sources */,
 				0FAAB0C72AE64E27003B8DE4 /* ImageMessageCell.swift in Sources */,
+				0FF066A42B14AE4600D6E844 /* OrderStatusModel.swift in Sources */,
 				0FA940692AE94443009A10C9 /* GameRedPacketMessageCell.swift in Sources */,
 				0F0D428B2AD4211600E65306 /* LIMModel.swift in Sources */,
 				0FB10E762AF88BEE00E64777 /* ChatMoreMnueConfig.swift in Sources */,
@@ -2104,6 +2176,7 @@
 				);
 				INFOPLIST_FILE = Platform/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "桔子糖";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2151,6 +2224,7 @@
 				);
 				INFOPLIST_FILE = Platform/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "桔子糖";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -11,15 +11,13 @@ import AMapLocationKit
 import ImSDK_Plus_Swift
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate, WXApiDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // app initialize
         appInitializes()
-//        // 添加监听
-//        addObservers()
         // 注册通知
         registNotification()
         // Override point for customization after application launch.
@@ -39,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WXApiDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
+        // 应用回到前台时，刷新几个数据
         OSSManager.shared.loadOssInfo()
         AMapServices.shared().apiKey = "f41fc14a42f6ca6000e016f5a0bd322c"
         AMapServices.shared().enableHTTPS = true
@@ -63,7 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WXApiDelegate {
         let handleUrlStr = url.absoluteString
         LSLog("handleOpen options handleUrlStr:\(handleUrlStr)")
         if let handleUrl = URL(string: handleUrlStr) {
-            return WXApi.handleOpen(handleUrl, delegate: self)
+            return WXApi.handleOpen(handleUrl, delegate: WXApiManager.shared)
         }
         return false
     }
@@ -72,13 +71,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WXApiDelegate {
         let handleUrlStr = url.absoluteString
         LSLog("handleOpen sourceApplication handleUrlStr:\(handleUrlStr)")
         if let handleUrl = URL(string: handleUrlStr) {
-            return WXApi.handleOpen(handleUrl, delegate: self)
+            return WXApi.handleOpen(handleUrl, delegate: WXApiManager.shared)
         }
         return false
     }
     
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        return WXApi.handleOpenUniversalLink(userActivity, delegate: self)
+        LSLog("userActivity restorationHandler:\(userActivity)")
+        var result = true
+        if userActivity.activityType == NSUserActivityTypeBrowsingWeb {
+            if let webpageURL = userActivity.webpageURL {
+                LSLog("userActivity restorationHandler webpageURL:\(webpageURL)")
+                // 使用URLComponents来解析URL的参数
+                if let urlComponents = URLComponents(url: webpageURL, resolvingAgainstBaseURL: false) {
+                    // 微信标识
+                    if urlComponents.path.contains("/app/") {
+                        // 处理微信返回的数据
+                        result = WXApi.handleOpenUniversalLink(userActivity, delegate: WXApiManager.shared)
+                    } else {
+                        
+                    }
+                }
+            } else {
+                
+            }
+            
+        } else {
+            
+        }
+        return result
     }
     /*********************************************  微信SDK end  *********************************************/
     

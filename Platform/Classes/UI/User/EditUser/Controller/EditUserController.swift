@@ -25,10 +25,10 @@ class EditUserController: BaseController {
     let optionKey = "OptionKey"
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = UIColor.ls_color("#F8F8F8")
         title = "编辑资料"
+        super.viewDidLoad()
+        view.backgroundColor = UIColor.ls_color("#F8F8F8")
+        
         // 重置Navigation
         resetNavigation()
         setupUI()

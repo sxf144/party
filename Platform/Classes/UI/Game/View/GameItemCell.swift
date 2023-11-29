@@ -32,7 +32,7 @@ class GameItemCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
-        imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderSmall)
+        imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderGameCover)
         return imageView
     }()
     
@@ -95,7 +95,7 @@ extension GameItemCell {
         backgroundColor = item.selected ? UIColor.ls_color("#FE9C5B", alpha: 0.08) : UIColor.white
         
         // 游戏封面
-        cover.kf.setImage(with: URL(string: item.cover), placeholder: PlaceHolderSmall)
+        cover.kf.setImage(with: URL(string: item.cover), placeholder: PlaceHolderGameCover)
         
         // 游戏名称
         nameLabel.text = item.name

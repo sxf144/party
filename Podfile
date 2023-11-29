@@ -28,11 +28,13 @@ target 'Platform' do
   pod 'ZLPhotoBrowser'
   pod 'JXSegmentedView'
 #  pod 'WechatOpenSDK'
-  pod 'AMap3DMap-NO-IDFA'
+#  pod 'AMap3DMap-NO-IDFA'
   pod 'AMapSearch-NO-IDFA'
   pod 'AMapLocation-NO-IDFA'
+  pod 'AMapNavi-NO-IDFA' #内包含 AMap3DMap-NO-IDFA，无需再引用 AMap3DMap-NO-IDFA
   pod 'TXIMSDK_Plus_Swift_iOS'
   pod 'WechatOpenSDK-XCFramework'
+  pod 'swiftScan'   #iOS qrCode、barCode Swift Version
   # *********************************************** Objective-C ***********************************************
 
 end

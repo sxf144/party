@@ -17,7 +17,7 @@ class ChatController: BaseController {
     // chatKeyBoard
     private let kToolBarLastH: CGFloat = 52
     
-    let CellHeight = 80.0
+//    let CellHeight = 80.0
     let PageCount: UInt = 20
     var conversation: LIMConversation = LIMConversation()
     var dataList: [LIMMessage] = []
@@ -62,7 +62,7 @@ class ChatController: BaseController {
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.separatorStyle = .none
-        tableView.estimatedRowHeight = CellHeight
+//        tableView.estimatedRowHeight = CellHeight
         tableView.rowHeight = UITableView.automaticDimension
         
         // 注册UITableViewCell类
@@ -118,7 +118,7 @@ extension ChatController {
         if let conv = conv {
             conversation = conv
             if (conversation.type == .LIM_C2C) {
-                title = conversation.showName
+                navigationView.titleLabel.text = conversation.showName
                 let uid = conversation.userID ?? ""
                 bottomView.setUserId(uid)
                 V2TIMManager.shared.getUsersInfo(userIDList: [uid]) { infoList in
@@ -131,7 +131,7 @@ extension ChatController {
             } else if (conversation.type == .LIM_GROUP) {
                 uniqueCode = conversation.groupID ?? ""
                 bottomView.setUniCode(uniqueCode)
-                title = conversation.showName
+                navigationView.titleLabel.text = conversation.showName
                 getOtherData()
             }
         }
@@ -206,7 +206,7 @@ extension ChatController {
         V2TIMManager.shared.getHistoryMessageList(option: option) { msgs in
             LSLog("getHistoryMessageList msgs:\(msgs)")
             if (msgs.count < self.PageCount) {
-                self.hasMore = true;
+                self.hasMore = false;
             }
             self.isLoading = false
             self.handleData(msgs: msgs, refresh: refresh)
@@ -231,21 +231,43 @@ extension ChatController {
         // 处理其他数据
         handleOtherData()
         
+        
         // 刷新界面
+//        let lastOffsetY = tableView.contentOffset.y
         tableView.reloadData()
         tableView.layoutIfNeeded()
         
         if refresh {
-            scrollToBottom()
-        } else {
-            // 恢复原位置
-            var visibleHeight: CGFloat = 0
-            for i in 0 ..< msgs.count {
-                let indexPath = IndexPath(row: i, section: 0)
-                let cell = tableView.cellForRow(at: indexPath)
-                visibleHeight += cell?.bounds.height ?? 0
+            if tableView.contentSize.height > tableView.frame.height {
+                
+//                tableView.setContentOffset(CGPoint(x: 0, y: tableView.contentSize.height - tableView.frame.size.height), animated: false)
+                
+                let lastSection = tableView.numberOfSections - 1
+                if lastSection >= 0 {
+                    let lastRow = tableView.numberOfRows(inSection: lastSection) - 1
+                    if lastRow >= 0 {
+                        let indexPath = IndexPath(row: lastRow, section: lastSection)
+                        tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                    }
+                }
             }
-            tableView.scrollRectToVisible(CGRect(x: 0, y: tableView.contentOffset.y + visibleHeight, width: tableView.frame.width, height: tableView.frame.height), animated: false)
+        } else {
+//            // 恢复原位置
+//            var visibleHeight: CGFloat = 0
+//            for i in 0 ..< msgs.count {
+//                let indexPath = IndexPath(row: i, section: 0)
+//                let cell = tableView.cellForRow(at: indexPath)
+//                visibleHeight += cell?.bounds.height ?? 0
+//            }
+//            LSLog("lastOffsetY:\(lastOffsetY),visibleHeight:\(visibleHeight)")
+//            tableView.setContentOffset(CGPoint(x: 0, y: lastOffsetY + visibleHeight), animated: false)
+            
+            // 恢复原位置
+            let lastSection = tableView.numberOfSections - 1
+            if lastSection >= 0 {
+                let indexPath = IndexPath(row: msgs.count, section: lastSection)
+                tableView.scrollToRow(at: indexPath, at: .top, animated: false)
+            }
         }
     }
     
@@ -433,11 +455,13 @@ extension ChatController {
         // 判断是否是自己抽到了卡牌
         if limMsg.isSelf ?? false, limMsg.elemType == .LIMElemGameStatusSync, limMsg.gameElem?.action.actionId == .LIMGameStatusCard {
             if let gameElem = limMsg.gameElem {
-                TaskView.shared.showInWindow(gameElem)
-                TaskView.shared.redPacketBlock = {
+                TaskView.shared.redPacketBlock = { gElem in
+                    LSLog("redPacketBlock")
                     // 发红包逃避任务
-                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: 0)
+                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: gElem.taskId)
+                    
                 }
+                TaskView.shared.showInWindow(gameElem)
             }
         }
     }
@@ -681,27 +705,33 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "RedPacketMessageCell", for: indexPath) as! RedPacketMessageCell
                 tempCell.configure(with: item)
                 tempCell.fetchBlock = {
-                    NetworkManager.shared.fetchRedPacket(item.redPacketElem?.id ?? 0) { resp in
-                        
-                        if resp.status == .success {
-                            LSLog("fetchRedPacket succ")
-                            LSHUD.showInfo("领取到\(resp.data.getAmount)个桔子糖")
-                            item.redPacketElem?.status = 1
-                            tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-                            if let redPacketId = item.redPacketElem?.id {
-                                RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
+                    
+                    // 状态为1，是已经处理过的红包，直接跳转进入详情
+                    if item.redPacketElem?.status == 1 {
+                        // 打开红包详情
+                        PageManager.shared.pushToRedPacketDetailController(item)
+                    } else {
+                        NetworkManager.shared.fetchRedPacket(item.redPacketElem?.id ?? 0) { resp in
+                            if resp.status == .success {
+                                LSLog("fetchRedPacket succ")
+                                item.redPacketElem?.status = 1
+                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+                                if let redPacketId = item.redPacketElem?.id {
+                                    RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
+                                }
+                                // 打开红包详情
+                                PageManager.shared.pushToRedPacketDetailController(item)
+                            } else {
+                                // 红包已抢完，红包已领取，红包已过期，其他未知错误，都算已读
+                                LSLog("fetchRedPacket fail")
+                                LSHUD.showError(resp.msg)
+                                // 处理红包已处理的状态
+                                item.redPacketElem?.status = 1
+                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+                                if let redPacketId = item.redPacketElem?.id {
+                                    RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
+                                }
                             }
-                        } else if resp.status == .exist {
-                            LSHUD.showInfo(resp.msg)
-                            // 处理红包已经领完的响应
-                            item.redPacketElem?.status = 1
-                            tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-                            if let redPacketId = item.redPacketElem?.id {
-                                RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
-                            }
-                        } else {
-                            LSLog("fetchRedPacket fail")
-                            LSHUD.showError(resp.msg)
                         }
                     }
                 }
@@ -805,7 +835,7 @@ extension ChatController {
             make.top.equalToSuperview().offset(kNavBarHeight)
             make.centerX.equalToSuperview()
             make.width.equalToSuperview()
-            make.bottom.equalTo(bottomView.snp.top)
+            make.bottom.equalToSuperview().offset(-kTabBarHeight)
         }
         
         bottomView.snp.makeConstraints { (make) in

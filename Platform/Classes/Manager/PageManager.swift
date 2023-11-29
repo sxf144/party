@@ -33,8 +33,9 @@ class PageManager: NSObject {
 //    }
 //
     /// 手机号登录
-    func pushToPhoneLogin() {
+    func pushToPhoneLogin(_ type:PhoneLoginController.ActionType) {
         let vc = PhoneLoginController()
+        vc.setType(type)
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -71,13 +72,13 @@ class PageManager: NSObject {
     /// 局详情
     func pushToPartyDetail(_ uniqueCode:String) {
         let vc = PartyDetailController()
-        vc.hidesBottomBarWhenPushed = true
         vc.setData(uniqueCode: uniqueCode)
+        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 关注列表
-    func pushToFollowList(_ uniqueCode:String) {
+    func pushToFollowListController() {
         let vc = FollowListController()
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
@@ -91,8 +92,8 @@ class PageManager: NSObject {
         currentNav()?.pushViewController(vc, animated: true)
     }
     
-    /// 地图Controller
-    func moveInMapSearch(){
+    /// 地图搜索Controller
+    func moveInMapSearch() {
         let vc = MapSearchController()
         vc.hidesBottomBarWhenPushed = true
 
@@ -107,6 +108,14 @@ class PageManager: NSObject {
 
         // 推送新视图控制器
         currentNav()?.pushViewController(vc, animated: false)
+    }
+    
+    /// 地图定点导航
+    func pushToMapNavigationController(_ landMark:String, address:String, lat:Double, lon:Double) {
+        let vc = MapNavigationController()
+        vc.setData(landMark, address: address, lat: lat, lon: lon)
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 聊天页
@@ -145,6 +154,14 @@ class PageManager: NSObject {
     func pushToSendRedPacketController(_ uniCode:String, personCount:Int, userId:String, taskId:Int64) {
         let vc = SendRedPacketController()
         vc.setData(uniCode, personCount: personCount, userId: userId, taskId: taskId)
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 红包详情
+    func pushToRedPacketDetailController(_ limMsg:LIMMessage) {
+        let vc = RedPacketDetailController()
+        vc.setData(limMsg)
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -191,6 +208,7 @@ class PageManager: NSObject {
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
+    
     
     
 //

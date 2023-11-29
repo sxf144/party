@@ -64,6 +64,8 @@ let kAppBuildVersion:String = Bundle.main.infoDictionary!["CFBundleVersion"] as!
 let PlaceHolderAvatar = UIImage(named: "default_avatar")
 let PlaceHolderBig = UIImage(named: "default_big")
 let PlaceHolderSmall = UIImage(named: "default_small")
+let PlaceHolderGameCover = UIImage(named: "game_cover_default")
+
 
 // MARK: 用户协议
 let Agreement = "https://img.juzitang.net/html/agreement.html"
@@ -88,6 +90,3 @@ let LUIKit_File_Path = LUIKit_DB_Path.appendingPathComponent("file")
 /// 红包领取记录
 let REDPACKET_RECORD = "redpacket_record"
 
-/// 微信appid
-let WX_APPID = "wx72781ac3ee6155d0"
-let UNIVERSAL_LINK = "https://static.juzitang.net/app/"

@@ -8,26 +8,36 @@
 
 import UIKit
 import SnapKit
+import swiftScan
 
 class PublishSuccController: BaseController {
     
-    let qrPlaceHolder = UIImage(named: "default_big")
+    let qrSize: CGSize = CGSize(width: 188, height: 188)
     var sTime: String = ""
     var eTime: String = ""
     var uniCode: String = ""
+    var qrCodeImage: UIImage?
     
     override func viewDidLoad() {
-        self.title = "发布成功"
+        title = "发布成功"
         super.viewDidLoad()
         setupUI()
     }
     
-    // 创建UITableView
+    override func pop() {
+        LSLog("PublishSuccController pop")
+        // 返回到堆栈中的某个特定视图控制器
+        if let targetViewController = PageManager.shared.currentNav()?.viewControllers.first(where: { $0 is BaseController }) {
+            PageManager.shared.currentNav()?.popToViewController(targetViewController, animated: true)
+        }
+    }
+    
+    // 二维码图片
     fileprivate lazy var qrCode: UIImageView = {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.isUserInteractionEnabled = true
-        imageView.kf.setImage(with: URL(string: ""), placeholder: qrPlaceHolder)
+        imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderBig)
         return imageView
     }()
     
@@ -94,16 +104,23 @@ extension PublishSuccController {
         sTime = startTime
         eTime = endTime
         uniCode = uniqueCode
+        
 //        let qrCodeUrl = "juzitang://detail?code=\(uniCode)"
-//        qrCode.kf.setImage(with: URL(string: qrCodeUrl), placeholder: qrPlaceHolder)
+        let qrCodeUrl = "https://static.juzitang.net/detail?code=\(uniCode)"
+        // 调用生成二维码的方法
+        if let qrCodeImage = LBXScanWrapper.createCode(codeType: "CIQRCodeGenerator", codeString: qrCodeUrl, size: qrSize, qrColor: .black, bkColor: .white) {
+            qrCode.image = qrCodeImage
+        }
+
         timeLabel.text = "时间：\(sTime)-\(eTime)"
         timeLabel.sizeToFit()
     }
 }
 
 
-extension PublishSuccController{
-    fileprivate func setupUI(){
+extension PublishSuccController {
+    
+    fileprivate func setupUI() {
         
         view.addSubview(qrCode)
         view.addSubview(tipLabel)
@@ -113,11 +130,10 @@ extension PublishSuccController{
         view.addSubview(shareIV)
         view.addSubview(shareLabel)
         
-        
         qrCode.snp.makeConstraints { (make) in
             make.top.equalToSuperview().offset(kNavBarHeight + 40)
             make.centerX.equalToSuperview()
-            make.size.equalTo(CGSize(width: 188, height: 188))
+            make.size.equalTo(qrSize)
         }
         
         tipLabel.snp.makeConstraints { (make) in

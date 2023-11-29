@@ -38,7 +38,7 @@ class GameRoundListController: BaseController {
     public var selectedBlock: ((_ roundItems:[[String: Any]]) -> ())?
 
     override func viewDidLoad() {
-        self.title = "选择本局卡牌"
+        title = "选择本局卡牌"
         super.viewDidLoad()
         setupUI()
         

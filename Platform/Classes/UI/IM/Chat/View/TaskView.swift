@@ -16,11 +16,12 @@ class TaskView: UIView {
     
     static let shared = TaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))
     /// 回调闭包
-    public var redPacketBlock: (() -> ())?
+    public var redPacketBlock: ((_ gElem:LIMGameElem) -> ())?
     let CardImageDefault: UIImage = UIImage(named: "card_item_bg")!
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
     var userPageInfo: UserPageModel? = LoginManager.shared.getUserPageInfo()
+    var gameElem: LIMGameElem?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -92,9 +93,9 @@ extension TaskView {
     // 发红包逃避任务
     @objc fileprivate func clickRedPacketBtnBtn(_ sender:UIButton) {
         LSLog("clickRedPacketBtnBtn")
-        removeTaskView()
-        if let redPacketBlock = redPacketBlock {
-            redPacketBlock()
+        if let redPacketBlock = redPacketBlock, let gElem = gameElem {
+            redPacketBlock(gElem)
+            removeTaskView()
         }
     }
     
@@ -106,6 +107,9 @@ extension TaskView {
     
     /// 显示 view
     func showInWindow(_ gameElem:LIMGameElem) {
+        
+        // 赋值
+        self.gameElem = gameElem
         
         // 卡牌图片
         cardImageView.kf.setImage(with: URL(string: gameElem.action.cardInfo.introductionThumbnail ), placeholder: CardImageDefault)
