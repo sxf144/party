@@ -358,6 +358,7 @@ extension MyUserPageController {
 }
 
 extension MyUserPageController: LBXScanViewControllerDelegate  {
+    
     func scanFinished(scanResult: LBXScanResult, error: String?) {
         LSLog("scanFinished strScanned:\(scanResult.strScanned ?? "")")
         if let str = scanResult.strScanned {
