@@ -13,13 +13,15 @@ import ImSDK_Plus_Swift
 class GameCardMessageCell: UITableViewCell {
     
     /// 回调闭包
-    public var confirmBlock: (() -> ())?
+    public var gameCardConfirmBlock: (() -> ())?
+    public var gameCardBlock: (() -> ())?
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 10.0
     let HeadWidth: CGFloat = 44.0
     let ContentWidth: CGFloat = 240.0
     let CardImageDefault: UIImage = UIImage(named: "card_item_bg")!
     var item: LIMMessage = LIMMessage()
+    var party: PartyDetailModel = PartyDetailModel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -39,6 +41,9 @@ class GameCardMessageCell: UITableViewCell {
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = HeadWidth/2
         imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderAvatar)
+        let avatarTap = UITapGestureRecognizer(target: self, action: #selector(avatarTaped(_:)))
+        imageView.addGestureRecognizer(avatarTap)
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -50,6 +55,20 @@ class GameCardMessageCell: UITableViewCell {
         label.text = " "
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
+        label.sizeToFit()
+        return label
+    }()
+    
+    // 主持人
+    fileprivate lazy var hostLabel: UILabel = {
+        let label = UILabel()
+        label.backgroundColor = UIColor.ls_color("#FE9C5B")
+        label.font = kFontRegualer10
+        label.textColor = .white
+        label.text = "主持人"
+        label.layer.cornerRadius = 9
+        label.clipsToBounds = true
+        label.textAlignment = .center
         label.sizeToFit()
         return label
     }()
@@ -101,14 +120,16 @@ class GameCardMessageCell: UITableViewCell {
 
 extension GameCardMessageCell {
     
-    func configure(with citem: LIMMessage) {
+    func configure(_ citem: LIMMessage, party:PartyDetailModel) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
+        self.party = party
         
         // 判断是否是自己
         if item.isSelf ?? false {
             avatar.isHidden = true
             nameLabel.isHidden = true
+            hostLabel.isHidden = true
             contentBtn.backgroundColor = UIColor.ls_color("#4974FD")
             contentBtn.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
             titleLabel.textColor = UIColor.white
@@ -116,21 +137,27 @@ extension GameCardMessageCell {
         } else {
             avatar.isHidden = false
             nameLabel.isHidden = false
+            // 判断消息发送者是否主持人
+            if let userIds = item.gameElem?.action.teamUserIds {
+                if userIds.count > 0 {
+                    hostLabel.isHidden = self.party.userId != userIds[0]
+                } else {
+                    hostLabel.isHidden = true
+                }
+            } else {
+                hostLabel.isHidden = true
+            }
+            
             contentBtn.backgroundColor = UIColor.white
             contentBtn.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner, .layerMinXMaxYCorner]
             titleLabel.textColor = UIColor.ls_color("#333333")
             
-            avatar.snp.remakeConstraints { (make) in
-                make.left.equalToSuperview().offset(xMargin)
-                make.size.equalTo(CGSizeMake(HeadWidth, HeadWidth))
-                make.top.equalToSuperview().offset(yMargin)
-            }
-            
-            nameLabel.snp.remakeConstraints { (make) in
-                make.left.equalTo(avatar.snp.right).offset(12)
-                make.top.equalTo(avatar)
-                make.right.equalToSuperview().offset(-65)
-            }
+            // 用户头像
+            avatar.kf.setImage(with: URL(string: item.faceURL ?? ""), placeholder: PlaceHolderAvatar)
+
+            // 用户昵称
+            nameLabel.text = item.nickName
+            nameLabel.sizeToFit()
         }
         
         
@@ -171,7 +198,6 @@ extension GameCardMessageCell {
                     make.bottom.equalToSuperview().offset(-yMargin)
                 }
             }
-            
         } else {
             
             // 先重置contentBtn的约束，为先取消底部跟superview的约束，否则约束要报错
@@ -197,14 +223,6 @@ extension GameCardMessageCell {
             }
         }
         
-        LSLog("card faceURL:\(item.faceURL ?? "")")
-        // 用户头像
-        avatar.kf.setImage(with: URL(string: item.faceURL ?? ""), placeholder: PlaceHolderAvatar)
-
-        // 用户昵称
-        nameLabel.text = item.nickName
-        nameLabel.sizeToFit()
-        
         // 封面图
         iconIV.kf.setImage(with: URL(string: item.gameElem?.action.cardInfo.introductionThumbnail ?? ""), placeholder: CardImageDefault)
         
@@ -219,23 +237,37 @@ extension GameCardMessageCell {
     // 点击内容
     @objc func clickContentBtn(_ sender:UIButton) {
         LSLog("clickContentBtn")
+        if let gameCardBlock = gameCardBlock {
+            gameCardBlock()
+        }
     }
     
     // 主持人确认
     @objc func clickConfirmBtn(_ sender:UIButton) {
         LSLog("clickConfirmBtn")
-        if let confirmBlock = confirmBlock {
-            confirmBlock()
+        if let gameCardConfirmBlock = gameCardConfirmBlock {
+            gameCardConfirmBlock()
+        }
+    }
+    
+    // 点击用户头像
+    @objc private func avatarTaped(_ tap: UITapGestureRecognizer) {
+        if let userIds = item.gameElem?.action.teamUserIds {
+            if userIds.count > 0 {
+                let pid = userIds[0]
+                PageManager.shared.pushToUserPage(pid)
+            }
         }
     }
 }
 
-extension GameCardMessageCell{
+extension GameCardMessageCell {
     
-    fileprivate func setupUI(){
+    fileprivate func setupUI() {
         
         contentView.addSubview(avatar)
         contentView.addSubview(nameLabel)
+        contentView.addSubview(hostLabel)
         contentView.addSubview(contentBtn)
         contentBtn.addSubview(iconIV)
         contentBtn.addSubview(titleLabel)
@@ -250,7 +282,12 @@ extension GameCardMessageCell{
         nameLabel.snp.makeConstraints { (make) in
             make.left.equalTo(avatar.snp.right).offset(12)
             make.top.equalToSuperview().offset(yMargin)
-            make.right.equalToSuperview().offset(-65)
+        }
+        
+        hostLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(nameLabel.snp.right).offset(6)
+            make.centerY.equalTo(nameLabel)
+            make.size.equalTo(CGSize(width: 46, height: 18))
         }
         
         contentBtn.snp.makeConstraints { (make) in

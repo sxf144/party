@@ -19,7 +19,7 @@ class MyPartyResp: RespModel {
     }
 }
 
-struct MyPartyModel {
+class MyPartyModel {
     
     /// 页数
     var pageNum: Int64 = 1
@@ -47,7 +47,7 @@ struct MyPartyModel {
     init() {}
 }
 
-struct PartyItem {
+class PartyItem {
     
     var userId: String = ""
     var uniqueCode: String = ""

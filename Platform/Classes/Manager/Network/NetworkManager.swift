@@ -137,6 +137,16 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 获取粉丝列表
+    func getFansList(_ pageNum:Int64 = 1, pageSize:Int64 = 10, _ response: @escaping((FansListResp) -> ()) ){
+        var para:[String:Any] = ["page_num": pageNum]
+        para["page_size"] = pageSize
+        Network.shared.httpGetRequest(path: "/user/my_fans", para: para) { (json) in
+            let resp = FansListResp(json)
+            response(resp)
+        }
+    }
+    
     /// 添加关注
     func followPeople(_ peopleId:String = "", _ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["people_id": peopleId]
@@ -262,6 +272,16 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 踢出局
+    func kickOut(_ uniqueCode:String = "", peopleIds:[String] = [],_ response: @escaping((JoinResp) -> ()) ){
+        var para:[String:Any] = ["unique_code": uniqueCode]
+        para["people_ids"] = peopleIds
+        Network.shared.httpPostRequest(path: "/play/kick_out", para: para) { (json) in
+            let resp = JoinResp(json)
+            response(resp)
+        }
+    }
+    
     /// 退出局
     func leaveParty(_ uniqueCode:String = "",_ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["unique_code": uniqueCode]
@@ -324,6 +344,16 @@ class NetworkManager: NSObject {
         para["rounds"] = rounds
         para["teams"] = teams
         Network.shared.httpPostRequest(path: "/play/start_game", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 结束游戏
+    func endGame(_ uniqueCode:String = "", sceneId:Int64 = 0, _ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["unique_code": uniqueCode]
+        para["scene_id"] = sceneId
+        Network.shared.httpPostRequest(path: "/play/end_game", para: para) { (json) in
             let resp = RespModel(json)
             response(resp)
         }
@@ -393,6 +423,14 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 获取第三方绑定
+    func getExternalBind(_ response: @escaping((BindResp) -> ()) ){
+        Network.shared.httpGetRequest(path: "/settings/get_external_bind", para: nil) { (json) in
+            let resp = BindResp(json)
+            response(resp)
+        }
+    }
+    
     /// 绑定手机
     func bindMobile(_ mobile:String, code:String,_ response: @escaping((RespModel) -> ()) ){
         var para:[String:Any] = ["mobile": mobile]
@@ -407,6 +445,43 @@ class NetworkManager: NSObject {
     func bindWx(_ code:String,_ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["code": code]
         Network.shared.httpPostRequest(path: "/settings/bind_wx", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 举报
+    func report(_ objType:Int64, objId:String, reasonId:Int64,_ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["obj_type": objType]
+        para["obj_id"] = objId
+        para["reason_id"] = reasonId
+        Network.shared.httpPostRequest(path: "/user/report", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 获取举报理由
+    func getReportReasonList(_ response: @escaping((ReportReasonListResp) -> ()) ){
+        Network.shared.httpGetRequest(path: "/user/report/reason_list", para: nil) { (json) in
+            let resp = ReportReasonListResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 添加黑名单
+    func addBlackList(_ peopleId:String,_ response: @escaping((RespModel) -> ()) ){
+        let para:[String:Any] = ["people_id": peopleId]
+        Network.shared.httpPostRequest(path: "/user/add_blacklist", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
+    /// 取消黑名单
+    func removeBlackList(_ peopleId:String,_ response: @escaping((RespModel) -> ()) ){
+        let para:[String:Any] = ["people_id": peopleId]
+        Network.shared.httpPostRequest(path: "/user/remove_blacklist", para: para) { (json) in
             let resp = RespModel(json)
             response(resp)
         }

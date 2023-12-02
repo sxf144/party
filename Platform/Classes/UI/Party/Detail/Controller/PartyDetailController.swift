@@ -371,7 +371,9 @@ extension PartyDetailController {
     
     // 获取详情
     func getPartyDetail() {
+        LSHUD.showLoading()
         NetworkManager.shared.getPartyDetail (uniCode) { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("getPartyDetail data:\(resp.data)")
                 self.partyDetail = resp.data
@@ -496,6 +498,31 @@ extension PartyDetailController {
                 }
             } else {
                 LSLog("joinParty fail")
+                LSHUD.showError(resp.msg)
+            }
+        }
+    }
+    
+    // 移除成员
+    func kickOut(_ items:[SimpleUserInfo]) {
+        if items.count <= 0 {
+            return
+        }
+        var peopleIds:[String] = []
+        for i in 0 ..< items.count {
+            let fItem = items[i]
+            peopleIds.append(fItem.userId)
+        }
+        LSHUD.showLoading()
+        NetworkManager.shared.kickOut(uniCode, peopleIds: peopleIds) { resp in
+            LSHUD.hide()
+            if resp.status == .success {
+                LSLog("kickOut succ")
+                LSHUD.showInfo("操作成功")
+                self.getParticipateList()
+            } else {
+                LSLog("kickOut fail")
+                LSHUD.showError(resp.msg)
             }
         }
     }
@@ -510,6 +537,7 @@ extension PartyDetailController {
                 self.joinStatusChanged()
             } else {
                 LSLog("joinParty fail")
+                LSHUD.showError(resp.msg)
             }
         }
     }
@@ -528,7 +556,7 @@ extension PartyDetailController {
                 self.pop()
             } else {
                 LSLog("dismissParty fail")
-                LSHUD.showInfo(resp.msg)
+                LSHUD.showError(resp.msg)
             }
         }
     }
@@ -592,8 +620,8 @@ extension PartyDetailController {
             
             // 费用
             
-            if let fee = detail.fee, fee != 0 {
-                let newFee = String(format: "%.2f", Float(fee)/100)
+            if detail.fee != 0 {
+                let newFee = String(format: "%.2f", Float(detail.fee)/100)
                 feeLabel.text = "费用：¥" + String(newFee)
             } else {
                 feeLabel.text = "费用免费"
@@ -605,8 +633,8 @@ extension PartyDetailController {
             introductionLabel.sizeToFit()
             
             // 主打游戏
-            if detail.relationGame?.name != "" {
-                gameLabel.text = detail.relationGame?.name
+            if !detail.relationGame.name.isEmpty {
+                gameLabel.text = detail.relationGame.name
                 gameLabel.sizeToFit()
             }
             
@@ -646,7 +674,7 @@ extension PartyDetailController {
                 joinBtn.layer.borderWidth = 0
                 joinBtn.backgroundColor = UIColor.ls_color("#FE9C5B")
                 joinBtn.setTitleColor(UIColor.white, for: .normal)
-                let fee = String(format: "%.2f", Float(detail.fee!)/100)
+                let fee = String(format: "%.2f", Float(detail.fee)/100)
                 joinBtn.setTitle("¥\(fee)加入组局", for: .normal)
             } else if (detail.joinState == 0) {
                 // 未加入
@@ -663,7 +691,7 @@ extension PartyDetailController {
         // 需要数据partyDetail、participateData都存在才能绘制
         if let pDetail = partyDetail, let partData = participateData {
             // 参与人
-            let total = pDetail.maleCnt! + pDetail.femaleCnt!
+            let total = pDetail.maleCnt + pDetail.femaleCnt
             personTitleLabel.text = "参与人（\(partData.participateList.count)/\(total)）"
             personTitleLabel.sizeToFit()
             
@@ -959,8 +987,18 @@ extension PartyDetailController {
     }
     
     @objc func handleDelPersonTap() {
-        // 移除好友
-        
+        // 移除成员
+        LSLog("handleDelPersonTap")
+        if let uniCode = partyDetail?.uniqueCode {
+            let vc = ParticipateListController()
+            vc.setData(uniCode, mutiSelect: true)
+            vc.selectedBlock = { items in
+                LSLog("selectedBlock items:\(items)")
+                self.kickOut(items)
+            }
+            vc.hidesBottomBarWhenPushed = true
+            PageManager.shared.currentVC()?.present(vc, animated: true)
+        }
     }
     
     // 查看位置

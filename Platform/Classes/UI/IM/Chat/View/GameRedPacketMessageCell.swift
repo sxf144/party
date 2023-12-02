@@ -56,7 +56,7 @@ class GameRedPacketMessageCell: UITableViewCell {
 
 extension GameRedPacketMessageCell {
     
-    func configure(with citem: LIMMessage) {
+    func configure(_ citem: LIMMessage) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
         
@@ -123,7 +123,6 @@ extension GameRedPacketMessageCell {
             actionBlock()
         }
     }
-    
 }
 
 extension GameRedPacketMessageCell{

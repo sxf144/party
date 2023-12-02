@@ -34,8 +34,8 @@ class MapNavigationController: BaseController {
     fileprivate lazy var myMapView: MAMapView = {
         let mapView = MAMapView(frame: view.bounds)
         mapView.delegate = self
-        mapView.showsUserLocation = false
-        mapView.userTrackingMode = .none
+        mapView.showsUserLocation = true
+        mapView.userTrackingMode = .follow
         mapView.zoomLevel = defaultZoomLevel
         let coordinate = CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
         mapView.centerCoordinate = coordinate
@@ -137,22 +137,29 @@ extension MapNavigationController: MAMapViewDelegate, AMapNaviWalkManagerDelegat
             firstLoad = false
             
             // 添加图钉
+//            let coordinate = CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
+//            let annotation = MAPointAnnotation()
+//            annotation.coordinate = coordinate
+//            annotation.title = "终点"
+//            mapView.addAnnotation(annotation)
+            
+            // 添加图钉
             let coordinate = CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
-            let annotation = MAPointAnnotation()
-            annotation.coordinate = coordinate
-            annotation.title = "终点"
+            let annotation = CustomAnnotation(coordinate: coordinate, title: "终点", subtitle: "", customImage: UIImage(named: "icon_location3"))
             mapView.addAnnotation(annotation)
         }
     }
     
     func mapView(_ mapView: MAMapView!, viewFor annotation: MAAnnotation!) -> MAAnnotationView! {
-        if annotation is MAPointAnnotation {
-            
-            let identifier = "CustomAnnotationView"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? CustomAnnotationView
+        
+        if annotation is CustomAnnotation {
+            let reuseIdentifier = "customAnnotation"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? CustomAnnotationView
 
             if annotationView == nil {
-                annotationView = CustomAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView = CustomAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+            } else {
+                annotationView!.annotation = annotation
             }
 
             return annotationView

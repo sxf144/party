@@ -228,8 +228,8 @@ extension GameListController: UITableViewDataSource, UITableViewDelegate, UIScro
     }
 }
 
-extension GameListController{
-    fileprivate func setupUI(){
+extension GameListController {
+    fileprivate func setupUI() {
         
         view.addSubview(tableView)
         view.addSubview(bottomView)

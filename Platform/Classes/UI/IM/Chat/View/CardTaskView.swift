@@ -1,5 +1,5 @@
 //
-//  TaskView.swift
+//  CardTaskView.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -12,16 +12,16 @@ import SnapKit
 // GiftView高度
 private let CONTENT_HEIGHT: CGFloat = 310
 
-class TaskView: UIView {
+class CardTaskView: UIView {
     
-    static let shared = TaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))
+    static let shared = CardTaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))
     /// 回调闭包
-    public var redPacketBlock: ((_ gElem:LIMGameElem) -> ())?
+    public var cardTaskBlock: ((_ limMsg:LIMMessage) -> ())?
     let CardImageDefault: UIImage = UIImage(named: "card_item_bg")!
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
     var userPageInfo: UserPageModel? = LoginManager.shared.getUserPageInfo()
-    var gameElem: LIMGameElem?
+    var limMsg: LIMMessage?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -32,11 +32,19 @@ class TaskView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 背景
+    fileprivate lazy var bgView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: frame.size.height))
+        view.alpha = 0.0
+        view.backgroundColor = .black
+        return view
+    }()
+    
     /// 主体
     fileprivate lazy var contentView: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: frame.size.height))
-        view.alpha = 0.2
-        view.backgroundColor = UIColor.black
+        view.alpha = 0.0
+        view.backgroundColor = .clear
         let tapGes = UITapGestureRecognizer(target: self, action: #selector(cancelDidClick))
         view.addGestureRecognizer(tapGes)
         return view
@@ -82,19 +90,19 @@ class TaskView: UIView {
         button.titleLabel?.font = kFontMedium14
         button.layer.cornerRadius = 23
         button.clipsToBounds = true
-        button.addTarget(self, action: #selector(clickRedPacketBtnBtn(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(clickRedPacketBtn(_:)), for: .touchUpInside)
         return button
     }()
 }
 
 
-extension TaskView {
+extension CardTaskView {
     
     // 发红包逃避任务
-    @objc fileprivate func clickRedPacketBtnBtn(_ sender:UIButton) {
-        LSLog("clickRedPacketBtnBtn")
-        if let redPacketBlock = redPacketBlock, let gElem = gameElem {
-            redPacketBlock(gElem)
+    @objc fileprivate func clickRedPacketBtn(_ sender:UIButton) {
+        LSLog("clickRedPacketBtn")
+        if let cardTaskBlock = cardTaskBlock, let limMsg = limMsg {
+            cardTaskBlock(limMsg)
             removeTaskView()
         }
     }
@@ -106,22 +114,35 @@ extension TaskView {
     }
     
     /// 显示 view
-    func showInWindow(_ gameElem:LIMGameElem) {
+    func showInWindow(_ limMsg:LIMMessage) {
         
         // 赋值
-        self.gameElem = gameElem
+        self.limMsg = limMsg
+        
+        // 是自己抽到，才展示发红包逃避按钮
+        if limMsg.isSelf ?? false {
+            // 判断任务已经完成过，不展示发红包逃避按钮
+            if limMsg.gameElem?.status == 1 {
+                redPacketBtn.isHidden = true
+            } else {
+                redPacketBtn.isHidden = false
+            }
+        } else {
+            redPacketBtn.isHidden = true
+        }
         
         // 卡牌图片
-        cardImageView.kf.setImage(with: URL(string: gameElem.action.cardInfo.introductionThumbnail ), placeholder: CardImageDefault)
+        cardImageView.kf.setImage(with: URL(string: limMsg.gameElem?.action.cardInfo.introductionThumbnail ), placeholder: CardImageDefault)
         
         // 卡牌名称
-        nameLabel.text = gameElem.action.cardInfo.name
+        nameLabel.text = limMsg.gameElem?.action.cardInfo.name
         nameLabel.sizeToFit()
         
         let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow })
         keyWindow!.addSubview(self)
         keyWindow!.bringSubviewToFront(self)
         UIView.animate(withDuration: 0.3) {
+            self.bgView.alpha = 0.6
             self.contentView.alpha = 1.0
         }
     }
@@ -129,7 +150,8 @@ extension TaskView {
     /// 移除 view
     func removeTaskView() {
         UIView.animate(withDuration: 0.3, animations: {
-            self.contentView.alpha = 0.2
+            self.bgView.alpha = 0.0
+            self.contentView.alpha = 0.0
             UIApplication.shared.sendAction(#selector(self.resignFirstResponder), to: nil, from: nil, for: nil)
         }) { (suc) in
             self.removeFromSuperview()
@@ -139,16 +161,21 @@ extension TaskView {
 
 
 
-extension TaskView {
+extension CardTaskView {
     
     fileprivate func setupUI() {
         
+        addSubview(bgView)
         addSubview(contentView)
         contentView.addSubview(titleImageView)
         contentView.addSubview(cardImageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(redPacketBtn)
         
+        
+        bgView.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
         
         contentView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()

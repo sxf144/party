@@ -13,7 +13,7 @@ import ImSDK_Plus_Swift
 class GameStoryMessageCell: UITableViewCell {
     
     /// 回调闭包
-    public var confirmBlock: (() -> ())?
+    public var gameStoryConfirmBlock: (() -> ())?
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 10.0
     var item: LIMMessage = LIMMessage()
@@ -72,7 +72,7 @@ class GameStoryMessageCell: UITableViewCell {
 
 extension GameStoryMessageCell {
     
-    func configure(with citem: LIMMessage) {
+    func configure(_ citem: LIMMessage) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
         
@@ -140,8 +140,8 @@ extension GameStoryMessageCell {
     // 主持人确认
     @objc func clickConfirmBtn(_ sender:UIButton) {
         LSLog("clickConfirmBtn")
-        if let confirmBlock = confirmBlock {
-            confirmBlock()
+        if let gameStoryConfirmBlock = gameStoryConfirmBlock {
+            gameStoryConfirmBlock()
         }
     }
 }

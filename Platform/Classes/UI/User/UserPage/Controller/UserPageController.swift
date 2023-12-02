@@ -31,8 +31,8 @@ class UserPageController: BaseController {
     
     // TopView
     fileprivate lazy var topView: UIView = {
-        let v = UIView()
-        return v
+        let view = UIView()
+        return view
     }()
     
     // 头像
@@ -186,7 +186,13 @@ extension UserPageController {
     
     // 获取详情
     func getUserHomePage() {
+        if peopleId.isEmpty {
+            return
+        }
+        
+        LSHUD.showLoading()
         NetworkManager.shared.getUserPage (peopleId) { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("getUserPage data:\(resp.data)")
                 self.userPageData = resp.data
@@ -223,8 +229,8 @@ extension UserPageController {
     }
     
     func refreshFollowBtn() {
-        
-        if userPageData.relation.follow {
+        // 0无关系 1 关注了对方 2双向关注 3 是我的粉丝
+        if (userPageData.relation.follow == 1 || userPageData.relation.follow == 2) {
             followBtn.setTitle("取消关注", for: .normal)
             followBtn.backgroundColor = UIColor.ls_color("#FE5B5B")
         } else {
@@ -235,17 +241,100 @@ extension UserPageController {
     
     // 更多
     override func rightAction() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        // 添加带有图标的动作
+        let action1 = UIAlertAction(title: "举报", style: .default) { (action) in
+            self.handleReport()
+        }
+        action1.setValue(UIImage(named: "icon_report"), forKey: "image")
+        action1.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
         
+        let action2Title = self.userPageData.relation.black ? "取消拉黑" : "拉黑"
+        let action2 = UIAlertAction(title: action2Title, style: .default) { (action) in
+            self.handleBlackList()
+        }
+        action2.setValue(UIImage(named: "icon_blacklist"), forKey: "image")
+        action2.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel)
+
+        // 添加动作到操作表
+        alertController.addAction(action1)
+        alertController.addAction(action2)
+        alertController.addAction(cancelAction)
+
+        // 显示操作表
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func handleReport() {
+        // 选择举报理由
+        let vc = ReportReasonListController()
+        vc.reasonConfirmBlock = { [self] reasonItem in
+            self.report(reasonItem)
+        }
+        vc.hidesBottomBarWhenPushed = true
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    // 取消拉黑、拉黑
+    func handleBlackList() {
+        
+        if self.userPageData.relation.black {
+            NetworkManager.shared.removeBlackList(self.peopleId) { resp in
+                if resp.status == .success {
+                    LSLog("removeBlackList succ")
+                    self.userPageData.relation.black = false
+                    LSHUD.showInfo("操作成功")
+                } else {
+                    LSLog("removeBlackList fail")
+                    LSHUD.showInfo("操作失败")
+                }
+            }
+        } else {
+            NetworkManager.shared.addBlackList(self.peopleId) { resp in
+                if resp.status == .success {
+                    LSLog("addBlackList succ")
+                    self.userPageData.relation.black = true
+                    LSHUD.showInfo("操作成功")
+                } else {
+                    LSLog("addBlackList fail")
+                    LSHUD.showInfo("操作失败")
+                }
+            }
+        }
+    }
+    
+    func report(_ resonItem:ReportReasonItem) {
+        // objType 1用户，2局
+        let objType:Int64 = 1
+        let objId:String = peopleId
+        
+        NetworkManager.shared.report(objType, objId: objId, reasonId: resonItem.reasonId) { resp in
+            if resp.status == .success {
+                LSLog("report succ")
+                LSHUD.showInfo("操作成功")
+            } else {
+                LSLog("report fail")
+                LSHUD.showInfo("操作失败")
+            }
+        }
     }
     
     // 关注
     @objc func clickFollowBtn(_ sender:UIButton) {
         
-        if userPageData.relation.follow {
+        if (userPageData.relation.follow == 1 || userPageData.relation.follow == 2) {
             NetworkManager.shared.unfollowPeople(peopleId) { resp in
                 if resp.status == .success {
                     LSLog("unfollowPeople succ")
-                    self.userPageData.relation.follow = false
+                    if self.userPageData.relation.follow == 1 {
+                        self.userPageData.relation.follow = 0
+                    } else {
+                        self.userPageData.relation.follow = 3
+                    }
+                    
                     self.refreshFollowBtn()
                 } else {
                     LSLog("unfollowPeople fail")
@@ -256,7 +345,12 @@ extension UserPageController {
             NetworkManager.shared.followPeople(peopleId) { resp in
                 if resp.status == .success {
                     LSLog("followPeople succ")
-                    self.userPageData.relation.follow = true
+                    if self.userPageData.relation.follow == 0 {
+                        self.userPageData.relation.follow = 1
+                    } else {
+                        self.userPageData.relation.follow = 2
+                    }
+                    
                     self.refreshFollowBtn()
                 } else {
                     LSLog("followPeople fail")

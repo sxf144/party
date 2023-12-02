@@ -27,7 +27,7 @@ enum UserBgObjectType: Int{
 
 
 
-struct UserInfoModel {
+class UserInfoModel {
     
     /// IM标识
     var userSig:String = ""
@@ -76,7 +76,7 @@ struct UserInfoModel {
 }
 
 /// 用户形象
-struct UserBgObject {
+class UserBgObject {
     /// Oss对象存储ID
     var ossObjId = ""
     /// 对象类型，101：图片；102：视频
@@ -97,7 +97,7 @@ struct UserBgObject {
     
 }
 
-struct QQInfoModel {
+class QQInfoModel {
     
     var openId = ""
     var nickName = ""
@@ -105,7 +105,7 @@ struct QQInfoModel {
     var headUrl = ""
 }
 
-struct SimpleUserInfo {
+class SimpleUserInfo {
     
     /// 用户ID
     var userId: String = ""

@@ -21,23 +21,28 @@ class ChatController: BaseController {
     let PageCount: UInt = 20
     var conversation: LIMConversation = LIMConversation()
     var dataList: [LIMMessage] = []
+    var participateList: [SimpleUserInfo] = []
+    var userPageData: UserPageModel = UserPageModel()
     var memberDic: [String: SimpleUserInfo] = [String: SimpleUserInfo]()
     var uniqueCode: String = ""
-    var partyDetail: PartyDetailModel?
+    var partyDetail: PartyDetailModel = PartyDetailModel()
     var isLoading: Bool = false
     var hasMore: Bool = true
-    let myUserInfo:UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
+    let myUserInfo: UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
+    var sceneId: Int64 = 0
+    
 
     override func viewDidLoad() {
         title = ""
         view.backgroundColor = UIColor.ls_color("#F8F8F8")
         
         super.viewDidLoad()
+        resetNavigation()
         setupUI()
         addObservers()
         
         // 拉取数据
-        loadData(true)
+        loadNewData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -121,18 +126,10 @@ extension ChatController {
                 navigationView.titleLabel.text = conversation.showName
                 let uid = conversation.userID ?? ""
                 bottomView.setUserId(uid)
-                V2TIMManager.shared.getUsersInfo(userIDList: [uid]) { infoList in
-                    
-                    self.handleUserInfoList(infoList: infoList)
-                    
-                } fail: { code, desc in
-                    LSLog("getUsersInfo fail code:\(code), desc:\(desc)")
-                }
             } else if (conversation.type == .LIM_GROUP) {
                 uniqueCode = conversation.groupID ?? ""
                 bottomView.setUniCode(uniqueCode)
                 navigationView.titleLabel.text = conversation.showName
-                getOtherData()
             }
         }
     }
@@ -147,33 +144,50 @@ extension ChatController {
         }
     }
     
-    func getOtherData() {
+    // 获取详情
+    func getUserHomePage(_ peopleId:String,_ completion: @escaping () -> Void) {
+        NetworkManager.shared.getUserPage (peopleId) { resp in
+            if resp.status == .success {
+                LSLog("getUserPage data:\(resp.data)")
+                self.userPageData = resp.data
+                self.handleUserPage(self.userPageData)
+                completion()
+            } else {
+                LSLog("getUserPage fail")
+            }
+        }
+    }
+    
+    func getParticipateList(_ completion: @escaping () -> Void) {
         if uniqueCode.isEmpty {
+            completion()
             return
         }
-        
         NetworkManager.shared.getParticipateList(uniqueCode) { resp in
             LSLog("getParticipateList data:\(resp.data)")
-            
             if resp.status == .success {
                 LSLog("getParticipateList succ")
-                self.handleMemberList(resp.data.participateList)
+                self.participateList = resp.data.participateList
+                self.handleMemberList(self.participateList)
+                completion()
             } else {
                 LSLog("getParticipateList fail")
             }
+        }
+    }
+    
+    func getPartyDetail(_ completion: @escaping () -> Void) {
+        if uniqueCode.isEmpty {
+            completion()
+            return
         }
         
         NetworkManager.shared.getPartyDetail (uniqueCode) { resp in
             if resp.status == .success {
                 LSLog("getPartyDetail data:\(resp.data)")
                 self.partyDetail = resp.data
-                self.handleOtherData()
-                self.bottomView.setPartyDetail(self.partyDetail)
-                // 刷新界面
-                DispatchQueue.main.async {
-                    // 在这里执行reloadData完成后的操作
-                    self.tableView.reloadData()
-                }
+                self.handlePartyDetail()
+                completion()
             } else {
                 LSLog("getPartyDetail fail")
             }
@@ -184,13 +198,13 @@ extension ChatController {
         V2TIMManager.shared.addAdvancedMsgListener(listener: self)
     }
 
-    func loadData(_ refresh: Bool = false) {
+    func loadMsgs(_ refresh: Bool = false, _ completion: @escaping(([V2TIMMessage]) -> ())) {
         // 正在拉取数据
         if isLoading {
             return
         }
         
-        // 不是刷新，但是无更多数据
+        // 不是刷新，且无更多数据
         if (!refresh && !hasMore) {
             return
         }
@@ -210,10 +224,54 @@ extension ChatController {
             }
             self.isLoading = false
             self.handleData(msgs: msgs, refresh: refresh)
+            completion(msgs)
         } fail: { code, desc in
             self.isLoading = false
             // 刷新界面
             self.tableView.reloadData()
+        }
+    }
+    
+    func loadNewData() {
+        // 使用 DispatchGroup 来等待异步任务完成
+        let dispatchGroup = DispatchGroup()
+        
+        // 将异步任务添加到 DispatchGroup 中
+        dispatchGroup.enter()
+        loadMsgs(true) { msgs in
+            dispatchGroup.leave()
+        }
+        
+        if (conversation.type == .LIM_C2C) {
+            dispatchGroup.enter()
+            let uid = conversation.userID ?? ""
+            getUserHomePage(uid) {
+                dispatchGroup.leave()
+            }
+        } else if (conversation.type == .LIM_GROUP) {
+
+            dispatchGroup.enter()
+            getPartyDetail {
+                dispatchGroup.leave()
+            }
+
+            dispatchGroup.enter()
+            getParticipateList {
+                dispatchGroup.leave()
+            }
+        }
+        
+        // 在 DispatchGroup 中的所有任务完成后执行
+        dispatchGroup.notify(queue: .main) {
+            self.handleOtherData()
+            self.refreshComplete()
+        }
+    }
+    
+    func loadMoreData() {
+        loadMsgs(false) { msgs in
+            self.handleOtherData()
+            self.loadMoreComplete(msgs)
         }
     }
     
@@ -227,53 +285,23 @@ extension ChatController {
             let limMsg:LIMMessage = LIMModel.TIMMsgToLIMMsg(item)
             dataList.insert(limMsg, at: 0)
         }
-        
-        // 处理其他数据
-        handleOtherData()
-        
-        
-        // 刷新界面
-//        let lastOffsetY = tableView.contentOffset.y
+    }
+    
+    func refreshComplete() {
         tableView.reloadData()
         tableView.layoutIfNeeded()
-        
-        if refresh {
-            if tableView.contentSize.height > tableView.frame.height {
-                
-//                tableView.setContentOffset(CGPoint(x: 0, y: tableView.contentSize.height - tableView.frame.size.height), animated: false)
-                
-                let lastSection = tableView.numberOfSections - 1
-                if lastSection >= 0 {
-                    let lastRow = tableView.numberOfRows(inSection: lastSection) - 1
-                    if lastRow >= 0 {
-                        let indexPath = IndexPath(row: lastRow, section: lastSection)
-                        tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
-                    }
-                }
-            }
-        } else {
-//            // 恢复原位置
-//            var visibleHeight: CGFloat = 0
-//            for i in 0 ..< msgs.count {
-//                let indexPath = IndexPath(row: i, section: 0)
-//                let cell = tableView.cellForRow(at: indexPath)
-//                visibleHeight += cell?.bounds.height ?? 0
-//            }
-//            LSLog("lastOffsetY:\(lastOffsetY),visibleHeight:\(visibleHeight)")
-//            tableView.setContentOffset(CGPoint(x: 0, y: lastOffsetY + visibleHeight), animated: false)
-            
-            // 恢复原位置
-            let lastSection = tableView.numberOfSections - 1
-            if lastSection >= 0 {
-                let indexPath = IndexPath(row: msgs.count, section: lastSection)
-                tableView.scrollToRow(at: indexPath, at: .top, animated: false)
-            }
-        }
+        scrollToBottom(false)
+    }
+    
+    func loadMoreComplete(_ msgs:[V2TIMMessage]) {
+        tableView.reloadData()
+        tableView.layoutIfNeeded()
+        scrollToLast(msgs.count)
     }
     
     // 处理其他数据
     func handleOtherData() {
-        if (dataList.count == 0 || memberDic.count == 0) {
+        if (dataList.count == 0 || memberDic.count == 0 || partyDetail.uniqueCode == nil) {
             return
         }
         
@@ -290,14 +318,23 @@ extension ChatController {
                     item.gameElem?.status = 1
                 } else {
                     // 如果是红包、卡牌任务、剧情故事（时间为0），置为未完成
-                    if partyDetail?.state != 2, partyDetail?.state != 3 {
+                    if partyDetail.state != 2, partyDetail.state != 3 {
                         if (item.gameElem?.action.actionId == .LIMGameStatusCard || item.gameElem?.action.actionId == .LIMGameStatusRedPacket || (item.gameElem?.action.actionId == .LIMGameStatusStory && item.gameElem?.action.roundInfo.showSeconds == 0)) {
                             item.gameElem?.status = 0
                         } else {
                             item.gameElem?.status = 1
                         }
+                        
+                        // 最后一条如果是游戏结束消息，把sceneId置为0
+                        if item.gameElem?.action.actionId == .LIMGameStatusEnd {
+                            sceneId = 0
+                        } else {
+                            sceneId = item.gameElem?.sceneId ?? 0
+                        }
                     } else {
                         item.gameElem?.status = 1
+                        // 如果是解散或者过期状态，把sceneId置为0
+                        sceneId = 0
                     }
                 }
                 lastGameElemExist = true
@@ -384,17 +421,26 @@ extension ChatController {
         }
     }
     
-    func scrollToBottom() {
-        // 跳转到最底部
-        DispatchQueue.main.async { [self] in
-            // 在这里执行reloadData完成后的操作
+    func scrollToLast(_ newMsgCount:Int) {
+        if tableView.contentSize.height > tableView.frame.height {
+            // 恢复原位置
+            let lastSection = tableView.numberOfSections - 1
+            if lastSection >= 0, newMsgCount >= 0, newMsgCount < dataList.count {
+                let indexPath = IndexPath(row: newMsgCount, section: lastSection)
+                tableView.scrollToRow(at: indexPath, at: .top, animated: false)
+            }
+        }
+    }
+    
+    func scrollToBottom(_ animated:Bool = true) {
+        if tableView.contentSize.height > tableView.frame.height {
             let lastSection = tableView.numberOfSections - 1
 
             if lastSection >= 0 {
                 let lastRow = tableView.numberOfRows(inSection: lastSection) - 1
                 if lastRow >= 0 {
                     let indexPath = IndexPath(row: lastRow, section: lastSection)
-                    tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+                    tableView.scrollToRow(at: indexPath, at: .bottom, animated: animated)
                 }
             }
         }
@@ -406,37 +452,27 @@ extension ChatController {
             let item = memberList[i]
             memberDic[item.userId] = item
         }
-        
-        // 处理其他数据
-        handleOtherData()
-        
-        // 刷新界面
-        DispatchQueue.main.async {
-            // 在这里执行reloadData完成后的操作
-            self.tableView.reloadData()
-        }
     }
     
-    func handleUserInfoList(infoList:[V2TIMUserFullInfo]) {
+    func handleUserPage(_ userPage:UserPageModel) {
         memberDic = [String: SimpleUserInfo]()
-        for i in 0 ..< infoList.count {
-            let item = infoList[i]
-            var obj: SimpleUserInfo = SimpleUserInfo()
-            obj.userId = item.userID
-            obj.nick = item.nickName ?? ""
-            obj.portrait = item.faceURL ?? ""
-            obj.selfSignature = item.selfSignature ?? ""
-            memberDic[obj.userId] = obj
-        }
+        let obj: SimpleUserInfo = SimpleUserInfo()
+        obj.userId = userPage.user.userId
+        obj.nick = userPage.user.nick
+        obj.portrait = userPage.user.portrait
+        obj.selfSignature = userPage.user.intro
+        memberDic[obj.userId] = obj
         
-        // 处理其他数据
-        handleOtherData()
-        
-        // 刷新界面
-        DispatchQueue.main.async {
-            // 在这里执行reloadData完成后的操作
-            self.tableView.reloadData()
-        }
+        // 设置导航栏图标
+        navigationView.avatar.kf.setImage(with: URL(string: obj.portrait), placeholder: PlaceHolderAvatar)
+    }
+    
+    func handlePartyDetail() {
+        self.bottomView.setPartyDetail(partyDetail)
+        // 设置导航栏图标、名称
+        navigationView.avatar.kf.setImage(with: URL(string: partyDetail.cover), placeholder: PlaceHolderAvatar)
+        let personCount = partyDetail.maleCnt + partyDetail.femaleCnt - partyDetail.maleRemainCount - partyDetail.femaleRemainCount
+        navigationView.titleLabel.text = "\(conversation.showName ?? "")(\(personCount))"
     }
     
     func addNewMessage(_ msg:V2TIMMessage) {
@@ -453,15 +489,38 @@ extension ChatController {
         scrollToBottom()
         
         // 判断是否是自己抽到了卡牌
-        if limMsg.isSelf ?? false, limMsg.elemType == .LIMElemGameStatusSync, limMsg.gameElem?.action.actionId == .LIMGameStatusCard {
-            if let gameElem = limMsg.gameElem {
-                TaskView.shared.redPacketBlock = { gElem in
-                    LSLog("redPacketBlock")
+        if limMsg.elemType == .LIMElemGameStatusSync {
+            if limMsg.isSelf ?? false, limMsg.gameElem?.action.actionId == .LIMGameStatusCard {
+                // 先关闭其他 TaskView
+                StoryTaskView.shared.removeTaskView()
+                // 打开需要的 TaskView
+                CardTaskView.shared.cardTaskBlock = { msg in
+                    LSLog("cardTaskBlock")
                     // 发红包逃避任务
-                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: gElem.taskId)
+                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: msg.gameElem?.taskId ?? 0)
                     
                 }
-                TaskView.shared.showInWindow(gameElem)
+                CardTaskView.shared.showInWindow(limMsg)
+            }
+            
+            if limMsg.gameElem?.action.actionId == .LIMGameStatusStory {
+                // 先关闭其他 TaskView
+                CardTaskView.shared.removeTaskView()
+                // 打开需要的 TaskView
+                StoryTaskView.shared.storyTaskBlock = { msg in
+                    LSLog("storyTaskBlock")
+                    // 下一关
+                    NetworkManager.shared.doneTask(limMsg.gameElem?.taskId ?? 0) { resp in
+                        if resp.status == .success {
+                            LSLog("doneTask succ")
+                            limMsg.gameElem?.status = 1
+                        } else {
+                            LSLog("doneTask fail")
+                            LSHUD.showError(resp.msg)
+                        }
+                    }
+                }
+                StoryTaskView.shared.showInWindow(limMsg)
             }
         }
     }
@@ -530,6 +589,206 @@ extension ChatController {
         
         // 插入本地消息
         self.updateMessage(msg)
+    }
+    
+    // 更多
+    override func rightAction() {
+        /**
+         * 私聊展示举报、拉黑
+         * 群聊展示举报、结束当前游戏、解散此桔
+         */
+        if self.uniqueCode.isEmpty {
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+            // 添加带有图标的动作
+            let action1 = UIAlertAction(title: "举报", style: .default) { (action) in
+                self.handleReport()
+            }
+            action1.setValue(UIImage(named: "icon_report"), forKey: "image")
+            action1.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            
+            let action2Title = self.userPageData.relation.black ? "取消拉黑" : "拉黑"
+            let action2 = UIAlertAction(title: action2Title, style: .default) { (action) in
+                self.handleBlackList()
+            }
+            action2.setValue(UIImage(named: "icon_blacklist"), forKey: "image")
+            action2.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            
+            let cancelAction = UIAlertAction(title: "取消", style: .cancel)
+
+            // 添加动作到操作表
+            alertController.addAction(action1)
+            alertController.addAction(action2)
+            alertController.addAction(cancelAction)
+
+            // 显示操作表
+            present(alertController, animated: true, completion: nil)
+        } else {
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+            // 添加带有图标的动作
+            let action1 = UIAlertAction(title: "举报", style: .default) { (action) in
+                self.handleReport()
+            }
+            action1.setValue(UIImage(named: "icon_report"), forKey: "image")
+            action1.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            
+            let action2 = UIAlertAction(title: "结束当前游戏", style: .default) { (action) in
+                self.showEndAlert()
+            }
+            action2.setValue(UIImage(named: "icon_endgame"), forKey: "image")
+            action2.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            
+            // 添加带有图标的动作
+            let action3 = UIAlertAction(title: "解散此桔", style: .default) { (action) in
+                self.showDismissAlert()
+            }
+            action3.setValue(UIImage(named: "icon_dismissgame"), forKey: "image")
+            action3.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            
+            let cancelAction = UIAlertAction(title: "取消", style: .cancel)
+
+            // 添加动作到操作表
+            alertController.addAction(action1)
+            
+            // 当前桔非解散、非过期、当前游戏在游戏中、主持人是自己，才展示
+            if partyDetail.userId == myUserInfo.userId, partyDetail.state != 2, partyDetail.state != 3, sceneId > 0 {
+                alertController.addAction(action2)
+            }
+            // 当前桔非解散、非过期、主持人是自己，才展示解散提示
+            if partyDetail.userId == myUserInfo.userId, partyDetail.state != 2, partyDetail.state != 3 {
+                alertController.addAction(action3)
+            }
+            
+            alertController.addAction(cancelAction)
+
+            // 显示操作表
+            present(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    func handleReport() {
+        // 选择举报理由
+        let vc = ReportReasonListController()
+        vc.reasonConfirmBlock = { [self] reasonItem in
+            self.report(reasonItem)
+        }
+        vc.hidesBottomBarWhenPushed = true
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    func handleBlackList() {
+        // 取消拉黑、拉黑
+        LSHUD.showLoading()
+        if self.userPageData.relation.black {
+            NetworkManager.shared.removeBlackList(self.userPageData.user.userId) { resp in
+                LSHUD.hide()
+                if resp.status == .success {
+                    LSLog("removeBlackList succ")
+                    self.userPageData.relation.black = false
+                    LSHUD.showInfo("操作成功")
+                } else {
+                    LSLog("removeBlackList fail")
+                    LSHUD.showInfo("操作失败")
+                }
+            }
+        } else {
+            NetworkManager.shared.addBlackList(self.userPageData.user.userId) { resp in
+                LSHUD.hide()
+                if resp.status == .success {
+                    LSLog("addBlackList succ")
+                    self.userPageData.relation.black = true
+                    LSHUD.showInfo("操作成功")
+                } else {
+                    LSLog("addBlackList fail")
+                    LSHUD.showInfo("操作失败")
+                }
+            }
+        }
+    }
+    
+    func report(_ resonItem:ReportReasonItem) {
+        // objType 1用户，2局
+        let objType:Int64 = 2
+        let objId:String = uniqueCode
+        
+        NetworkManager.shared.report(objType, objId: objId, reasonId: resonItem.reasonId) { resp in
+            if resp.status == .success {
+                LSLog("report succ")
+                LSHUD.showInfo("操作成功")
+            } else {
+                LSLog("report fail")
+                LSHUD.showInfo("操作失败")
+            }
+        }
+    }
+    
+    func showEndAlert() {
+        // 二次确认是否要结束当前游戏
+        let alertController = UIAlertController(title: "", message: "确定要结束当前游戏吗？", preferredStyle: .alert)
+                
+        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
+            self.endGame()
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func endGame() {
+        LSHUD.showLoading()
+        // 结束当前游戏
+        NetworkManager.shared.endGame(self.uniqueCode, sceneId: self.sceneId) { resp in
+            LSHUD.hide()
+            if resp.status == .success {
+                LSLog("endGame succ")
+                self.sceneId = 0
+                LSHUD.showInfo("操作成功")
+            } else {
+                LSLog("endGame fail")
+                LSHUD.showInfo("操作失败")
+            }
+        }
+    }
+    
+    func showDismissAlert() {
+        // 二次确认是否要解散
+        let alertController = UIAlertController(title: "", message: "确定要解散此桔吗？", preferredStyle: .alert)
+                
+        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
+            self.dismissParty()
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func dismissParty() {
+        LSHUD.showLoading()
+        NetworkManager.shared.dismissParty(self.uniqueCode) { resp in
+            LSHUD.hide()
+            if resp.status == .success {
+                LSLog("dismissParty succ")
+                self.partyDetail.state = 2
+                // 发送局状态变更通知
+                LSNotification.postPartyStatusChange()
+                // 返回
+                self.pop()
+            } else {
+                LSLog("dismissParty fail")
+                LSHUD.showInfo(resp.msg)
+            }
+        }
     }
 }
 
@@ -645,7 +904,8 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         if offsetY <= 0 {
-            loadData()
+//            loadMsgs(false)
+            loadMoreData()
         }
     }
     
@@ -671,41 +931,41 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
             
             case .LIMElemText:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "TextMessageCell", for: indexPath) as! TextMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item, party: partyDetail)
                 tempCell.delegate = self
                 cell = tempCell
                 
             case .LIMElemSystemMsg:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "SysMessageCell", for: indexPath) as! SysMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item)
                 cell = tempCell
                 
             case .LIMElemGroupTips:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "GroupTipsMessageCell", for: indexPath) as! GroupTipsMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item)
                 cell = tempCell
                 
             case .LIMElemImage:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "ImageMessageCell", for: indexPath) as! ImageMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item, party: partyDetail)
                 tempCell.delegate = self
                 cell = tempCell
                 
             case .LIMElemGift:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "GiftMessageCell", for: indexPath) as! GiftMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item, party: partyDetail)
                 cell = tempCell
                 
             case .LIMElemInvite:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "InviteMessageCell", for: indexPath) as! InviteMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item, party: partyDetail)
                 cell = tempCell
                 
             case .LIMElemRedPacket:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "RedPacketMessageCell", for: indexPath) as! RedPacketMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item, party: partyDetail)
                 tempCell.fetchBlock = {
-                    
+                    LSLog("fetchBlock")
                     // 状态为1，是已经处理过的红包，直接跳转进入详情
                     if item.redPacketElem?.status == 1 {
                         // 打开红包详情
@@ -743,10 +1003,10 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     
                     case .LIMGameStatusStory:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameStoryMessageCell", for: indexPath) as! GameStoryMessageCell
-                        tempCell.configure(with: item)
+                        tempCell.configure(item)
                         // 主持人确认完成任务
-                        tempCell.confirmBlock = {
-                            LSLog("confirmBlock")
+                        tempCell.gameStoryConfirmBlock = {
+                            LSLog("gameStoryConfirmBlock")
                             NetworkManager.shared.doneTask(item.gameElem?.taskId ?? 0) { resp in
                                 if resp.status == .success {
                                     LSLog("doneTask succ")
@@ -762,10 +1022,19 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     
                     case .LIMGameStatusCard:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameCardMessageCell", for: indexPath) as! GameCardMessageCell
-                        tempCell.configure(with: item)
+                        tempCell.configure(item, party: partyDetail)
+                        tempCell.gameCardBlock = {
+                            CardTaskView.shared.cardTaskBlock = { msg in
+                                LSLog("cardTaskBlock")
+                                // 发红包逃避任务
+                                PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: msg.gameElem?.taskId ?? 0)
+                                
+                            }
+                            CardTaskView.shared.showInWindow(item)
+                        }
                         // 主持人确认完成任务
-                        tempCell.confirmBlock = {
-                            LSLog("confirmBlock")
+                        tempCell.gameCardConfirmBlock = {
+                            LSLog("gameCardConfirmBlock")
                             NetworkManager.shared.doneTask(item.gameElem?.taskId ?? 0) { resp in
                                 if resp.status == .success {
                                     LSLog("doneTask succ")
@@ -781,7 +1050,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     
                     case .LIMGameStatusRedPacket:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameRedPacketMessageCell", for: indexPath) as! GameRedPacketMessageCell
-                        tempCell.configure(with: item)
+                        tempCell.configure(item)
                         // 发红包
                         tempCell.actionBlock = {
                             LSLog("actionBlock")
@@ -798,14 +1067,14 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     
                     default:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "DefaultMessageCell", for: indexPath) as! DefaultMessageCell
-                        tempCell.configure(with: item)
+                        tempCell.configure(item)
                         cell = tempCell
                 }
                 
                 
             default:
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "DefaultMessageCell", for: indexPath) as! DefaultMessageCell
-                tempCell.configure(with: item)
+                tempCell.configure(item)
                 cell = tempCell
         }
         
@@ -814,7 +1083,27 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 选中cell
-//        let item = dataList[indexPath.row]
+        let item = dataList[indexPath.row]
+        // 目前仅处理story
+        if item.elemType == .LIMElemGameStatusSync, item.gameElem?.action.actionId == .LIMGameStatusStory {
+            // 先关闭其他 TaskView
+            CardTaskView.shared.removeTaskView()
+            // 打开需要的 TaskView
+            StoryTaskView.shared.storyTaskBlock = { msg in
+                LSLog("storyTaskBlock")
+                // 下一关
+                NetworkManager.shared.doneTask(item.gameElem?.taskId ?? 0) { resp in
+                    if resp.status == .success {
+                        LSLog("doneTask succ")
+                        item.gameElem?.status = 1
+                    } else {
+                        LSLog("doneTask fail")
+                        LSHUD.showError(resp.msg)
+                    }
+                }
+            }
+            StoryTaskView.shared.showInWindow(item)
+        }
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -843,5 +1132,13 @@ extension ChatController {
             make.width.equalToSuperview()
             make.bottom.equalToSuperview()
         }
+    }
+    
+    fileprivate func resetNavigation() {
+        
+        navigationView.showAvatar()
+        let rightImg = UIImage(named: "icon_more_action")
+        let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.rightButton.setImage(shareImg, for: .normal)
     }
 }

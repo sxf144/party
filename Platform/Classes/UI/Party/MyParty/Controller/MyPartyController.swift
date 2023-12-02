@@ -147,6 +147,7 @@ extension MyPartyController: UITableViewDataSource, UITableViewDelegate, UIScrol
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = partyList.plays[indexPath.row]
+        LSLog("---- state ----:\(item.state)")
         var finalCell:UITableViewCell!
         if item.firstInvalid {
             let cell = tableView.dequeueReusableCell(withIdentifier: "MyHistoryPartyCell", for: indexPath) as! MyHistoryPartyCell
@@ -166,10 +167,6 @@ extension MyPartyController: UITableViewDataSource, UITableViewDelegate, UIScrol
         let item = partyList.plays[indexPath.row]
         // 跳转到局详情
         PageManager.shared.pushToPartyDetail(item.uniqueCode)
-    }
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {

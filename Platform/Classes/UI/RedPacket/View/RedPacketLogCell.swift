@@ -60,7 +60,7 @@ class RedPacketLogCell: UITableViewCell {
     fileprivate lazy var maxTipLabel: UILabel = {
         let label = UILabel()
         label.font = kFontRegualer10
-        label.textColor = UIColor.ls_color("##FE9C5B")
+        label.textColor = UIColor.ls_color("#FE9C5B")
         label.text = "手气最佳"
         label.sizeToFit()
         label.isHidden = true
@@ -86,6 +86,7 @@ extension RedPacketLogCell {
         amountLabel.sizeToFit()
         
         // 判断手气最佳是否展示
+        maxTipLabel.isHidden = !item.isMax
     }
 }
 

@@ -13,7 +13,8 @@ class SendRedPacketController: BaseController {
     
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
-    var type: Int64 = 1
+    // type 1、拼手气红包，2、平分红包，默认为1
+    var type: RedPacketType = .RedPacketTypeLuck
     let maxCharacterCount = 10
     var uniqueCode: String = ""
     var personCount: Int = 1
@@ -190,7 +191,6 @@ extension SendRedPacketController {
             countView.isHidden = true
             personCountLabel.isHidden = true
         } else {
-            type = 2
             typeSelectBtn.isHidden = false
             countView.isHidden = false
             personCountLabel.isHidden = false
@@ -206,13 +206,13 @@ extension SendRedPacketController {
         // 添加操作按钮
         let option1 = UIAlertAction(title: "拼手气红包", style: .default) { (action) in
             // 处理选项1的操作
-            self.type = 1
+            self.type = .RedPacketTypeLuck
             self.typeLabel.text = action.title
         }
 
         let option2 = UIAlertAction(title: "普通红包", style: .default) { (action) in
             // 处理选项2的操作
-            self.type = 2
+            self.type = .RedPacketTypeAverage
             self.typeLabel.text = action.title
         }
 
@@ -252,7 +252,7 @@ extension SendRedPacketController {
         }
         
         var amount = (Int64(amountTextField.text?.trim() ?? "") ?? 0)*100
-        NetworkManager.shared.sendRedPacket(taskId, uniqueCode: uniqueCode, toUserId: userId, count: count, amount: amount, getType: type) { resp in
+        NetworkManager.shared.sendRedPacket(taskId, uniqueCode: uniqueCode, toUserId: userId, count: count, amount: amount, getType: type.rawValue) { resp in
             
             if resp.status == .success {
                 LSLog("sendRedPacket succ")

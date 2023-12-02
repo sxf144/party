@@ -56,6 +56,24 @@ class MyHistoryPartyCell: UITableViewCell {
         return imageView
     }()
     
+    // 蒙层
+    fileprivate lazy var coverMask: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.ls_color("#000000", alpha: 0.6)
+        view.isHidden = true
+        return view
+    }()
+    
+    // 蒙层内容
+    fileprivate lazy var maskLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer14
+        label.textColor = .white
+        label.text = "已解散"
+        label.sizeToFit()
+        return label
+    }()
+    
     // 桔名称
     fileprivate lazy var nameLabel: UILabel = {
         let label = UILabel()
@@ -129,15 +147,27 @@ extension MyHistoryPartyCell {
         // 桔地址
         addressLabel.text = item.address
         addressLabel.sizeToFit()
+        
+        // 展示状态
+        if (item.state == 2 || item.state == 3) {
+            coverMask.isHidden = false
+            maskLabel.text = item.state == 2 ? "已解散" : "已结束"
+            maskLabel.sizeToFit()
+        } else {
+            coverMask.isHidden = true
+        }
     }
 }
 
-extension MyHistoryPartyCell{
-    fileprivate func setupUI(){
+extension MyHistoryPartyCell {
+    
+    fileprivate func setupUI() {
         
         contentView.addSubview(splitLabel)
         contentView.addSubview(bgView)
         bgView.addSubview(cover)
+        cover.addSubview(coverMask)
+        coverMask.addSubview(maskLabel)
         bgView.addSubview(nameLabel)
         bgView.addSubview(personLabel)
         bgView.addSubview(timeLabel)
@@ -161,6 +191,14 @@ extension MyHistoryPartyCell{
             make.left.equalToSuperview().offset(15)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSizeMake(75, 100))
+        }
+        
+        coverMask.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
+        maskLabel.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
         }
         
         nameLabel.snp.makeConstraints { (make) in

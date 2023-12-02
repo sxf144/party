@@ -125,6 +125,7 @@ extension PhoneLoginController {
     }
     
     @objc func updateCountdown() {
+        
         if secondsLeft > 0 {
             verificationCodeTextField.rightView?.isUserInteractionEnabled = false
             verificationCodeTextField.rightView?.tintColor = UIColor.lightGray
@@ -170,6 +171,8 @@ extension PhoneLoginController {
                 if resp.status == .success {
                     // 绑定成功
                     LSHUD.showInfo("绑定成功")
+                    // 发送账号绑定成功通知
+                    LSNotification.postAccountBindStatusChange()
                     self.pop()
                 } else {
                     //错误提示

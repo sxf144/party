@@ -10,6 +10,15 @@ import UIKit
 import SwiftyJSON
 import ImSDK_Plus_Swift
 
+// 红包类别，1、拼手气红包，2、平均分
+public enum RedPacketType: Int64 {
+
+    case RedPacketTypeLuck = 1
+
+    case RedPacketTypeAverage = 2
+}
+
+// 会话类别， 1、私聊， 2、群聊
 public enum LIMConversationType: Int {
     
     case LIM_UNKNOWN
@@ -19,6 +28,7 @@ public enum LIMConversationType: Int {
     case LIM_GROUP
 }
 
+// 消息类别
 public enum LIMElemType: String {
     
     case LIMElemNone = "None"
@@ -165,15 +175,15 @@ public class LIMInviteElem {
     
     /// 发起人ID
     var userId:String = ""
-    /// 发起人名称
+    /// 发起人名称（客户端自用）
     var userName:String = ""
     /// 被邀请者ID
     var toUserId:String = ""
-    /// 被邀请者名称
+    /// 被邀请者名称（客户端自用）
     var toUserName:String = ""
     /// 局名称
     var name:String = ""
-    /// 群时表示群ID
+    /// 群ID
     var uniqueCode:String = ""
     /// 开始时间
     var startTime:String = ""

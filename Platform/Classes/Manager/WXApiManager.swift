@@ -32,7 +32,16 @@ extension WXApiManager {
         //构造SendAuthReq结构体
         let req: SendAuthReq = SendAuthReq()
         req.scope = "snsapi_userinfo"
-        req.state = "juzitang"
+        req.state = "auth"
+        //第三方向微信终端发送一个SendAuthReq消息结构
+        WXApi.send(req)
+    }
+    
+    func sendBindRequest() {
+        //构造SendAuthReq结构体
+        let req: SendAuthReq = SendAuthReq()
+        req.scope = "snsapi_userinfo"
+        req.state = "bind"
         //第三方向微信终端发送一个SendAuthReq消息结构
         WXApi.send(req)
     }
@@ -77,23 +86,49 @@ extension WXApiManager: WXApiDelegate {
         if let authResp = resp as? SendAuthResp {
             // 处理微信登录授权结果
             if authResp.errCode == WXSuccess.rawValue {
-                // 用户同意授权，获取code
-                let code:String = authResp.code ?? ""
-                // TODO: 处理code，进行登录操作
-                let grantType = GrantType.authorizationCode.rawValue
-                let source = "wx"
-                LSHUD.showLoading("登录中")
-                //发起授权登录
-                NetworkManager.shared.authorize("", smsCode: "", code: code, grantType: grantType, source: source, refreshToken: "", identityToken: "") { (resp) in
-                    LSHUD.hide()
-                    if resp.status == .success {
-                        // 保存token
-                        LoginManager.shared.saveUserToken(resp.data)
-                        LSLog("authorize data:\(resp.data)")
-                        LoginManager.shared.login()
-                    } else {
-                        //错误提示
-                        LSHUD.showError(resp.msg)
+                LSLog("authResp succ")
+                if authResp.state == "auth" {
+                    LSLog("authResp succ auth")
+                    /**
+                     * 用户同意授权，获取code
+                     * 登录授权返回，向自己服务器继续发起登录
+                     */
+                    if let code = authResp.code {
+                        let grantType = GrantType.authorizationCode.rawValue
+                        let source = "wx"
+                        LSHUD.showLoading("登录中")
+                        //发起授权登录
+                        NetworkManager.shared.authorize("", smsCode: "", code: code, grantType: grantType, source: source, refreshToken: "", identityToken: "") { (resp) in
+                            LSHUD.hide()
+                            if resp.status == .success {
+                                // 保存token
+                                LoginManager.shared.saveUserToken(resp.data)
+                                LSLog("authorize data:\(resp.data)")
+                                LoginManager.shared.login()
+                            } else {
+                                //错误提示
+                                LSHUD.showError(resp.msg)
+                            }
+                        }
+                    }
+                } else if authResp.state == "bind" {
+                    LSLog("authResp succ bind")
+                    /**
+                     * 用户同意授权，获取code
+                     * 绑定微信授权返回，向自己服务器继续发起绑定请求
+                     */
+                    if let code = authResp.code {
+                        NetworkManager.shared.bindWx(code) { (resp) in
+                            if resp.status == .success {
+                                // 绑定成功
+                                LSHUD.showInfo("绑定成功")
+                                // 发送账号绑定成功通知
+                                LSNotification.postAccountBindStatusChange()
+                            } else {
+                                //错误提示
+                                LSHUD.showError(resp.msg)
+                            }
+                        }
                     }
                 }
             } else {

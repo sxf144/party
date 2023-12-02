@@ -95,7 +95,7 @@ extension GiftLogCell {
         }
         
         timeLabel.snp.makeConstraints { (make) in
-            make.left.equalToSuperview().offset(10)
+            make.left.equalTo(icon.snp.right).offset(10)
             make.bottom.equalToSuperview().offset(-yMargin)
         }
     }

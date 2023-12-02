@@ -10,6 +10,7 @@ import UIKit
 import SwiftyJSON
 
 
+
 class QueryRedPacketResp: RespModel {
     var data:QueryRedPacketModel?
     
@@ -71,6 +72,8 @@ class RedPacketFetchItem {
     var portrait:String = ""
     /// 领取时间
     var fetchTime:String = ""
+    /// 手气最佳（客户端专用）
+    var isMax:Bool = false
     
     init(_ json: JSON) {
         amount = json["amount"].int64Value

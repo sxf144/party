@@ -19,60 +19,60 @@ class PartyDetailResp: RespModel {
     }
 }
 
-struct PartyDetailModel {
+class PartyDetailModel {
     
     /// 地址
-    var address: String?
+    var address: String = ""
     /// 城市地址六位编码
-    var addressCode: Int64?
+    var addressCode: Int64 = 0
     /// 城市名称
-    var cityName: String?
+    var cityName: String = ""
     /// 评论数
-    var commentCnt: Int64?
+    var commentCnt: Int64 = 0
     /// 图片或者视频
-    var cover: String?
+    var cover: String = ""
     /// 开始时间
-    var startTime: String?
+    var startTime: String = ""
     /// 结束时间
-    var endTime: String?
+    var endTime: String = ""
     /// 本局费用(单位：分)
-    var fee: Int64?
+    var fee: Int64 = 0
     /// 女性数量要求
-    var femaleCnt: Int64?
+    var femaleCnt: Int64 = 0
     /// 女性剩余数量
-    var femaleRemainCount: Int64?
+    var femaleRemainCount: Int64 = 0
     /// 本轮介绍
-    var introduction: String?
+    var introduction: String = ""
     /// 参与状态 0 未参与 1已参与 2待付款
-    var joinState: Int64?
+    var joinState: Int64 = 0
     /// 地标
-    var landmark: String?
+    var landmark: String = ""
     /// 纬度
-    var latitude: Double?
+    var latitude: Double = 0
     /// 经度
-    var longitude: Double?
+    var longitude: Double = 0
     /// 点赞数
-    var likeCnt: Int64?
+    var likeCnt: Int64 = 0
     /// 男性数量要求
-    var maleCnt: Int64?
+    var maleCnt: Int64 = 0
     /// 男性剩余数量
-    var maleRemainCount: Int64?
+    var maleRemainCount: Int64 = 0
     /// 名字
-    var name: String?
+    var name: String = ""
     /// 创局用户昵称
-    var nick: String?
+    var nick: String = ""
     /// 创局用户头像
-    var portrait: String?
+    var portrait: String = ""
     /// 1 公开 其他人可以刷到，可以加入 0私密 其他人刷不到，只能邀请或者扫码加入
-    var isPublic: Int64?
+    var isPublic: Int64 = 0
     /// 局状态 1正常 2解散 3结束
-    var state: Int64?
+    var state: Int64 = 0
     /// 此局唯一码
-    var uniqueCode: String?
+    var uniqueCode: String = ""
     /// 创局用户ID
-    var userId: String?
+    var userId: String = ""
     /// 关联游戏
-    var relationGame: RelationGame?
+    var relationGame: RelationGame = RelationGame()
     
     init(_ json:JSON) {
         address = json["address"].stringValue
@@ -107,16 +107,16 @@ struct PartyDetailModel {
     init() {}
 }
 
-struct RelationGame {
-    var gameId: Int64
-    var cover: String
-    var gameStatus: Int64
-    var interactPersonCount: Int64
-    var introduction: String
-    var name: String
-    var personCountMax: Int64
-    var personCountMin: Int64
-    var sceneId: Int64
+class RelationGame {
+    var gameId: Int64 = 0
+    var cover: String = ""
+    var gameStatus: Int64 = 0
+    var interactPersonCount: Int64 = 0
+    var introduction: String = ""
+    var name: String = ""
+    var personCountMax: Int64 = 0
+    var personCountMin: Int64 = 0
+    var sceneId: Int64 = 0
     
     init(_ json:JSON) {
         gameId = json["game_id"].int64Value
@@ -129,6 +129,8 @@ struct RelationGame {
         personCountMin = json["person_count_min"].int64Value
         sceneId = json["scene_id"].int64Value
     }
+    
+    init() {}
 }
 
 

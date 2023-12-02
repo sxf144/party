@@ -19,7 +19,7 @@ class FollowListController: BaseController {
     var needSelect:Bool = false
 
     override func viewDidLoad() {
-        title = "邀请好友"
+        title = "我的关注"
         super.viewDidLoad()
         resetNavigation()
         setupUI()
@@ -114,7 +114,7 @@ extension FollowListController {
     
     func resetSelectedNum() {
         var selectedNum = 0
-        for item in  followList.users {
+        for item in followList.users {
             if item.selected {
                 selectedNum += 1
             }
@@ -124,9 +124,10 @@ extension FollowListController {
     }
     
     override func rightAction() {
+        
         if let followSelectedBlock = followSelectedBlock {
             var seletedItems: [FollowItem] = []
-            for item in  followList.users {
+            for item in followList.users {
                 if item.selected {
                     seletedItems.append(item)
                 }
@@ -149,7 +150,7 @@ extension FollowListController: UITableViewDataSource, UITableViewDelegate, UISc
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FollowCell", for: indexPath) as! FollowCell
-        var item = followList.users[indexPath.row]
+        let item = followList.users[indexPath.row]
         item.needSelect = needSelect
         cell.configure(with: item)
         return cell
@@ -192,6 +193,7 @@ extension FollowListController {
     fileprivate func resetNavigation() {
         
         if needSelect {
+            navigationView.titleLabel.text = "邀请"
             navigationView.rightButton.setImage(nil, for: .normal)
             navigationView.rightButton.setTitle("完成（0）", for: .normal)
             navigationView.rightButton.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)

@@ -113,7 +113,7 @@ fileprivate extension MyLocationManager {
         var finalStr: String
         
         if (distance < 1000) {
-            finalStr = "\(distance)m"
+            finalStr = "\(String(format: "%.2f", distance))m"
         } else {
             finalStr = "\(String(format: "%.2f", distance/1000))km"
         }

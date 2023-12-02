@@ -84,6 +84,13 @@ class PageManager: NSObject {
         currentNav()?.pushViewController(vc, animated: true)
     }
     
+    /// 粉丝列表
+    func pushToFansListController() {
+        let vc = FansListController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
     /// 个人主页
     func pushToUserPage(_ userId:String) {
         let vc = UserPageController()

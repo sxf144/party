@@ -154,12 +154,37 @@ extension RedPacketDetailController {
         NetworkManager.shared.queryRedPacket(limMsg.redPacketElem?.id ?? 0)  { resp in
             if resp.status == .success {
                 LSLog("queryRedPacket resp:\(resp)")
-                self.redPacketDetail = resp.data ?? QueryRedPacketModel()
-                self.refreshData()
+                
+                if let data = resp.data {
+                    self.handleData(data)
+                }
+                
             } else {
                 LSLog("queryRedPacket fail")
             }
         }
+    }
+    
+    func handleData(_ data:QueryRedPacketModel) {
+        redPacketDetail = data
+        // 处理手气最佳
+        if redPacketDetail.logs.count == redPacketDetail.count, redPacketDetail.getType == RedPacketType.RedPacketTypeLuck.rawValue {
+            var maxIndex = -1
+            var maxValue:Int64 = 0
+            for i in 0 ..< redPacketDetail.logs.count {
+                let item = redPacketDetail.logs[i]
+                if item.amount > maxValue {
+                    maxIndex = i
+                    maxValue = item.amount
+                }
+            }
+            
+            if maxIndex >= 0, maxIndex < redPacketDetail.logs.count {
+                redPacketDetail.logs[maxIndex].isMax = true
+            }
+        }
+        
+        refreshData()
     }
     
     // 刷新界面
@@ -201,7 +226,7 @@ extension RedPacketDetailController: UITableViewDataSource, UITableViewDelegate 
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "RedPacketLogCell", for: indexPath) as! RedPacketLogCell
-        let item = redPacketDetail.logs[indexPath.section]
+        let item = redPacketDetail.logs[indexPath.row]
         cell.configure(with: item)
         return cell
     }

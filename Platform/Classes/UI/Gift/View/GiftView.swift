@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 
 // GiftView高度
-private let CONTENT_HEIGHT: CGFloat = 310
+private let CONTENT_HEIGHT: CGFloat = 510
 
 class GiftView: UIView {
     
@@ -188,14 +188,16 @@ extension GiftView {
     // 点击选择成员
     @objc fileprivate func clickSelectBtn(_ sender:UIButton) {
         LSLog("clickSelectBtn")
-        // 选择游戏类型
+        // 选择成员
         let vc = ParticipateListController()
-        vc.setData(uniCode: uniqueCode)
-        vc.selectedBlock = { item in
-            LSLog("selectedBlock item:\(item)")
-            self.participateItem = item
-            // 刷新成员UI
-            self.handleSelectBtn()
+        vc.setData(uniqueCode, mutiSelect: false)
+        vc.selectedBlock = { items in
+            LSLog("selectedBlock items:\(items)")
+            if items.count > 0 {
+                self.participateItem = items[0]
+                // 刷新成员UI
+                self.handleSelectBtn()
+            }
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentVC()?.present(vc, animated: true)

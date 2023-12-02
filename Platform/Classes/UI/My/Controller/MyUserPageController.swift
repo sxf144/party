@@ -334,7 +334,7 @@ extension MyUserPageController {
     
     // 粉丝
     @objc private func fansTapAction(_ tap: UITapGestureRecognizer) {
-//        PageManager.shared.pushTo
+        PageManager.shared.pushToFansListController()
     }
     
     // 礼物

@@ -25,6 +25,8 @@ struct NotificationName {
     static let userPageInfoChange = NSNotification.Name("kNotification_userPageInfoChange")
     /// 局状态变化
     static let partyStatusChange = NSNotification.Name("kNotification_partyStatusChange")
+    /// 账号绑定状态变化
+    static let accountBindStatusChange = NSNotification.Name("kNotification_accountBindStatusChange")
 }
 
 class LSNotification: NSObject {
@@ -76,4 +78,8 @@ class LSNotification: NSObject {
         NotificationCenter.default.post(name: NotificationName.partyStatusChange, object: nil)
     }
     
+    /// 账号绑定状态更新
+    static func postAccountBindStatusChange() {
+        NotificationCenter.default.post(name: NotificationName.accountBindStatusChange, object: nil)
+    }
 }

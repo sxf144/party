@@ -16,11 +16,13 @@ class ParticipateListController: BaseController {
     let CellHeight = 80.0
     var participateList: [SimpleUserInfo] = []
     /// 回调闭包
-    public var selectedBlock: ((_ item:SimpleUserInfo) -> ())?
+    public var selectedBlock: ((_ items:[SimpleUserInfo]) -> ())?
+    var mutiSelect:Bool = false
 
     override func viewDidLoad() {
         title = "选择成员"
         super.viewDidLoad()
+        resetNavigation()
         setupUI()
         
         // 设置下拉刷新
@@ -52,8 +54,12 @@ class ParticipateListController: BaseController {
 
 extension ParticipateListController {
     
-    func setData(uniCode: String) {
+    func setData(_ uniCode: String, mutiSelect:Bool) {
         uniqueCode = uniCode
+        self.mutiSelect = mutiSelect
+        
+        // 重置导航栏
+        resetNavigation()
     }
     
     func getParticipateList() {
@@ -73,10 +79,23 @@ extension ParticipateListController {
             
             if resp.status == .success {
                 LSLog("getParticipateList succ")
-                self.participateList = resp.data.participateList
+                self.handleData(resp.data.participateList)
                 self.tableView.reloadData()
             } else {
                 LSLog("getParticipateList fail")
+            }
+        }
+    }
+    
+    // 处理数据
+    func handleData(_ list:[SimpleUserInfo]) {
+        self.participateList = []
+        let userInfo: UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
+        // 排除掉自己
+        for i in 0 ..< list.count {
+            let item = list[i]
+            if item.userId != userInfo.userId {
+                self.participateList.append(item)
             }
         }
     }
@@ -84,6 +103,33 @@ extension ParticipateListController {
     func loadNewData() {
         // 在这里执行下拉刷新的操作
         getParticipateList()
+    }
+    
+    func resetSelectedNum() {
+        var selectedNum = 0
+        for item in participateList {
+            if item.selected {
+                selectedNum += 1
+            }
+        }
+        
+        navigationView.rightButton.setTitle("完成（\(selectedNum)）", for: .normal)
+    }
+    
+    override func rightAction() {
+        
+        if let selectedBlock = selectedBlock {
+            var seletedItems: [SimpleUserInfo] = []
+            for item in participateList {
+                if item.selected {
+                    seletedItems.append(item)
+                }
+            }
+            
+            selectedBlock(seletedItems)
+        }
+        
+        pop()
     }
 }
 
@@ -110,10 +156,22 @@ extension ParticipateListController: UITableViewDataSource, UITableViewDelegate,
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 选中cell
         let item = participateList[indexPath.row]
-        if let selectedBlock = selectedBlock {
-            selectedBlock(item)
-            // 返回上一层
-            self.dismiss(animated: true, completion: nil)
+        
+        
+        // 多选、单选
+        if mutiSelect {
+            participateList[indexPath.row].selected = !item.selected
+            resetSelectedNum()
+            tableView.reloadRows(at: [indexPath], with: .fade)
+        } else {
+            item.selected = true
+            tableView.reloadRows(at: [indexPath], with: .none)
+            
+            if let selectedBlock = selectedBlock {
+                selectedBlock([item])
+                // 返回上一层
+                self.dismiss(animated: true, completion: nil)
+            }
         }
     }
 }
@@ -129,6 +187,23 @@ extension ParticipateListController{
             make.centerX.equalToSuperview()
             make.width.equalToSuperview()
             make.bottom.equalToSuperview()
+        }
+    }
+    
+    fileprivate func resetNavigation() {
+        
+        if mutiSelect {
+            navigationView.rightButton.setImage(nil, for: .normal)
+            navigationView.rightButton.setTitle("完成（0）", for: .normal)
+            navigationView.rightButton.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
+            navigationView.rightButton.titleLabel?.font = UIFont.ls_mediumFont(16)
+            
+            navigationView.rightButton.snp.updateConstraints { (make) in
+                make.right.equalTo(-16)
+                make.bottom.equalToSuperview()
+                make.width.greaterThanOrEqualTo(56)
+                make.height.equalTo(44)
+            }
         }
     }
 }

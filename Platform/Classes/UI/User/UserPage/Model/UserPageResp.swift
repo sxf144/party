@@ -19,7 +19,7 @@ class UserPageResp: RespModel {
     }
 }
 
-struct UserPageModel {
+class UserPageModel {
     
     /// 礼物
     var gift: Gift = Gift()
@@ -48,7 +48,7 @@ struct UserPageModel {
     }
 }
 
-struct Gift {
+class Gift {
     var recvGiftCnt: Int64 = 0
     var recvGiftValue: Int64 = 0
     
@@ -70,16 +70,17 @@ struct Gift {
     }
 }
 
-struct Relation {
+class Relation {
     var black: Bool = true
     var fansCnt: Int64 = 0
-    var follow: Bool = false
+    // 0无关系 1 关注了对方 2双向关注 3 是我的粉丝
+    var follow: Int64 = 0
     var followCnt: Int64 = 0
     
     init(_ json:JSON) {
         black = json["black"].boolValue
         fansCnt = json["fans_cnt"].int64Value
-        follow = json["follow"].boolValue
+        follow = json["follow"].int64Value
         followCnt = json["follow_cnt"].int64Value
     }
     
@@ -98,7 +99,7 @@ struct Relation {
     }
 }
 
-struct User {
+class User {
     var coinBalance: Int64 = 0
     var intro: String = ""
     var nick: String = ""

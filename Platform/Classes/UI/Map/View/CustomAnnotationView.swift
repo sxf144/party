@@ -11,17 +11,24 @@ import AMapNaviKit
 class CustomAnnotationView: MAAnnotationView {
     override init!(annotation: MAAnnotation!, reuseIdentifier: String!) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        setupUI()
+        self.image = (annotation as! CustomAnnotation).customImage
     }
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupUI()
-    }
-
-    func setupUI() {
-        // 在这里设置标注视图的外观，可以设置图标等
-        image = UIImage(named: "icon_location1")
+        fatalError("init(coder:) has not been implemented")
     }
 }
 
+class CustomAnnotation: NSObject, MAAnnotation {
+    var coordinate: CLLocationCoordinate2D
+    var title: String?
+    var subtitle: String?
+    var customImage: UIImage?
+
+    init(coordinate: CLLocationCoordinate2D, title: String?, subtitle: String?, customImage: UIImage?) {
+        self.coordinate = coordinate
+        self.title = title
+        self.subtitle = subtitle
+        self.customImage = customImage
+    }
+}

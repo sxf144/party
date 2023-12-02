@@ -41,7 +41,7 @@ class GameEndMessageCell: UITableViewCell {
 
 extension GameEndMessageCell {
     
-    func configure(with citem: LIMMessage) {
+    func configure(_ citem: LIMMessage) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
     }

@@ -17,6 +17,8 @@ enum NavigationViewStyle: Int {
 
 class NavigationView: UIView {
     
+    let HeadWidth: CGFloat = 40
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -61,9 +63,21 @@ class NavigationView: UIView {
         label.font = UIFont.ls_mediumFont(18)
         label.textAlignment = NSTextAlignment.center
         label.textColor = UIColor.ls_color("#2F1557")
+        label.sizeToFit()
         return label
     }()
-
+    
+    /// 头像
+    lazy var avatar: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = HeadWidth/2
+        imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderAvatar)
+        imageView.isHidden = true
+        return imageView
+    }()
+    
     /// 分割线
     lazy var seperateLine: UIView = {
         let view = UIView()
@@ -84,7 +98,15 @@ extension NavigationView {
             self.titleLabel.textColor = UIColor.ls_color("#FFFFFF")
             self.backView.backgroundColor = UIColor.ls_color("#14110F")
         }
+    }
+    
+    func showAvatar() {
+        avatar.isHidden = false
         
+        titleLabel.snp.remakeConstraints { (make) in
+            make.centerX.equalToSuperview().offset(HeadWidth/2+3)
+            make.bottom.equalTo(-11)
+        }
     }
 }
 
@@ -110,7 +132,13 @@ fileprivate extension NavigationView {
         titleLabel.snp.makeConstraints { (make) in
             make.centerX.equalToSuperview()
             make.bottom.equalTo(-11)
-            make.width.equalTo(kScreenW*0.75)
+        }
+        
+        self.addSubview(avatar)
+        avatar.snp.makeConstraints { (make) in
+            make.right.equalTo(titleLabel.snp.left).offset(-6)
+            make.bottom.equalToSuperview().offset(-2)
+            make.size.equalTo(CGSize(width: HeadWidth, height: HeadWidth))
         }
 
         self.addSubview(rightButton)
