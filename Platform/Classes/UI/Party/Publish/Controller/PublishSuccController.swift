@@ -105,7 +105,6 @@ extension PublishSuccController {
         eTime = endTime
         uniCode = uniqueCode
         
-//        let qrCodeUrl = "juzitang://detail?code=\(uniCode)"
         let qrCodeUrl = "https://static.juzitang.net/detail?code=\(uniCode)"
         // 调用生成二维码的方法
         if let qrCodeImage = LBXScanWrapper.createCode(codeType: "CIQRCodeGenerator", codeString: qrCodeUrl, size: qrSize, qrColor: .black, bkColor: .white) {

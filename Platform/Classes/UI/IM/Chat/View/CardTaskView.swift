@@ -9,9 +9,6 @@
 import UIKit
 import SnapKit
 
-// GiftView高度
-private let CONTENT_HEIGHT: CGFloat = 310
-
 class CardTaskView: UIView {
     
     static let shared = CardTaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))
@@ -195,7 +192,7 @@ extension CardTaskView {
         
         nameLabel.snp.makeConstraints { (make) in
             make.width.lessThanOrEqualToSuperview().offset(-xMargin*2)
-            make.centerX.centerY.equalToSuperview()
+            make.center.equalToSuperview()
         }
         
         redPacketBtn.snp.makeConstraints { (make) in

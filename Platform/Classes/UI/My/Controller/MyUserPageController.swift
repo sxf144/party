@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import swiftScan
 
 class MyUserPageController: BaseController {
     
@@ -36,8 +37,8 @@ class MyUserPageController: BaseController {
     
     // TopView
     fileprivate lazy var topView: UIView = {
-        let v = UIView()
-        return v
+        let view = UIView()
+        return view
     }()
     
     // 头像
@@ -47,6 +48,15 @@ class MyUserPageController: BaseController {
         imageView.clipsToBounds = true
         imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderBig)
         return imageView
+    }()
+    
+    // 扫码按钮
+    fileprivate lazy var qrScanBtn: UIButton = {
+        let button = UIButton()
+        button.clipsToBounds = true
+        button.setImage(UIImage(named: "icon_qrscan"), for: .normal)
+        button.addTarget(self, action: #selector(clickQRScanBtn(_:)), for: .touchUpInside)
+        return button
     }()
     
     // 头像小
@@ -297,9 +307,13 @@ extension MyUserPageController {
         accountNumLabel.text = String(userPageData.user.coinBalance)
     }
     
-    // 更多
-    override func rightAction() {
-        
+    // 编辑资料
+    @objc func clickQRScanBtn(_ sender:UIButton) {
+        LSLog("clickQRScanBtn")
+        let vc = LBXScanViewController()
+        vc.scanResultDelegate = self
+        vc.hidesBottomBarWhenPushed = true
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
     }
     
     // 编辑资料
@@ -343,12 +357,38 @@ extension MyUserPageController {
     }
 }
 
+extension MyUserPageController: LBXScanViewControllerDelegate  {
+    func scanFinished(scanResult: LBXScanResult, error: String?) {
+        LSLog("scanFinished strScanned:\(scanResult.strScanned ?? "")")
+        if let str = scanResult.strScanned {
+            if let url = URL(string: scanResult.strScanned) {
+                if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+                    if urlComponents.path.contains("detail") {
+                        // 跳转到partyDetail
+                        // 解析参数
+                        if let queryItems = urlComponents.queryItems {
+                            for queryItem in queryItems {
+                                if queryItem.name == "code" {
+                                    if let uniCode = queryItem.value {
+                                        PageManager.shared.pushToPartyDetail(uniCode)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 extension MyUserPageController {
     
     fileprivate func setupUI() {
         
         view.addSubview(topView)
         topView.addSubview(avatar)
+        topView.addSubview(qrScanBtn)
         topView.addSubview(avatarSmall)
         topView.addSubview(nickLabel)
         topView.addSubview(sexIcon)
@@ -381,6 +421,12 @@ extension MyUserPageController {
 
         avatar.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
+        }
+        
+        qrScanBtn.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(kNavBarHeight-33)
+            make.right.equalToSuperview().offset(-leftMargin)
+            make.size.equalTo(CGSize(width: 22, height: 22))
         }
         
         avatarSmall.snp.makeConstraints { (make) in

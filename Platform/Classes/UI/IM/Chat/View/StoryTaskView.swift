@@ -9,9 +9,6 @@
 import UIKit
 import SnapKit
 
-// GiftView高度
-private let CONTENT_HEIGHT: CGFloat = 310
-
 class StoryTaskView: UIView {
     
     static let shared = StoryTaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))

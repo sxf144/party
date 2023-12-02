@@ -88,16 +88,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     if urlComponents.path.contains("/app/") {
                         // 处理微信返回的数据
                         result = WXApi.handleOpenUniversalLink(userActivity, delegate: WXApiManager.shared)
-                    } else {
-                        
+                    } else if urlComponents.path.contains("detail") {
+                        LSLog("userActivity path contain detail")
+                        // 跳转到partyDetail
+                        // 解析参数
+                        if let queryItems = urlComponents.queryItems {
+                            for queryItem in queryItems {
+                                if queryItem.name == "code" {
+                                    if let uniCode = queryItem.value {
+                                        PageManager.shared.pushToPartyDetail(uniCode)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } else {
-                
+                // 不存在webpageURL，暂不处理
             }
             
         } else {
-            
+            // 非NSUserActivityTypeBrowsingWeb模式，暂不处理
         }
         return result
     }

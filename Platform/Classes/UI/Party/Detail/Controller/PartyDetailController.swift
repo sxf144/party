@@ -849,7 +849,7 @@ extension PartyDetailController {
     }
     
     @objc func clickQrCodeBtn(_ sender:UIButton) {
-        
+        QRPartyView.shared.showInWindow(partyDetail?.uniqueCode ?? "")
     }
     
     func updateComment(_ item:CommentItem) {

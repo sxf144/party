@@ -162,6 +162,7 @@
 		0FE2DBAB2B19B20A00826222 /* ReportReasonListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE2DBA62B19B20A00826222 /* ReportReasonListController.swift */; };
 		0FE2DBAC2B19B20A00826222 /* ReportReasonListResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE2DBA82B19B20A00826222 /* ReportReasonListResp.swift */; };
 		0FE2DBAD2B19B20A00826222 /* ReportReasonItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE2DBAA2B19B20A00826222 /* ReportReasonItemCell.swift */; };
+		0FE61ADD2B1B333A00591F00 /* QRPartyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE61ADC2B1B333A00591F00 /* QRPartyView.swift */; };
 		0FEBF5942A9D978D00CB43BF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0FEBF5932A9D978D00CB43BF /* Images.xcassets */; };
 		0FEBF5962A9F3FA800CB43BF /* UserTokenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF5952A9F3FA700CB43BF /* UserTokenModel.swift */; };
 		0FEBF59C2AA07E7800CB43BF /* HomeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEBF59B2AA07E7700CB43BF /* HomeController.swift */; };
@@ -399,6 +400,7 @@
 		0FE2DBA62B19B20A00826222 /* ReportReasonListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReportReasonListController.swift; sourceTree = "<group>"; };
 		0FE2DBA82B19B20A00826222 /* ReportReasonListResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReportReasonListResp.swift; sourceTree = "<group>"; };
 		0FE2DBAA2B19B20A00826222 /* ReportReasonItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReportReasonItemCell.swift; sourceTree = "<group>"; };
+		0FE61ADC2B1B333A00591F00 /* QRPartyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRPartyView.swift; sourceTree = "<group>"; };
 		0FEBF5932A9D978D00CB43BF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0FEBF5952A9F3FA700CB43BF /* UserTokenModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserTokenModel.swift; sourceTree = "<group>"; };
 		0FEBF59B2AA07E7700CB43BF /* HomeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeController.swift; sourceTree = "<group>"; };
@@ -840,6 +842,7 @@
 		0F8E1BBE2ACBABE500C67D62 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				0FE61ADC2B1B333A00591F00 /* QRPartyView.swift */,
 				0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */,
 				0F8E1BBF2ACBABE500C67D62 /* CommentCell.swift */,
 			);
@@ -1999,6 +2002,7 @@
 				49FBBFD4268DA77A000C851E /* TabBarController.swift in Sources */,
 				0FB10ECA2AF89B3500E64777 /* FYThemeColors.swift in Sources */,
 				0FDD98282AF0FA1300EBA619 /* GameCardCell.swift in Sources */,
+				0FE61ADD2B1B333A00591F00 /* QRPartyView.swift in Sources */,
 				0F3743902B11FE7C008F6B31 /* CoinLogModel.swift in Sources */,
 				0FBDBABC2ADFEB1D00E0A0CB /* ConversationListController.swift in Sources */,
 				0F8E1BBB2AC9AC7300C67D62 /* PartyDetailResp.swift in Sources */,

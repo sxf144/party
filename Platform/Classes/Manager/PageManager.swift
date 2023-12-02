@@ -216,6 +216,12 @@ class PageManager: NSObject {
         currentNav()?.pushViewController(vc, animated: true)
     }
     
+//    /// 账号管理
+//    func pushToLBXScanViewController() {
+//        let vc = LBXScanviewco()
+//        vc.hidesBottomBarWhenPushed = true
+//        currentNav()?.pushViewController(vc, animated: true)
+//    }
     
     
 //
