@@ -117,7 +117,7 @@ class ChooseLocationView: UIView {
         let button = UIButton()
         button.backgroundColor = UIColor.ls_color("#FE9C5B")
         button.titleLabel?.font = UIFont.ls_mediumFont(15)
-        button.setTitle("发送", for: .normal)
+        button.setTitle("完成", for: .normal)
         button.setTitleColor(UIColor.ls_color("#ffffff"), for: .normal)
         button.layer.cornerRadius = 8
         button.addTarget(self, action: #selector(clickRightBtn(_:)), for: .touchUpInside)

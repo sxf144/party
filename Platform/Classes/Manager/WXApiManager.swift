@@ -14,7 +14,7 @@ class WXApiManager: NSObject {
     public var payBlock: ((_ orderId:String, _ status:Int64) -> ())?
     /// 微信appid
     let WX_APPID = "wx4b6080cc0837f2ec"
-    let UNIVERSAL_LINK = "https://static.juzitang.net/app/"
+    let WX_UNIVERSAL_LINK = "https://static.juzitang.net/app/"
     var currOrderId: String = ""
     
     private override init() {
@@ -25,7 +25,7 @@ class WXApiManager: NSObject {
 extension WXApiManager {
     
     func registerApp() -> Bool {
-        return WXApi.registerApp(WX_APPID, universalLink: UNIVERSAL_LINK)
+        return WXApi.registerApp(WX_APPID, universalLink: WX_UNIVERSAL_LINK)
     }
     
     func sendAuthRequest() {
@@ -75,6 +75,51 @@ extension WXApiManager {
                 }
             }
         }
+    }
+    
+    func shareToWX(_ title:String, description:String, pageUrl:String, image:UIImage?) {
+        let webpageObject = WXWebpageObject()
+        webpageObject.webpageUrl = pageUrl
+        let message = WXMediaMessage()
+        message.title = title
+        message.description = description
+        if let image = image {
+            let thumbImage = resizeImage(image: image, targetSize: CGSize(width: 100, height: 100))
+            message.setThumbImage(thumbImage)
+        }
+        message.mediaObject = webpageObject
+        let req = SendMessageToWXReq()
+        req.bText = false
+        req.message = message
+        WXApi.send(req)
+    }
+    
+    func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
+        let size = image.size
+
+        // 计算调整比例
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+
+        // 选择更大的比例，确保图片完全填充目标尺寸
+        let scaleFactor = max(widthRatio, heightRatio)
+
+        // 计算调整后的大小
+        let scaledWidth = size.width * scaleFactor
+        let scaledHeight = size.height * scaleFactor
+
+        // 计算裁剪的位置，使图片居中
+        let x = (targetSize.width - scaledWidth) / 2.0
+        let y = (targetSize.height - scaledHeight) / 2.0
+
+        // 设置调整后的图片上下文
+        UIGraphicsBeginImageContextWithOptions(targetSize, false, 0.0)
+        let rect = CGRect(x: x, y: y, width: scaledWidth, height: scaledHeight)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage ?? UIImage()
     }
 }
 
@@ -147,6 +192,15 @@ extension WXApiManager: WXApiDelegate {
             } else {
                 // 支付失败，提示错误
                 LSHUD.showError(payResp.errStr)
+            }
+        } else if let msgResp = resp as? SendMessageToWXResp {
+            // SendMessageToWXResp 分享回调
+            if msgResp.errCode == WXSuccess.rawValue {
+                LSLog("WXApiManager sendMessage succ")
+            } else {
+                LSLog("WXApiManager sendMessage fail:\(msgResp.errStr)")
+                // 分享失败，提示错误
+//                LSHUD.showError(msgResp.errStr)
             }
         }
     }

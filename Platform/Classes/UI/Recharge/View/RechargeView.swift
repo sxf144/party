@@ -102,7 +102,7 @@ class RechargeView: UIView {
         let label = UILabel()
         label.font = kFontMedium12
         label.textColor = UIColor.ls_color("#aaaaaa")
-        label.text = "余额：" + String(userPageInfo?.user.coinBalance ?? 0) + " JZ币"
+        label.text = String(format: "余额：%.2f JZ币", Double((userPageInfo?.user.coinBalance ?? 0))/100)
         label.sizeToFit()
         return label
     }()
@@ -167,7 +167,7 @@ extension RechargeView {
     @objc func handleUserPageInfoChange(_ notification: Notification) {
         userPageInfo = LoginManager.shared.getUserPageInfo()
         // 更新代币值
-        coinLabel.text = "余额：" + String(userPageInfo?.user.coinBalance ?? 0) + " JZ币"
+        coinLabel.text = String(format: "余额：%.2f JZ币", Double((userPageInfo?.user.coinBalance ?? 0))/100)
         coinLabel.sizeToFit()
     }
     
@@ -228,7 +228,7 @@ extension RechargeView {
         
         LSHUD.showLoading()
         NetworkManager.shared.getRechargeList { resp in
-            LSLog("getRechargeList data:\(String(describing: resp.data))")
+            LSLog("getRechargeList data:\(resp.data)")
             if resp.status == .success {
                 LSLog("getRechargeList succ")
                 self.requestProductInfo(resp.data.items)
@@ -325,6 +325,10 @@ extension RechargeView: SKPaymentTransactionObserver, SKProductsRequestDelegate 
             
         } else {
             LSLog("No products found.")
+        }
+        
+        if self.dataList.count >= 2 {
+            selectedIndex = 1
         }
         
         DispatchQueue.main.async {

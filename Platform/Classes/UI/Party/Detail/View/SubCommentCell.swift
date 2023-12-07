@@ -175,6 +175,7 @@ extension SubCommentCell {
             loadMoreView.isHidden = false
             loadMoreLabel.text = str
             loadMoreLabel.sizeToFit()
+            loadMoreLabel.sizeToFit()
             
             loadMoreView.snp.remakeConstraints { make in
                 make.left.equalTo(timeLabel)

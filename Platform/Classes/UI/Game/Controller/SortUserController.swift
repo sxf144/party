@@ -157,7 +157,6 @@ extension SortUserController {
         }
         
         for i in stride(from: 0, to: userList.count, by: step) {
-            
             if step == 1 {
                 dataList.append([userList[i]])
             } else if step == 2 {

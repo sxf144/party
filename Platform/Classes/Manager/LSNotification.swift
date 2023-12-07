@@ -74,8 +74,8 @@ class LSNotification: NSObject {
     }
     
     /// 局状态信息更新
-    static func postPartyStatusChange() {
-        NotificationCenter.default.post(name: NotificationName.partyStatusChange, object: nil)
+    static func postPartyStatusChange(_ party:PartyDetailModel = PartyDetailModel()) {
+        NotificationCenter.default.post(name: NotificationName.partyStatusChange, object: party)
     }
     
     /// 账号绑定状态更新

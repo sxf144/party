@@ -16,12 +16,15 @@ class PublishSuccController: BaseController {
     var sTime: String = ""
     var eTime: String = ""
     var uniCode: String = ""
+    var name: String = ""
+    var cover: UIImage?
     var qrCodeImage: UIImage?
     
     override func viewDidLoad() {
         title = "发布成功"
         super.viewDidLoad()
         setupUI()
+        resetNavigation()
     }
     
     override func pop() {
@@ -62,12 +65,13 @@ class PublishSuccController: BaseController {
     }()
     
     // 邀请好友
-    fileprivate lazy var inviteIV: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_invite")
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 28
-        return imageView
+    fileprivate lazy var inviteBtn: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "icon_invite"), for: .normal)
+        button.clipsToBounds = true
+        button.layer.cornerRadius = 28
+        button.addTarget(self, action: #selector(clickInviteBtn(_:)), for: .touchUpInside)
+        return button
     }()
     
     fileprivate lazy var inviteLabel: UILabel = {
@@ -80,12 +84,13 @@ class PublishSuccController: BaseController {
     }()
     
     // 分享到微信
-    fileprivate lazy var shareIV: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "share_weixin")
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 28
-        return imageView
+    fileprivate lazy var shareBtn: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "share_weixin"), for: .normal)
+        button.clipsToBounds = true
+        button.layer.cornerRadius = 28
+        button.addTarget(self, action: #selector(clickShareBtn(_:)), for: .touchUpInside)
+        return button
     }()
     
     fileprivate lazy var shareLabel: UILabel = {
@@ -100,19 +105,65 @@ class PublishSuccController: BaseController {
 
 extension PublishSuccController {
     
-    func setData(startTime: String, endTime: String, uniqueCode: String) {
+    func setData(startTime: String, endTime: String, uniqueCode: String, name:String, cover:UIImage?) {
         sTime = startTime
         eTime = endTime
         uniCode = uniqueCode
+        self.name = name
+        self.cover = cover
         
-        let qrCodeUrl = "https://static.juzitang.net/detail?code=\(uniCode)"
+        let qrCodeUrl = "\(UNIVERSAL_LINK)/detail?code=\(uniCode)"
         // 调用生成二维码的方法
         if let qrCodeImage = LBXScanWrapper.createCode(codeType: "CIQRCodeGenerator", codeString: qrCodeUrl, size: qrSize, qrColor: .black, bkColor: .white) {
             qrCode.image = qrCodeImage
         }
 
-        timeLabel.text = "时间：\(sTime)-\(eTime)"
+        timeLabel.text = Date.formatDate(startTime: sTime, endTime: eTime)
         timeLabel.sizeToFit()
+    }
+    
+    override func rightAction() {
+        pop()
+    }
+    
+    // 邀请好友
+    @objc func clickInviteBtn(_ sender:UIButton) {
+        let vc = FollowListController()
+        vc.setData(true)
+        vc.followSelectedBlock = { [weak self] followItems in
+            LSLog("followSelectedBlock followItems:\(followItems)")
+            var peopleIds:[String] = []
+            for i in 0 ..< followItems.count {
+                let fItem = followItems[i]
+                peopleIds.append(fItem.userId)
+            }
+            // 邀请加入局
+            self?.inviteJoinParty(peopleIds)
+        }
+        vc.hidesBottomBarWhenPushed = true
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    // 分享到微信
+    @objc func clickShareBtn(_ sender:UIButton) {
+        // 分享
+        let title = "邀请你加入\(name)"
+        let desc = timeLabel.text!
+        let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(uniCode)"
+        WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cover)
+    }
+    
+    // 邀请加入组局
+    func inviteJoinParty(_ peopleIds:[String]) {
+        NetworkManager.shared.inviteJoinParty(uniCode, peopleIds: peopleIds) { resp in
+            
+            if resp.status == .success {
+                LSLog("inviteJoinParty:\(resp)")
+                LSHUD.showInfo("邀请已发出")
+            } else {
+                LSLog("inviteJoinParty fail")
+            }
+        }
     }
 }
 
@@ -124,9 +175,9 @@ extension PublishSuccController {
         view.addSubview(qrCode)
         view.addSubview(tipLabel)
         view.addSubview(timeLabel)
-        view.addSubview(inviteIV)
+        view.addSubview(inviteBtn)
         view.addSubview(inviteLabel)
-        view.addSubview(shareIV)
+        view.addSubview(shareBtn)
         view.addSubview(shareLabel)
         
         qrCode.snp.makeConstraints { (make) in
@@ -145,24 +196,41 @@ extension PublishSuccController {
             make.centerX.equalToSuperview()
         }
         
-        inviteIV.snp.makeConstraints { (make) in
+        inviteBtn.snp.makeConstraints { (make) in
             make.top.equalTo(timeLabel.snp.bottom).offset(40)
             make.centerX.equalToSuperview().offset(-60)
         }
         
         inviteLabel.snp.makeConstraints { (make) in
-            make.top.equalTo(inviteIV.snp.bottom).offset(8)
-            make.centerX.equalTo(inviteIV)
+            make.top.equalTo(inviteBtn.snp.bottom).offset(8)
+            make.centerX.equalTo(inviteBtn)
         }
         
-        shareIV.snp.makeConstraints { (make) in
+        shareBtn.snp.makeConstraints { (make) in
             make.top.equalTo(timeLabel.snp.bottom).offset(40)
             make.centerX.equalToSuperview().offset(60)
         }
         
         shareLabel.snp.makeConstraints { (make) in
-            make.top.equalTo(shareIV.snp.bottom).offset(8)
-            make.centerX.equalTo(shareIV)
+            make.top.equalTo(shareBtn.snp.bottom).offset(8)
+            make.centerX.equalTo(shareBtn)
+        }
+    }
+    
+    fileprivate func resetNavigation() {
+        
+        navigationView.rightButton.setImage(nil, for: .normal)
+        navigationView.rightButton.setTitle("完成", for: .normal)
+        navigationView.rightButton.setTitleColor(UIColor.ls_color("#ffffff"), for: .normal)
+        navigationView.rightButton.titleLabel?.font = UIFont.ls_mediumFont(15)
+        navigationView.rightButton.layer.cornerRadius = 8
+        navigationView.rightButton.backgroundColor = UIColor.ls_color("#FE9C5B")
+        
+        navigationView.rightButton.snp.updateConstraints { (make) in
+            make.right.equalTo(-16)
+            make.bottom.equalToSuperview().offset(-6)
+            make.width.greaterThanOrEqualTo(56)
+            make.height.equalTo(32)
         }
     }
 }

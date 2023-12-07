@@ -87,7 +87,7 @@ class NavigationView: UIView {
 }
 
 extension NavigationView {
-    func changeStyle(_ style: NavigationViewStyle){
+    func changeStyle(_ style: NavigationViewStyle) {
         switch style {
         case .defalut:
             self.leftButton.setImage(UIImage(named: "icon_arrow_left_black"), for: .normal)

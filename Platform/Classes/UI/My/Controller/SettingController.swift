@@ -80,9 +80,25 @@ extension SettingController {
     // 退出登录
     @objc func clickLogoutBtn(_ sender:UIButton) {
         LSLog("clickLogoutBtn")
-        LoginManager.shared.logout()
+        showLogoutAlert()
     }
     
+    func showLogoutAlert() {
+        // 二次确认是否要退出
+        let alertController = BaseAlertController(title: "确定要退出登录吗？", message: nil)
+                
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) {(action) in
+            LoginManager.shared.logout()
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
 }
 
 extension SettingController {

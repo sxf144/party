@@ -93,9 +93,11 @@ extension PhoneLoginController {
         
         if type == .ActionLogin {
             navigationView.titleLabel.text = "手机登录"
+            navigationView.titleLabel.sizeToFit()
             loginBtn.setTitle("登录", for: .normal)
         } else {
             navigationView.titleLabel.text = "绑定手机"
+            navigationView.titleLabel.sizeToFit()
             loginBtn.setTitle("绑定", for: .normal)
         }
     }

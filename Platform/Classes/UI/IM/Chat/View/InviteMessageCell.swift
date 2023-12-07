@@ -166,15 +166,12 @@ extension InviteMessageCell {
 
         // 邀请标题
         var fromName = item.inviteElem?.userName ?? ""
-        var toName = item.inviteElem?.toUserName ?? ""
         let userInfo = LoginManager.shared.getUserInfo()
         if (userInfo?.userId == item.inviteElem?.userId) {
-            fromName = "你"
+            fromName = userInfo?.nick ?? ""
         }
-        if (userInfo?.userId == item.inviteElem?.toUserId) {
-            toName = "你"
-        }
-        titleLabel.text = "邀请" + toName + "加入" + fromName + "的桔，快来～"
+        
+        titleLabel.text = "邀请你加入" + fromName + "的桔，快来～"
         titleLabel.sizeToFit()
 
         // 邀请时间

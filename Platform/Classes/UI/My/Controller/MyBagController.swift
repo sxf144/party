@@ -15,7 +15,7 @@ class MyBagController: BaseController {
     let leftMargin = 16.0
     let detailViewCornerRadius: CGFloat = 24
     let topHeight:CGFloat = 216.0
-    var userPageData: UserPageModel = UserPageModel()
+    var userPageData: UserPageModel = LoginManager.shared.getUserPageInfo() ?? UserPageModel()
     let options: [[String: String]] = [["icon": "icon_bag_transaction", "title": "收支记录"], ["icon": "icon_bag_gift", "title": "收到的礼物"], ["icon": "icon_bag_cashing", "title": "提现"]]
     let optionKey = "OptionKey"
     
@@ -27,6 +27,7 @@ class MyBagController: BaseController {
         // 重置Navigation
         resetNavigation()
         setupUI()
+        addObservers()
     }
     
     // TopView
@@ -57,7 +58,7 @@ class MyBagController: BaseController {
         let label = UILabel()
         label.font = UIFont.ls_boldFont(30)
         label.textColor = .white
-        label.text = String(userPageData.user.coinBalance)
+        label.text = String(format: "%.2f", Double(userPageData.user.coinBalance)/100)
         label.sizeToFit()
         return label
     }()
@@ -83,33 +84,24 @@ class MyBagController: BaseController {
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         return view
     }()
-    
 }
 
 extension MyBagController {
     
-    func setData(_ userPageData:UserPageModel) {
-        self.userPageData = userPageData
+    func addObservers() {
+        LSLog("addObservers")
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserPageInfoChange(_:)), name: NotificationName.userPageInfoChange, object: nil)
     }
     
-    // 获取详情
-    func getUserHomePage() {
-        NetworkManager.shared.getUserPage  { resp in
-            if resp.status == .success {
-                LSLog("getUserPage data:\(resp.data)")
-                self.userPageData = resp.data
-                self.refreshData()
-            } else {
-                LSLog("getUserPage fail")
-            }
-        }
+    @objc func handleUserPageInfoChange(_ notification: Notification) {
+        LSLog("handleUserPageInfoChange")
+        userPageData = LoginManager.shared.getUserPageInfo() ?? UserPageModel()
+        refreshData()
     }
     
-    // 刷新界面
     func refreshData() {
-        
-        // 余额
-        accountNumLabel.text = String(userPageData.user.coinBalance)
+        accountNumLabel.text = String(format: "%.2f", Double(userPageData.user.coinBalance)/100)
+        accountNumLabel.sizeToFit()
     }
     
     // 充值
@@ -134,7 +126,7 @@ extension MyBagController {
         } else if optionValue == 2 {
             PageManager.shared.pushToGiftLogController()
         } else if optionValue == 3 {
-            
+            PageManager.shared.pushToCashOutController()
         }
     }
 }

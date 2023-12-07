@@ -87,7 +87,7 @@ class RedPacketDetailController: BaseController {
     }()
     
     // 总金额
-    fileprivate lazy var amountLabel: UILabel = {
+    fileprivate lazy var myAmountLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.ls_mediumFont(36)
         label.textColor = UIColor.ls_color("#FE9C5B")
@@ -201,11 +201,12 @@ extension RedPacketDetailController {
         let amountString: String = String(format: "%.2f\(unitString)", Double(redPacketDetail.amount)/100 )
         let attributedText = NSMutableAttributedString(string: amountString)
         attributedText.addAttributes([.font: kFontRegualer14], range: NSRange(location: attributedText.length - unitString.count, length: unitString.count))
-        amountLabel.attributedText = attributedText
-        amountLabel.sizeToFit()
+        myAmountLabel.attributedText = attributedText
+        myAmountLabel.sizeToFit()
         
         // 记录标题
         logTitleLabel.text = String(format: "\(redPacketDetail.count)个红包，总金额：¥%.2f", Double(redPacketDetail.amount)/100 )
+        logTitleLabel.sizeToFit()
         
         // 刷新界面
         tableView.reloadData()
@@ -240,7 +241,7 @@ extension RedPacketDetailController {
         topView.addSubview(redView)
         topView.addSubview(avatar)
         topView.addSubview(nickLabel)
-        topView.addSubview(amountLabel)
+        topView.addSubview(myAmountLabel)
         headerView.addSubview(splitView)
         headerView.addSubview(midView)
         midView.addSubview(logTitleLabel)
@@ -277,7 +278,7 @@ extension RedPacketDetailController {
             make.centerX.equalToSuperview()
         }
         
-        amountLabel.snp.makeConstraints { (make) in
+        myAmountLabel.snp.makeConstraints { (make) in
             make.top.equalTo(nickLabel.snp.bottom).offset(12)
             make.centerX.equalToSuperview()
         }

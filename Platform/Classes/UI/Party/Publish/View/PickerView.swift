@@ -98,7 +98,7 @@ class PickerView: UIView {
     /// 保存最终返回的日期
     fileprivate var date:Date?
     /// 保存最终返回的时长
-    fileprivate var hourCnt:Int? = 2
+    fileprivate var hourCnt:Int? = 0
     /// 字体配色
     fileprivate var color:UIColor = UIColor.white
     fileprivate var bgColor:UIColor = UIColor.black
@@ -286,7 +286,7 @@ extension PickerView
 
         // 更新标签显示的值
 //        updateValueLabel()
-        print("当前值: \(String(describing: hourCnt))")
+        LSLog("当前值: \(String(describing: hourCnt))")
     }
 }
 

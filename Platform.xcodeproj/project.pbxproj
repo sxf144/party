@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0F07B9042AD187C7009B5FFB /* IMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F07B9032AD187C7009B5FFB /* IMManager.swift */; };
 		0F0D428B2AD4211600E65306 /* LIMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0D428A2AD4211600E65306 /* LIMModel.swift */; };
+		0F0F75892B1C8905009C948A /* BaseAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0F75882B1C8905009C948A /* BaseAlertController.swift */; };
 		0F2CBB2B2B16EC5600D976C0 /* QueryRedPacketResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2CBB2A2B16EC5600D976C0 /* QueryRedPacketResp.swift */; };
 		0F2CBB2D2B16F34800D976C0 /* RedPacketDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2CBB2C2B16F34800D976C0 /* RedPacketDetailController.swift */; };
 		0F37438E2B11F378008F6B31 /* WxOrderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37438D2B11F378008F6B31 /* WxOrderModel.swift */; };
@@ -77,7 +78,7 @@
 		0FA9406D2AEA646D009A10C9 /* ChatBottomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA9406C2AEA646D009A10C9 /* ChatBottomView.swift */; };
 		0FA940712AEA6D4E009A10C9 /* GiftView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA940702AEA6D4E009A10C9 /* GiftView.swift */; };
 		0FA9A9082B036CEA005D2780 /* FetchRedPacketResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA9A9072B036CE9005D2780 /* FetchRedPacketResp.swift */; };
-		0FA9A90A2B03770E005D2780 /* RedPacketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA9A9092B03770E005D2780 /* RedPacketManager.swift */; };
+		0FA9A90A2B03770E005D2780 /* SimpleDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA9A9092B03770E005D2780 /* SimpleDataManager.swift */; };
 		0FAAB0C52AE619CF003B8DE4 /* GroupTipsMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAAB0C42AE619CF003B8DE4 /* GroupTipsMessageCell.swift */; };
 		0FAAB0C72AE64E27003B8DE4 /* ImageMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAAB0C62AE64E27003B8DE4 /* ImageMessageCell.swift */; };
 		0FAAB0C92AE679C5003B8DE4 /* RedPacketMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAAB0C82AE679C5003B8DE4 /* RedPacketMessageCell.swift */; };
@@ -152,6 +153,10 @@
 		0FBDBACA2AE00B7900E0A0CB /* SysMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBDBAC92AE00B7900E0A0CB /* SysMessageCell.swift */; };
 		0FCDD2002B0CD9CB00F720F3 /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCDD1FF2B0CD9CB00F720F3 /* InputViewController.swift */; };
 		0FD8D0AB2AFF2E8500FB0915 /* SendRedPacketController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */; };
+		0FDC58F52B1F142700022ABA /* CashOutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F42B1F142700022ABA /* CashOutController.swift */; };
+		0FDC58FA2B1F2D3800022ABA /* CashOutLogModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F72B1F2D3800022ABA /* CashOutLogModel.swift */; };
+		0FDC58FB2B1F2D3800022ABA /* CashOutLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F92B1F2D3800022ABA /* CashOutLogCell.swift */; };
+		0FDC58FD2B1F3DCE00022ABA /* CashOutLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58FC2B1F3DCE00022ABA /* CashOutLogController.swift */; };
 		0FDD98262AF0F49200EBA619 /* GameRoundListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD98252AF0F49200EBA619 /* GameRoundListController.swift */; };
 		0FDD98282AF0FA1300EBA619 /* GameCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD98272AF0FA1300EBA619 /* GameCardCell.swift */; };
 		0FE2DB972B1764D300826222 /* RedPacketLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE2DB962B1764D200826222 /* RedPacketLogCell.swift */; };
@@ -245,6 +250,7 @@
 /* Begin PBXFileReference section */
 		0F07B9032AD187C7009B5FFB /* IMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMManager.swift; sourceTree = "<group>"; };
 		0F0D428A2AD4211600E65306 /* LIMModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LIMModel.swift; sourceTree = "<group>"; };
+		0F0F75882B1C8905009C948A /* BaseAlertController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAlertController.swift; sourceTree = "<group>"; };
 		0F2CBB2A2B16EC5600D976C0 /* QueryRedPacketResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryRedPacketResp.swift; sourceTree = "<group>"; };
 		0F2CBB2C2B16F34800D976C0 /* RedPacketDetailController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedPacketDetailController.swift; sourceTree = "<group>"; };
 		0F37438D2B11F378008F6B31 /* WxOrderModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WxOrderModel.swift; sourceTree = "<group>"; };
@@ -313,7 +319,7 @@
 		0FA9406C2AEA646D009A10C9 /* ChatBottomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatBottomView.swift; sourceTree = "<group>"; };
 		0FA940702AEA6D4E009A10C9 /* GiftView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftView.swift; sourceTree = "<group>"; };
 		0FA9A9072B036CE9005D2780 /* FetchRedPacketResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchRedPacketResp.swift; sourceTree = "<group>"; };
-		0FA9A9092B03770E005D2780 /* RedPacketManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedPacketManager.swift; sourceTree = "<group>"; };
+		0FA9A9092B03770E005D2780 /* SimpleDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDataManager.swift; sourceTree = "<group>"; };
 		0FA9A90B2B039FA5005D2780 /* Platform.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Platform.entitlements; sourceTree = "<group>"; };
 		0FAAB0C42AE619CF003B8DE4 /* GroupTipsMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupTipsMessageCell.swift; sourceTree = "<group>"; };
 		0FAAB0C62AE64E27003B8DE4 /* ImageMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageMessageCell.swift; sourceTree = "<group>"; };
@@ -390,6 +396,10 @@
 		0FBDBAC92AE00B7900E0A0CB /* SysMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SysMessageCell.swift; sourceTree = "<group>"; };
 		0FCDD1FF2B0CD9CB00F720F3 /* InputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
 		0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendRedPacketController.swift; sourceTree = "<group>"; };
+		0FDC58F42B1F142700022ABA /* CashOutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutController.swift; sourceTree = "<group>"; };
+		0FDC58F72B1F2D3800022ABA /* CashOutLogModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutLogModel.swift; sourceTree = "<group>"; };
+		0FDC58F92B1F2D3800022ABA /* CashOutLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutLogCell.swift; sourceTree = "<group>"; };
+		0FDC58FC2B1F3DCE00022ABA /* CashOutLogController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutLogController.swift; sourceTree = "<group>"; };
 		0FDD98252AF0F49200EBA619 /* GameRoundListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameRoundListController.swift; sourceTree = "<group>"; };
 		0FDD98272AF0FA1300EBA619 /* GameCardCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameCardCell.swift; sourceTree = "<group>"; };
 		0FE2DB962B1764D200826222 /* RedPacketLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RedPacketLogCell.swift; sourceTree = "<group>"; };
@@ -503,6 +513,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0F0F75852B1C8905009C948A /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				0F0F75862B1C8905009C948A /* CustomAlert */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		0F0F75862B1C8905009C948A /* CustomAlert */ = {
+			isa = PBXGroup;
+			children = (
+				0F0F75872B1C8905009C948A /* Controller */,
+			);
+			path = CustomAlert;
+			sourceTree = "<group>";
+		};
+		0F0F75872B1C8905009C948A /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				0F0F75882B1C8905009C948A /* BaseAlertController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
 		0F15E13D2AD2D89C009D1A58 /* IM */ = {
 			isa = PBXGroup;
 			children = (
@@ -940,10 +974,10 @@
 		0FB10E2E2AF88BEE00E64777 /* KeyboardCore */ = {
 			isa = PBXGroup;
 			children = (
+				0FB10E352AF88BEE00E64777 /* ChatKeyboardView.swift */,
 				0FB10E2F2AF88BEE00E64777 /* ChatMoreMenuView.swift */,
 				0FB10E302AF88BEE00E64777 /* ChatEmojiListView.swift */,
 				0FB10E312AF88BEE00E64777 /* Cell */,
-				0FB10E352AF88BEE00E64777 /* ChatKeyboardView.swift */,
 				0FB10E362AF88BEE00E64777 /* Model */,
 				0FB10E392AF88BEE00E64777 /* ChatKeyboard+Extensions.swift */,
 				0FB10E3A2AF88BEE00E64777 /* ChatGrowingTextView.swift */,
@@ -1177,6 +1211,41 @@
 			path = Controller;
 			sourceTree = "<group>";
 		};
+		0FDC58F02B1F140700022ABA /* CashOut */ = {
+			isa = PBXGroup;
+			children = (
+				0FDC58F12B1F140700022ABA /* Controller */,
+				0FDC58F62B1F2D3800022ABA /* Model */,
+				0FDC58F82B1F2D3800022ABA /* View */,
+			);
+			path = CashOut;
+			sourceTree = "<group>";
+		};
+		0FDC58F12B1F140700022ABA /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				0FDC58FC2B1F3DCE00022ABA /* CashOutLogController.swift */,
+				0FDC58F42B1F142700022ABA /* CashOutController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		0FDC58F62B1F2D3800022ABA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				0FDC58F72B1F2D3800022ABA /* CashOutLogModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		0FDC58F82B1F2D3800022ABA /* View */ = {
+			isa = PBXGroup;
+			children = (
+				0FDC58F92B1F2D3800022ABA /* CashOutLogCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		0FE2DB932B1764A200826222 /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -1257,6 +1326,8 @@
 		0FEBF58F2A9D8F3C00CB43BF /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				0FDC58F02B1F140700022ABA /* CashOut */,
+				0F0F75852B1C8905009C948A /* Common */,
 				0FE2DBA42B19B20A00826222 /* Report */,
 				0FFF00012B07561F0072FCFA /* My */,
 				0FD8D0A82AFF2D3200FB0915 /* RedPacket */,
@@ -1525,7 +1596,7 @@
 			isa = PBXGroup;
 			children = (
 				0F3743A52B148856008F6B31 /* WXApiManager.swift */,
-				0FA9A9092B03770E005D2780 /* RedPacketManager.swift */,
+				0FA9A9092B03770E005D2780 /* SimpleDataManager.swift */,
 				0F07B9032AD187C7009B5FFB /* IMManager.swift */,
 				0F4F3EF72AAB2176000AF5BD /* MyLocationManager.swift */,
 				49FBBF95268DA6D2000C851E /* Network */,
@@ -1899,7 +1970,7 @@
 				49FBBFBB268DA772000C851E /* PhoneLoginController.swift in Sources */,
 				0FA0B0482ACD5C54001F20DB /* FollowListResp.swift in Sources */,
 				0F8E1BC22ACBDFA800C67D62 /* ParticipateResp.swift in Sources */,
-				0FA9A90A2B03770E005D2780 /* RedPacketManager.swift in Sources */,
+				0FA9A90A2B03770E005D2780 /* SimpleDataManager.swift in Sources */,
 				49FBBF83268DA6A5000C851E /* NSString+LSAdd.m in Sources */,
 				0FA0B0472ACD5C54001F20DB /* FollowListController.swift in Sources */,
 				0F4DFE912AEF94B200DD158A /* RechargeView.swift in Sources */,
@@ -1933,6 +2004,7 @@
 				0FFF00102B0B778F0072FCFA /* SupplyUserController.swift in Sources */,
 				0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */,
 				0FB10E742AF88BEE00E64777 /* ChatKeyboardView.swift in Sources */,
+				0FDC58FB2B1F2D3800022ABA /* CashOutLogCell.swift in Sources */,
 				49FBBF7C268DA6A5000C851E /* UIFont+Extension.swift in Sources */,
 				0FA940672AE9432F009A10C9 /* DefaultMessageCell.swift in Sources */,
 				49FBBF81268DA6A5000C851E /* UIView+Extension.swift in Sources */,
@@ -1954,6 +2026,7 @@
 				0F37439A2B123160008F6B31 /* GiftLogCell.swift in Sources */,
 				0F4DFE9C2AF0B23800DD158A /* GameRoundListResp.swift in Sources */,
 				49FBBFA5268DA6D2000C851E /* LSNotification.swift in Sources */,
+				0FDC58FD2B1F3DCE00022ABA /* CashOutLogController.swift in Sources */,
 				0F2CBB2B2B16EC5600D976C0 /* QueryRedPacketResp.swift in Sources */,
 				49FBBFB9268DA772000C851E /* LoginController.swift in Sources */,
 				0F8E1BC02ACBABE500C67D62 /* CommentCell.swift in Sources */,
@@ -1974,6 +2047,7 @@
 				0F8E1BB22AC9213E00C67D62 /* PublishPartyController.swift in Sources */,
 				49FBBFA4268DA6D2000C851E /* LoginManager.swift in Sources */,
 				0FE2DBA22B1867F800826222 /* FansListResp.swift in Sources */,
+				0F0F75892B1C8905009C948A /* BaseAlertController.swift in Sources */,
 				0FB10EA62AF88BEE00E64777 /* ChatEmotionAttachment.swift in Sources */,
 				49FBBFD5268DA77A000C851E /* RespModel.swift in Sources */,
 				49FBBFD3268DA77A000C851E /* DatePickerController.swift in Sources */,
@@ -1992,6 +2066,7 @@
 				0F76D9F02AD05FBD0031DADE /* MyHistoryPartyCell.swift in Sources */,
 				0F3743A22B132FC8008F6B31 /* CardTaskView.swift in Sources */,
 				0FAAB0CB2AE6837C003B8DE4 /* GiftMessageCell.swift in Sources */,
+				0FDC58FA2B1F2D3800022ABA /* CashOutLogModel.swift in Sources */,
 				0F76D9EC2ACFBB4F0031DADE /* MyPartyController.swift in Sources */,
 				0F4338F72ACC8C320014F0C5 /* SubCommentCell.swift in Sources */,
 				0FB10EC92AF89B3500E64777 /* FYDarkTheme.swift in Sources */,
@@ -2040,6 +2115,7 @@
 				0FCDD2002B0CD9CB00F720F3 /* InputViewController.swift in Sources */,
 				0FB10EA42AF88BEE00E64777 /* ChatFindEmotion.swift in Sources */,
 				0FA647182AF3C28B00AC5787 /* GameUserTwoCell.swift in Sources */,
+				0FDC58F52B1F142700022ABA /* CashOutController.swift in Sources */,
 				0FA9A9082B036CEA005D2780 /* FetchRedPacketResp.swift in Sources */,
 				0FBDBABE2ADFEB1D00E0A0CB /* ConversationCell.swift in Sources */,
 				0F6138242AA6DA1700E5DB1A /* RecommendController.swift in Sources */,

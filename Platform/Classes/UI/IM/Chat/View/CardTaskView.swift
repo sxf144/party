@@ -13,7 +13,7 @@ class CardTaskView: UIView {
     
     static let shared = CardTaskView(frame: CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH))
     /// 回调闭包
-    public var cardTaskBlock: ((_ limMsg:LIMMessage) -> ())?
+    public var cardTaskBlock: (() -> ())?
     let CardImageDefault: UIImage = UIImage(named: "card_item_bg")!
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
@@ -98,8 +98,8 @@ extension CardTaskView {
     // 发红包逃避任务
     @objc fileprivate func clickRedPacketBtn(_ sender:UIButton) {
         LSLog("clickRedPacketBtn")
-        if let cardTaskBlock = cardTaskBlock, let limMsg = limMsg {
-            cardTaskBlock(limMsg)
+        if let cardTaskBlock = cardTaskBlock {
+            cardTaskBlock()
             removeTaskView()
         }
     }
@@ -142,6 +142,10 @@ extension CardTaskView {
             self.bgView.alpha = 0.6
             self.contentView.alpha = 1.0
         }
+        
+        // 创建一个震动反馈生成器
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.impactOccurred()
     }
     
     /// 移除 view

@@ -22,6 +22,7 @@ class RecommendCell: UITableViewCell {
     let RightToolHeight = 240.0
     let InfoAreaHeight = 100.0
     var item: RecommendItem?
+    var coverImage: UIImage?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -201,12 +202,29 @@ extension RecommendCell {
         
         // coverType 1、图片，2、视频
         if (item?.coverType == CoverType.image.rawValue) {
-            videoImageView.kf.setImage(with: URL(string: item?.cover ?? ""))
+            videoImageView.kf.setImage(with: URL(string: item?.cover ?? "")) { result in
+                switch result {
+                case .success(let value):
+                    LSLog("cover load succ")
+                    self.coverImage = value.image
+                case .failure(let error):
+                    LSLog("cover load error:\(error)")
+                }
+            }
             avPlayerLayer.isHidden = true
             videoImageView.isHidden = false
         } else if (item?.coverType == CoverType.video.rawValue) {
             avPlayerLayer.isHidden = false
             videoImageView.isHidden = true
+            videoImageView.kf.setImage(with: URL(string: item?.coverThumbnail ?? "")) { result in
+                switch result {
+                case .success(let value):
+                    LSLog("coverThumbnail load succ")
+                    self.coverImage = value.image
+                case .failure(let error):
+                    LSLog("coverThumbnail load error:\(error)")
+                }
+            }
             avPlayerLayer.frame = contentView.bounds
             if let videoURL = URL(string: item?.cover ?? "") {
                 // 创建AVPlayerItem，加载视频，但此处不播放
@@ -241,7 +259,14 @@ extension RecommendCell {
     }
     
     @objc func clickShareBtn(_ sender:UIButton) {
-        
+        // 分享
+        if let reItem = item, let cImage = coverImage {
+            let title = "邀请你加入\(reItem.playName)"
+//            let desc = item.ti
+            let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(reItem.uniqueCode)"
+            
+            WXApiManager.shared.shareToWX(title, description: "", pageUrl: pageUrl, image: cImage)
+        }
     }
     
     @objc func clickAddressBtn(_ sender:UIButton) {

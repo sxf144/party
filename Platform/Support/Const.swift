@@ -87,6 +87,11 @@ let LUIKit_Video_Path = LUIKit_DB_Path.appendingPathComponent("video")
 let LUIKit_Voice_Path = LUIKit_DB_Path.appendingPathComponent("voice")
 let LUIKit_File_Path = LUIKit_DB_Path.appendingPathComponent("file")
 
+let UNIVERSAL_LINK = "https://static.juzitang.net"
+
 /// 红包领取记录
 let REDPACKET_RECORD = "redpacket_record"
+
+/// 私聊限制
+let C2C_RECORD = "c2c_record"
 

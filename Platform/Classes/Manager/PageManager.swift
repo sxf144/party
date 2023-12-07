@@ -62,10 +62,10 @@ class PageManager: NSObject {
     }
     
     /// 发布成功
-    func pushToPublishSucc(_ uniqueCode:String, startTime:String, endTime:String) {
+    func pushToPublishSucc(_ uniqueCode:String, startTime:String, endTime:String, name:String, cover:UIImage?) {
         let vc = PublishSuccController()
         vc.hidesBottomBarWhenPushed = true
-        vc.setData(startTime: startTime, endTime: endTime, uniqueCode: uniqueCode)
+        vc.setData(startTime: startTime, endTime: endTime, uniqueCode: uniqueCode, name: name, cover:cover)
         currentNav()?.pushViewController(vc, animated: true)
     }
     
@@ -176,7 +176,6 @@ class PageManager: NSObject {
     /// 我的钱包
     func pushToMyBagController(_ userPageData:UserPageModel) {
         let vc = MyBagController()
-        vc.setData(userPageData)
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -198,6 +197,20 @@ class PageManager: NSObject {
     /// 礼物记录
     func pushToGiftLogController() {
         let vc = GiftLogController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 提现记录
+    func pushToCashOutLogController() {
+        let vc = CashOutLogController()
+        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 提现
+    func pushToCashOutController() {
+        let vc = CashOutController()
         vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }

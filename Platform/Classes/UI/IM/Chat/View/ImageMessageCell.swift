@@ -147,7 +147,9 @@ extension ImageMessageCell {
     // 点击重新发送
     @objc fileprivate func clickReSendBtn(_ sender:UIButton) {
         LSLog("clickReSendBtn")
-        delegate?.reSend(item)
+        if let delegate = delegate {
+            delegate.reSend(item)
+        }
     }
     
     // 点击用户头像

@@ -74,6 +74,7 @@ extension StepView {
         
         count -= 1
         countLabel.text = String(count)
+        countLabel.sizeToFit()
         // 回调闭包
         if let actionBlock = actionBlock {
             actionBlock(count)
@@ -83,6 +84,7 @@ extension StepView {
     @objc func clickRightBtn(_ sender:UIButton) {
         count += 1
         countLabel.text = String(count)
+        countLabel.sizeToFit()
         // 回调闭包
         if let actionBlock = actionBlock {
             actionBlock(count)

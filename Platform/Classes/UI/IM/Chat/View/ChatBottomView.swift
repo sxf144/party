@@ -12,7 +12,6 @@ import SnapKit
 class ChatBottomView: UIView {
     
     let xMargin: CGFloat = 16.0
-    let yMargin: CGFloat = 10.0
     let inputHeight: CGFloat = 40.0
     var uniqueCode: String = ""
     var userId: String = ""
@@ -32,6 +31,16 @@ class ChatBottomView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    fileprivate lazy var statusLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer16
+        label.textColor = UIColor.ls_color("#aaaaaa")
+        label.text = "此群已解散"
+        label.sizeToFit()
+        label.isHidden = true
+        return label
+    }()
     
     // inputBtn
     fileprivate lazy var inputBtn: UIButton = {
@@ -94,24 +103,64 @@ extension ChatBottomView {
     
     public func setUserId(_ userId:String) {
         self.userId = userId
-        resetGameBtn()
+        resetUI()
     }
     
     public func setUniCode(_ uniCode:String) {
         uniqueCode = uniCode
-        resetGameBtn()
+        resetUI()
     }
     
     public func setPartyDetail(_ detail:PartyDetailModel?) {
         partyDetail = detail
+        
+        //
+        resetUI()
     }
     
-    public func resetGameBtn() {
+    public func resetUI() {
+        
+        if let party = partyDetail {
+            // 已经解散或者已经结束
+            if party.state == 2 || party.state == 3 {
+                statusLabel.isHidden = false
+                statusLabel.text = party.state == 2 ? "此群已解散" : "此群已结束"
+                statusLabel.sizeToFit()
+                
+                inputBtn.isHidden = true
+                gameBtn.isHidden = true
+                redPacketBtn.isHidden = true
+                giftBtn.isHidden = true
+                return
+            } else {
+                statusLabel.isHidden = true
+                
+                inputBtn.isHidden = false
+                gameBtn.isHidden = false
+                redPacketBtn.isHidden = false
+                giftBtn.isHidden = false
+            }
+        }
+        
         // 判断是否群组，群组可以开启游戏，私聊隐藏游戏按钮
         if userId.isEmpty {
             gameBtn.isHidden = false
+            
+            inputBtn.snp.remakeConstraints { (make) in
+                make.left.equalToSuperview().offset(xMargin)
+                make.centerY.equalTo(giftBtn)
+                make.height.equalTo(inputHeight)
+                make.right.equalTo(gameBtn.snp.left).offset(-10)
+            }
         } else {
             gameBtn.isHidden = true
+            
+            inputBtn.snp.remakeConstraints { (make) in
+                make.left.equalToSuperview().offset(xMargin)
+                make.centerY.equalTo(giftBtn)
+                make.height.equalTo(inputHeight)
+                make.right.equalTo(redPacketBtn.snp.left).offset(-10)
+            }
         }
     }
     
@@ -173,18 +222,43 @@ extension ChatBottomView {
     
     fileprivate func setupUI() {
         
+        self.addSubview(statusLabel)
+        self.addSubview(giftBtn)
+        self.addSubview(redPacketBtn)
+        self.addSubview(gameBtn)
         self.addSubview(inputBtn)
         inputBtn.addSubview(imageBtn)
         inputBtn.addSubview(placeLabel)
-        self.addSubview(gameBtn)
-        self.addSubview(redPacketBtn)
-        self.addSubview(giftBtn)
+        
+        
+        statusLabel.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(16)
+            make.centerX.equalToSuperview()
+        }
+        
+        giftBtn.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(16)
+            make.right.equalToSuperview().offset(-xMargin)
+            make.size.equalTo(CGSize(width: 28, height: 28))
+        }
+        
+        redPacketBtn.snp.makeConstraints { (make) in
+            make.right.equalTo(giftBtn.snp.left).offset(-8)
+            make.centerY.equalTo(giftBtn)
+            make.size.equalTo(CGSize(width: 28, height: 28))
+        }
+        
+        gameBtn.snp.makeConstraints { (make) in
+            make.right.equalTo(redPacketBtn.snp.left).offset(-8)
+            make.centerY.equalTo(giftBtn)
+            make.size.equalTo(CGSize(width: 28, height: 28))
+        }
         
         inputBtn.snp.makeConstraints { (make) in
             make.left.equalToSuperview().offset(xMargin)
-            make.top.equalToSuperview().offset(yMargin)
+            make.centerY.equalTo(giftBtn)
             make.height.equalTo(inputHeight)
-            make.width.equalTo(230)
+            make.right.equalTo(gameBtn.snp.left).offset(-10)
         }
         
         imageBtn.snp.makeConstraints { (make) in
@@ -196,21 +270,6 @@ extension ChatBottomView {
         placeLabel.snp.makeConstraints { (make) in
             make.left.equalTo(imageBtn.snp.right).offset(10)
             make.centerY.equalToSuperview()
-        }
-        
-        gameBtn.snp.makeConstraints { (make) in
-            make.left.equalTo(inputBtn.snp.right).offset(10)
-            make.centerY.equalTo(inputBtn)
-        }
-        
-        redPacketBtn.snp.makeConstraints { (make) in
-            make.left.equalTo(gameBtn.snp.right).offset(8)
-            make.centerY.equalTo(inputBtn)
-        }
-        
-        giftBtn.snp.makeConstraints { (make) in
-            make.left.equalTo(redPacketBtn.snp.right).offset(8)
-            make.centerY.equalTo(inputBtn)
         }
     }
 }

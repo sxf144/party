@@ -110,7 +110,7 @@ extension LoginController {
 extension LoginController: ASAuthorizationControllerDelegate {
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+        if authorization.credential is ASAuthorizationAppleIDCredential {
             // 这里可以使用用户的标识符进行身份验证，或者将其与你的用户系统进行关联
             switch authorization.credential {
                 case let appleIDCredential as ASAuthorizationAppleIDCredential:
@@ -157,6 +157,8 @@ extension LoginController: ASAuthorizationControllerDelegate {
                 default:
                     break
                 }
+        } else {
+            // 暂不处理
         }
     }
 

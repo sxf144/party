@@ -154,7 +154,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // 创建并返回一个tabbar控制器
     func createTabBarController() -> TabBarController {
-        let tabBarController = TabBarController()
+        let tabBarController = TabBarController.shared
         // 在这里配置你的tabbar控制器，添加需要的视图控制器和标签项
         return tabBarController
     }

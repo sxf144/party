@@ -9,6 +9,8 @@
 import UIKit
 
 class TabBarController: UITabBarController {
+    
+    static let shared = TabBarController()
 
     let kColorTabNormal: UIColor = UIColor.ls_color("#2F1557");
     let kColorTabSelected: UIColor = UIColor.ls_color("#2F1557");
@@ -27,7 +29,20 @@ class TabBarController: UITabBarController {
          设置tintColor以解决tabbar按钮文字颜色被渲染为蓝色的问题
          在iOS7中，UIView新增了一个属性tintColor，被使用在UIView中改变应用程序的外观的。默认tintColor的值为nil，这表示它将会运用父视图层次的颜色来进行着色。如果父视图中没有设置tintColor，那么默认系统就会使用蓝色。
          */
-        self.tabBar.tintColor = kColorTabSelected
+        tabBar.tintColor = kColorTabSelected
+    }
+    
+    func addBadge(index: Int, value: String?) {
+        guard let tabItems = tabBar.items, index < tabItems.count else {
+            return
+        }
+        
+        let tabItem = tabItems[index]
+        if value == "0" {
+            tabItem.badgeValue = nil
+        } else {
+            tabItem.badgeValue = value
+        }
     }
 }
 

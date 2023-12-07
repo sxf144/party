@@ -81,7 +81,7 @@ class ChatKeyboardView: UIView {
     
     /// 文本输入框
     fileprivate lazy var chatTextView: ChatGrowingTextView = {
-        let w: CGFloat = kScreenW - self.kViewWH * 2 - self.kSpace * 3 - self.kSpace
+        let w: CGFloat = kScreenW - self.kSpace * 2
         let textView = ChatGrowingTextView(frame: CGRect(x: self.kSpace, y: self.kSpace, width: w, height: self.kViewWH))
         textView.placeholder = "请输入..."
         textView.theme.textColor = themed { $0.FYColor_Main_TextColor_V1 }
@@ -157,8 +157,8 @@ class ChatKeyboardView: UIView {
         self.isUserInteractionEnabled = true
         
         addSubview(toolBarView)
-        toolBarView.addSubview(moreButton)
-        toolBarView.addSubview(emojiButton)
+//        toolBarView.addSubview(moreButton)
+//        toolBarView.addSubview(emojiButton)
         toolBarView.addSubview(chatTextView)
         toolBarView.addSubview(topLineView)
         toolBarView.addSubview(bottomLineView)
@@ -466,8 +466,8 @@ extension ChatKeyboardView {
         
         let spaceY = toolBarView.frame.height - kSpace - kViewWH
         chatTextView.frame = CGRect(x: chatTextView.frame.origin.x, y: chatTextView.frame.origin.x, width: chatTextView.frame.width, height: textHeight)
-        moreButton.frame = CGRect(x: moreButton.frame.origin.x, y: spaceY, width: moreButton.frame.width, height: moreButton.frame.height)
-        emojiButton.frame = CGRect(x: emojiButton.frame.origin.x, y: spaceY, width: emojiButton.frame.width, height: emojiButton.frame.height)
+//        moreButton.frame = CGRect(x: moreButton.frame.origin.x, y: spaceY, width: moreButton.frame.width, height: moreButton.frame.height)
+//        emojiButton.frame = CGRect(x: emojiButton.frame.origin.x, y: spaceY, width: emojiButton.frame.width, height: emojiButton.frame.height)
         
         contentView.frame = CGRect(x: contentView.frame.origin.x, y: toolBarView.frame.maxY, width: contentView.frame.width, height: contentHeight)
         

@@ -181,6 +181,7 @@ class UserPageController: BaseController {
 extension UserPageController {
     
     func setData(userId: String) {
+        LSLog("setData peopleId:\(userId)")
         peopleId = userId
     }
     
@@ -224,8 +225,16 @@ extension UserPageController {
         // 礼物
         giftNumLabel.text = String(userPageData.gift.recvGiftCnt)
         
-        // 关注按钮
-        refreshFollowBtn()
+        // 如果是自己，隐藏关注，私聊
+        if userInfo?.userId == userPageData.user.userId {
+            followBtn.isHidden = true
+            sendMsgBtn.isHidden = true
+        } else {
+            followBtn.isHidden = false
+            sendMsgBtn.isHidden = false
+            // 关注按钮
+            refreshFollowBtn()
+        }
     }
     
     func refreshFollowBtn() {
@@ -271,8 +280,8 @@ extension UserPageController {
     func handleReport() {
         // 选择举报理由
         let vc = ReportReasonListController()
-        vc.reasonConfirmBlock = { [self] reasonItem in
-            self.report(reasonItem)
+        vc.reasonConfirmBlock = { [weak self] reasonItem in
+            self?.report(reasonItem)
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
@@ -487,7 +496,7 @@ extension UserPageController {
         let leftImg = UIImage(named: "icon_back_white")
         let backImg = leftImg?.withRenderingMode(.alwaysOriginal)
         navigationView.leftButton.setImage(backImg, for: .normal)
-        let rightImg = UIImage(named: "icon_more_action")
+        let rightImg = UIImage(named: "icon_more_white")
         let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
         navigationView.rightButton.setImage(shareImg, for: .normal)
     }

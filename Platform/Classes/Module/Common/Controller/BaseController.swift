@@ -65,7 +65,7 @@ class BaseController: UIViewController {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
-        LSLog("释放了\(self)")
+        LSLog("---- deinit ---- \(self)")
     }
     
     /// 标题栏
@@ -74,6 +74,9 @@ class BaseController: UIViewController {
         view.titleLabel.text = title
         view.leftButton.addTarget(self, action: #selector(leftAction), for: .touchUpInside)
         view.rightButton.addTarget(self, action: #selector(rightAction), for: .touchUpInside)
+        let avatarTapGes = UITapGestureRecognizer(target: self, action: #selector(navAvatarDidClick))
+        view.avatar.addGestureRecognizer(avatarTapGes)
+        view.avatar.isUserInteractionEnabled = true
         view.isHidden = !showNavifationBar
         return view
     }()
@@ -99,6 +102,10 @@ extension BaseController: UINavigationControllerDelegate {
     @objc func rightAction(){
         
     }
+    
+    @objc func navAvatarDidClick() {
+        LSLog("navAvatarDidClick")
+    }
 }
 
 fileprivate extension BaseController{
@@ -111,5 +118,4 @@ fileprivate extension BaseController{
         UIGraphicsPopContext()
         return img
     }
-    
 }

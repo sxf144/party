@@ -27,7 +27,7 @@ class PublishPartyController: BaseController {
     var maleCnt: Int = 5
     var femaleCnt: Int = 5
     var selectGameItem: GameItem = GameListResp.defaultGameItem()
-    var coverImage: UIImage!
+    var coverImage: UIImage?
     var coverUrl: String = ""
     var publicType: Int64 = 1
     var locationItem: AMapPOI?
@@ -39,6 +39,8 @@ class PublishPartyController: BaseController {
         
         // 初始化条件
         clickType1Btn(type1Btn)
+        // 弹出照片选择
+        imageTapped()
     }
     
     // scrollView
@@ -83,7 +85,7 @@ class PublishPartyController: BaseController {
     // 创建占位文本的UILabel
     fileprivate lazy var introducePlaceHolderLabel: UILabel = {
         let label = UILabel()
-        label.text = "添加描述..."
+        label.text = "简单介绍一下~"
         label.textColor = UIColor.ls_color("#aaaaaa") // 自定义字体颜色
         label.font = UIFont.ls_font(14) // 自定义字体
         
@@ -176,7 +178,10 @@ class PublishPartyController: BaseController {
     
     // 创建时间选择器
     fileprivate lazy var pickerView: PickerView = {
-        let pickerView = PickerView(frame: self.view.frame, minDate: nil, maxDate: nil, selectDate: nil, showOnlyValidDates: true)
+        // 最小时间为当前时间+10分钟，最大时间为当前+14天
+        let minDate = Date(timeIntervalSinceReferenceDate: Date().timeIntervalSinceReferenceDate + 600)
+        let maxDate = Date(timeIntervalSinceReferenceDate: Date().timeIntervalSinceReferenceDate + 14*24*3600)
+        let pickerView = PickerView(frame: self.view.frame, minDate: minDate, maxDate: maxDate, selectDate: nil, showOnlyValidDates: true)
         return pickerView
     }()
     
@@ -307,9 +312,11 @@ class PublishPartyController: BaseController {
         view.count = femaleCnt
         view.iconName = "icon_female"
         view.initUI()
-        view.actionBlock = { count in
-            self.femaleCnt = count
-            self.personTitle.text = "总人数（\(self.femaleCnt + self.maleCnt)）"
+        view.actionBlock = { [weak self] count in
+            self?.femaleCnt = count
+            let total = self!.femaleCnt + self!.maleCnt
+            self?.personTitle.text = "总人数（\(total)）"
+            self?.personTitle.sizeToFit()
         }
         
         return view
@@ -321,9 +328,11 @@ class PublishPartyController: BaseController {
         view.count = maleCnt
         view.iconName = "icon_male"
         view.initUI()
-        view.actionBlock = { count in
-            self.maleCnt = count
-            self.personTitle.text = "总人数（\(self.femaleCnt + self.maleCnt)）"
+        view.actionBlock = { [weak self] count in
+            self?.maleCnt = count
+            let total = self!.femaleCnt + self!.maleCnt
+            self?.personTitle.text = "总人数（\(total)）"
+            self?.personTitle.sizeToFit()
         }
         
         return view
@@ -408,20 +417,27 @@ extension PublishPartyController {
         pickerView.showInWindow { [unowned self] (date, hourCnt) in
             LSLog("date:\(date), hourCnt:\(hourCnt)")
             let beginTimeStamp:Int? = Int(date.ls_timeStamp)
-            let endTimeStamp: TimeInterval = TimeInterval((beginTimeStamp ?? 0) + hourCnt*3600)
-            let endDate = Date(timeIntervalSince1970: endTimeStamp)
+            var endDate:Date?
+            
+            if hourCnt != 0 {
+                let endTimeStamp: TimeInterval = TimeInterval((beginTimeStamp ?? 0) + hourCnt*3600)
+                endDate = Date(timeIntervalSince1970: endTimeStamp)
+            }
             
             let dateFormat: String = "yyyy-MM-dd HH:mm:ss"
             let dateFormat1: String = "yyyy-MM-dd HH:mm"
             let dateFormat2: String = " HH:mm"
             let beginDateStr = date.ls_formatterStr(dateFormat1)
-            let endDateStr = endDate.ls_formatterStr(dateFormat2)
+            let endDateStr = endDate?.ls_formatterStr(dateFormat2)
             
             beginTime = date.ls_formatterStr(dateFormat)
-            endTime = endDate.ls_formatterStr(dateFormat)
+            endTime = endDate?.ls_formatterStr(dateFormat) ?? ""
             
-            LSLog("beginDate:\(beginDateStr), endDate:\(endDateStr)")
-            timeLabel.text = beginDateStr + "-" + endDateStr
+            LSLog("beginDate:\(beginDateStr), endDate:\(endDateStr ?? "")")
+            
+            // 展示时间
+            timeLabel.text = Date.formatDate(startTime: beginTime, endTime: endTime)
+            timeLabel.sizeToFit()
         }
     }
     
@@ -445,11 +461,11 @@ extension PublishPartyController {
         
         // 选择游戏类型
         let vc = GameListController()
-        vc.gameSelectedBlock = { [self] gameItem in
+        vc.gameSelectedBlock = { [weak self] gameItem in
             LSLog("gameSelectedBlock gameItem:\(gameItem)")
-            selectGameItem = gameItem
-            gameLabel.text = selectGameItem.name
-            gameLabel.sizeToFit()
+            self?.selectGameItem = gameItem
+            self?.gameLabel.text = self?.selectGameItem.name
+            self?.gameLabel.sizeToFit()
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
@@ -468,17 +484,19 @@ extension PublishPartyController {
         
         // 检查参数完毕，先上传图片到阿里oss
         LSHUD.showLoading()
-        OSSManager.shared.uploadData(coverImage) { [self] resp in
-            LSLog("uploadData resp:\(resp)")
-            if (resp.status == .success) {
-                // 刷新图片
-                coverUrl = resp.fullUrl
-                cover.kf.setImage(with: URL(string: coverUrl))
-                
-                // 发布
-                publishParty()
-            } else {
-                LSHUD.hide()
+        if let image = coverImage {
+            OSSManager.shared.uploadData(image) { [weak self] resp in
+                LSLog("uploadData resp:\(resp)")
+                if (resp.status == .success) {
+                    // 刷新图片
+                    self?.coverUrl = resp.fullUrl
+                    self?.cover.kf.setImage(with: URL(string: self?.coverUrl))
+                    
+                    // 发布
+                    self?.publishParty()
+                } else {
+                    LSHUD.hide()
+                }
             }
         }
     }
@@ -501,12 +519,13 @@ extension PublishPartyController {
         para["female_cnt"] = femaleCnt
         para["fee"] = Int64(feeTextField.text ?? "")
         
-        NetworkManager.shared.publishParty(para) { resp in
+        NetworkManager.shared.publishParty(para) { [weak self] resp in
             LSHUD.hide()
             if resp.status == .success {
                 LSLog("createPlay succ")
                 // 跳转到发布成功界面
-                PageManager.shared.pushToPublishSucc(resp.data.uniqueCode, startTime: resp.data.startTime, endTime: resp.data.endTime)
+                let name = "\(self?.userInfo?.nick ?? "")的桔"
+                PageManager.shared.pushToPublishSucc(resp.data.uniqueCode, startTime: resp.data.startTime, endTime: resp.data.endTime, name: name, cover: self?.coverImage ?? nil)
                 // 发送局状态变更通知
                 LSNotification.postPartyStatusChange()
             } else {
@@ -523,11 +542,11 @@ extension PublishPartyController {
             return false
         }
         
-        if (introduce.text.isEmpty) {
-            LSLog("checkParam introduce err")
-            LSHUD.showError("请添加描述")
-            return false
-        }
+//        if (introduce.text.isEmpty) {
+//            LSLog("checkParam introduce err")
+//            LSHUD.showError("请添加描述")
+//            return false
+//        }
         
         if (beginTime.isEmpty) {
             LSLog("checkParam beginTime err")
@@ -535,11 +554,11 @@ extension PublishPartyController {
             return false
         }
         
-        if (endTime.isEmpty) {
-            LSLog("checkParam endTime err")
-            LSHUD.showError("请选择时间")
-            return false
-        }
+//        if (endTime.isEmpty) {
+//            LSLog("checkParam endTime err")
+//            LSHUD.showError("请选择时间")
+//            return false
+//        }
         
         if ((locationItem == nil) || (locationItem?.location == nil)) {
             LSLog("checkParam locationItem err")

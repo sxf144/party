@@ -423,6 +423,27 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 提现记录
+    func getCashOutLogs(_ pageNum:Int64 = 1, pageSize:Int64 = 10, _ response: @escaping((CashOutLogResp) -> ()) ){
+        var para:[String:Any] = ["page_num": pageNum]
+        para["page_size"] = pageSize
+        Network.shared.httpGetRequest(path: "/settings/withdraw/get_logs", para: para) { (json) in
+            let resp = CashOutLogResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 提现
+    func cashOut(_ amount:Int64 = 0, zfbAccount:String = "", realName:String = "", _ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["amount": amount]
+        para["zfb_account"] = zfbAccount
+        para["real_name"] = realName
+        Network.shared.httpPostRequest(path: "/settings/withdraw/apply", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
     /// 获取第三方绑定
     func getExternalBind(_ response: @escaping((BindResp) -> ()) ){
         Network.shared.httpGetRequest(path: "/settings/get_external_bind", para: nil) { (json) in

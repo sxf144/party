@@ -179,6 +179,7 @@ extension RecommendController {
         } else {
             onGoingView.isHidden = false
             onGoingLabel.text = "正在参与" + (recommendData.ongoing?.name)! + "..."
+            onGoingLabel.sizeToFit()
         }
     }
 }

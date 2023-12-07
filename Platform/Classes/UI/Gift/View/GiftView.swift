@@ -133,7 +133,7 @@ class GiftView: UIView {
         let label = UILabel()
         label.font = kFontMedium12
         label.textColor = UIColor.ls_color("#aaaaaa")
-        label.text = String(userPageInfo?.user.coinBalance ?? 0) + " JZ币"
+        label.text = String(format: "%.2f JZ币", Double(userPageInfo?.user.coinBalance ?? 0)/100)
         label.sizeToFit()
         return label
     }()
@@ -175,7 +175,7 @@ extension GiftView {
     @objc func handleUserPageInfoChange(_ notification: Notification) {
         userPageInfo = LoginManager.shared.getUserPageInfo()
         // 更新代币值
-        coinLabel.text = String(userPageInfo?.user.coinBalance ?? 0) + " JZ币"
+        coinLabel.text = String(format: "%.2f JZ币", Double(userPageInfo?.user.coinBalance ?? 0)/100)
         coinLabel.sizeToFit()
     }
     
@@ -191,12 +191,12 @@ extension GiftView {
         // 选择成员
         let vc = ParticipateListController()
         vc.setData(uniqueCode, mutiSelect: false)
-        vc.selectedBlock = { items in
+        vc.selectedBlock = { [weak self] items in
             LSLog("selectedBlock items:\(items)")
             if items.count > 0 {
-                self.participateItem = items[0]
+                self?.participateItem = items[0]
                 // 刷新成员UI
-                self.handleSelectBtn()
+                self?.handleSelectBtn()
             }
         }
         vc.hidesBottomBarWhenPushed = true
@@ -241,17 +241,17 @@ extension GiftView {
             return
         }
         
-        NetworkManager.shared.sendGift(uniqueCode, peopleId:peopleId, giftId:item.id) { resp in
+        NetworkManager.shared.sendGift(uniqueCode, peopleId:peopleId, giftId:item.id) { [self] resp in
             LSLog("sendGift resp:\(String(describing: resp))")
             
             if resp.status == .success {
                 LSLog("sendGift succ")
-                self.userPageInfo?.user.coinBalance = resp.data.coinBalance
-                if let userPageInfo = self.userPageInfo {
+                userPageInfo?.user.coinBalance = resp.data.coinBalance
+                coinLabel.text = String(format: "%.2f JZ币", Double(userPageInfo?.user.coinBalance ?? 0)/100)
+                coinLabel.sizeToFit()
+                if let userPageInfo = userPageInfo {
                     LoginManager.shared.saveUserPageInfo(userPageInfo)
                 }
-                
-                self.removeGiftView()
             } else {
                 LSLog("sendGift fail")
                 LSHUD.showError(resp.msg)
@@ -295,7 +295,13 @@ extension GiftView {
             
             if resp.status == .success {
                 LSLog("getGiftList succ")
-                self.dataList = resp.data?.items ?? []
+                if let items = resp.data?.items {
+                    self.dataList = items
+                    if self.dataList.count >= 2 {
+                        self.dataList[1].selected = true
+                    }
+                }
+                
                 self.giftCollectionView.reloadData()
             } else {
                 LSLog("getGiftList fail")
@@ -315,10 +321,10 @@ extension GiftView: UICollectionViewDelegate, UICollectionViewDataSource, UIColl
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GiftCell", for: indexPath) as! GiftCell
         // 配置单元格的内容
         cell.configure(with: item)
-        cell.sendBlock = { sendItem in
+        cell.sendBlock = { [weak self] sendItem in
             LSLog("sendBlock item:\(sendItem)")
             // 发送礼物
-            self.sendGift(sendItem)
+            self?.sendGift(sendItem)
         }
         return cell
     }

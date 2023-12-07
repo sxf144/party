@@ -349,7 +349,7 @@ extension MapSearchController {
         navigationView.leftButton.titleLabel?.font = UIFont.ls_mediumFont(15)
         
         navigationView.rightButton.setImage(nil, for: .normal)
-        navigationView.rightButton.setTitle("发送", for: .normal)
+        navigationView.rightButton.setTitle("完成", for: .normal)
         navigationView.rightButton.setTitleColor(UIColor.ls_color("#ffffff"), for: .normal)
         navigationView.rightButton.titleLabel?.font = UIFont.ls_mediumFont(15)
         navigationView.rightButton.layer.cornerRadius = 8

@@ -649,7 +649,7 @@ class LIMModel: NSObject {
                             str = msg.gameElem?.action.roundInfo.title ?? ""
                             break
                         case .LIMGameStatusCard:
-                            str = "抽到了[\(String(describing: msg.gameElem?.action.cardInfo.name))]"
+                        str = "抽到了[\(msg.gameElem?.action.cardInfo.name ?? "")]"
                             break
                         case .LIMGameStatusRedPacket:
                             str = "请发红包"

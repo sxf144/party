@@ -21,6 +21,8 @@ class GameListResp: RespModel {
     static func defaultGameItem() -> GameItem {
         var gameItem = GameItem()
         gameItem.name = "无游戏/稍后选择"
+        gameItem.personCountMin = 2
+        gameItem.personCountMax = 20
         return gameItem
     }
 }

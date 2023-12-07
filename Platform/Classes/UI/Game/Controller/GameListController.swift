@@ -169,9 +169,9 @@ extension GameListController {
         
         let vc = GameRoundListController()
         vc.setData(gameItem)
-        vc.selectedBlock = { roundItems in
+        vc.selectedBlock = { [weak self] roundItems in
             LSLog("selectedBlock roundItems:\(roundItems)")
-            self.selectedRounds = roundItems
+            self?.selectedRounds = roundItems
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentVC()?.present(vc, animated: true, completion: nil)

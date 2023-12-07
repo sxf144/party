@@ -199,6 +199,10 @@ extension StoryTaskView {
             self.bgView.alpha = 0.6
             self.contentView.alpha = 1.0
         }
+        
+        // 创建一个震动反馈生成器
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.impactOccurred()
     }
     
     /// 移除 view

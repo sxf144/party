@@ -157,6 +157,10 @@ extension Date{
     
     static func formatDate(startTime: String?, endTime: String?) -> String {
         
+        guard let startTime = startTime, !startTime.isEmpty else {
+            return ""
+        }
+        
         // 时间
         let inputDateFormatter = DateFormatter()
         inputDateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -165,39 +169,53 @@ extension Date{
         var outputDateString1 = ""
         var outputDateString2 = ""
         var outputDateString3 = ""
-        if let startTime = startTime, let inputDate = inputDateFormatter.date(from: startTime ) {
-            // 创建另一个 DateFormatter 对象，用于将日期对象格式化为其他格式
-            let outputDateFormatter = DateFormatter()
-            outputDateFormatter.dateFormat = "MM月dd日"
-            
+        
+        if let inputDate1 = inputDateFormatter.date(from: startTime ) {
+            let outputDateFormatter1 = DateFormatter()
+            outputDateFormatter1.dateFormat = "MM-dd(E)"
             // 使用输出的 DateFormatter 格式化日期对象
-            outputDateString1 = outputDateFormatter.string(from: inputDate)
+            outputDateString1 = outputDateFormatter1.string(from: inputDate1)
+            let outputDateFormatter2 = DateFormatter()
+            outputDateFormatter2.dateFormat = "HH:mm"
+            // 使用输出的 DateFormatter 格式化日期对象
+            outputDateString2 = outputDateFormatter2.string(from: inputDate1)
+            
+            if let endTime = endTime, let inputDate2 = inputDateFormatter.date(from: endTime ) {
+                // 创建另一个 DateFormatter 对象，用于将日期对象格式化为其他格式
+                let outputDateFormatter = DateFormatter()
+                outputDateFormatter.dateFormat = "HH:mm"
+                
+                // 使用输出的 DateFormatter 格式化日期对象
+                outputDateString3 = outputDateFormatter.string(from: inputDate2)
+                
+                let calendar = Calendar.current
+                let components = calendar.dateComponents([.hour], from: inputDate1, to: inputDate2)
+                
+                if let hours = components.hour {
+                    outputDateString3 = "(\(hours)h)"
+                } else {
+                    outputDateString3 = ""
+                }
+                
+            } else {
+                outputDateString3 = ""
+            }
+            
         } else {
-            outputDateString1 = " "
+            outputDateString1 = ""
+            outputDateString2 = ""
+            outputDateString3 = ""
         }
         
-        if let startTime = startTime, let inputDate = inputDateFormatter.date(from: startTime ) {
-            // 创建另一个 DateFormatter 对象，用于将日期对象格式化为其他格式
-            let outputDateFormatter = DateFormatter()
-            outputDateFormatter.dateFormat = "HH:mm"
-            
-            // 使用输出的 DateFormatter 格式化日期对象
-            outputDateString2 = outputDateFormatter.string(from: inputDate)
-        } else {
-            outputDateString2 = " "
+        var finalDateStr = ""
+        if !outputDateString1.isEmpty {
+            if outputDateString3.isEmpty {
+                finalDateStr = outputDateString1 + " " + outputDateString2
+            } else {
+                finalDateStr = outputDateString1 + " " + outputDateString2 + " " + outputDateString3
+            }
         }
         
-        if let endTime = endTime, let inputDate = inputDateFormatter.date(from: endTime ) {
-            // 创建另一个 DateFormatter 对象，用于将日期对象格式化为其他格式
-            let outputDateFormatter = DateFormatter()
-            outputDateFormatter.dateFormat = "HH:mm"
-            
-            // 使用输出的 DateFormatter 格式化日期对象
-            outputDateString3 = outputDateFormatter.string(from: inputDate)
-        } else {
-            outputDateString3 = " "
-        }
-        
-        return outputDateString1 + " " + outputDateString2 + "-" + outputDateString3
+        return finalDateStr
     }
 }

@@ -21,7 +21,6 @@ class MyUserPageController: BaseController {
     var peopleId: String = ""
     var userPageData: UserPageModel = LoginManager.shared.getUserPageInfo() ?? UserPageModel()
     
-
     override func viewDidLoad() {
         showNavifationBar = false
         slideBackEnabled = false
@@ -48,6 +47,13 @@ class MyUserPageController: BaseController {
         imageView.clipsToBounds = true
         imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderBig)
         return imageView
+    }()
+    
+    // mask
+    fileprivate lazy var avatarMask: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.ls_color("#000000", alpha: 0.3)
+        return view
     }()
     
     // 扫码按钮
@@ -296,15 +302,19 @@ extension MyUserPageController {
         
         // 关注
         followNumLabel.text = String(userPageData.relation.followCnt)
+        followNumLabel.sizeToFit()
         
         // 粉丝
         fansNumLabel.text = String(userPageData.relation.fansCnt)
+        fansNumLabel.sizeToFit()
         
         // 礼物
         giftNumLabel.text = String(userPageData.gift.recvGiftCnt)
+        giftNumLabel.sizeToFit()
         
         // 余额
-        accountNumLabel.text = String(userPageData.user.coinBalance)
+        accountNumLabel.text = String(format: "%.2f", Double(userPageData.user.coinBalance)/100)
+        accountNumLabel.sizeToFit()
     }
     
     // 编辑资料
@@ -361,7 +371,7 @@ extension MyUserPageController: LBXScanViewControllerDelegate  {
     
     func scanFinished(scanResult: LBXScanResult, error: String?) {
         LSLog("scanFinished strScanned:\(scanResult.strScanned ?? "")")
-        if let str = scanResult.strScanned {
+        if scanResult.strScanned != nil {
             if let url = URL(string: scanResult.strScanned) {
                 if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) {
                     if urlComponents.path.contains("detail") {
@@ -389,6 +399,7 @@ extension MyUserPageController {
         
         view.addSubview(topView)
         topView.addSubview(avatar)
+        topView.addSubview(avatarMask)
         topView.addSubview(qrScanBtn)
         topView.addSubview(avatarSmall)
         topView.addSubview(nickLabel)
@@ -421,6 +432,10 @@ extension MyUserPageController {
         }
 
         avatar.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
+        avatarMask.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
         

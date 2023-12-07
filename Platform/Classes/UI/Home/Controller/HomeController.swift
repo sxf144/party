@@ -23,24 +23,52 @@ class HomeController: BaseController {
         slideBackEnabled = false
         super.viewDidLoad()
         
-        self.view.backgroundColor = .black
+        view.backgroundColor = .black
         
         // 初始化controllers
         setupControllers()
         
+        // 添加监听
+        addObservers()
+        
         // checkToken
 //        LoginManager.shared.login()
         LoginManager.shared.refreshToken()
-        // 拉取自己的个人主页信息，主要为了获取代币信息
-        
+        // 加载数据
+        loadData()
     }
-    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         segmentedView.frame = CGRect(x: 0, y: 44, width: view.bounds.size.width, height: 50)
         listContainerView.frame = CGRect(x: 0, y: 0, width: view.bounds.size.width, height: view.bounds.size.height - kTabBarHeight)
+    }
+}
+
+extension HomeController {
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLogin(_:)), name: NotificationName.loginSuccess, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLogout(_:)), name: NotificationName.logoutSuccess, object: nil)
+    }
+    
+    @objc func handleLogin(_ notification: Notification) {
+        // 登录成功，重新加载数据
+        loadData()
+    }
+    
+    @objc func handleLogout(_ notification: Notification) {
+        // 退出登录
+    }
+    
+    func loadData() {
+        // 拉取自己的个人主页信息，主要为了获取代币信息
+        LoginManager.shared.getUserPage()
+        // 刷新会话信息，获取未读数
+        IMManager.shared.loadConversationList {
+            
+        }
     }
 }
 

@@ -194,6 +194,7 @@ extension FollowListController {
         
         if needSelect {
             navigationView.titleLabel.text = "邀请"
+            navigationView.titleLabel.sizeToFit()
             navigationView.rightButton.setImage(nil, for: .normal)
             navigationView.rightButton.setTitle("完成（0）", for: .normal)
             navigationView.rightButton.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)

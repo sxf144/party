@@ -17,7 +17,6 @@ class ChatController: BaseController {
     // chatKeyBoard
     private let kToolBarLastH: CGFloat = 52
     
-//    let CellHeight = 80.0
     let PageCount: UInt = 20
     var conversation: LIMConversation = LIMConversation()
     var dataList: [LIMMessage] = []
@@ -31,7 +30,6 @@ class ChatController: BaseController {
     let myUserInfo: UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
     var sceneId: Int64 = 0
     
-
     override func viewDidLoad() {
         title = ""
         view.backgroundColor = UIColor.ls_color("#F8F8F8")
@@ -90,19 +88,14 @@ class ChatController: BaseController {
     // 创建底部工具栏
     fileprivate lazy var bottomView: ChatBottomView = {
         let view = ChatBottomView()
-        view.inputBtnBlock = {
-            self.chatKeyboard.showKeyBoard()
+        view.inputBtnBlock = { [weak self] in
+            self?.chatKeyboard.showKeyBoard()
         }
-        view.imageBtnBlock = {
-            self.handleImagePicker()
+        view.imageBtnBlock = { [weak self] in
+            self?.handleImagePicker()
         }
-        view.redPacketBtnBlock = {
-//            let vc = SendRedPacketController()
-//            vc.setData(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: 0)
-//            vc.hidesBottomBarWhenPushed = true
-//            PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
-            
-            PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: 0)
+        view.redPacketBtnBlock = { [weak self] in
+            PageManager.shared.pushToSendRedPacketController(self?.uniqueCode ?? "", personCount: self?.memberDic.count ?? 0, userId: self?.conversation.userID ?? "", taskId: 0)
         }
         return view
     }()
@@ -118,29 +111,33 @@ class ChatController: BaseController {
 extension ChatController {
     
     func setData(conv: LIMConversation?) {
-        // 清除未读数
-        cleanUnread()
         if let conv = conv {
             conversation = conv
             if (conversation.type == .LIM_C2C) {
                 navigationView.titleLabel.text = conversation.showName
+                navigationView.titleLabel.sizeToFit()
                 let uid = conversation.userID ?? ""
                 bottomView.setUserId(uid)
             } else if (conversation.type == .LIM_GROUP) {
                 uniqueCode = conversation.groupID ?? ""
                 bottomView.setUniCode(uniqueCode)
                 navigationView.titleLabel.text = conversation.showName
+                navigationView.titleLabel.sizeToFit()
             }
         }
+        
+        // 清除未读数
+        cleanUnread()
     }
     
     func cleanUnread() {
-        
-        V2TIMManager.shared.cleanConversationUnreadMessageCount(conversationID: conversation.conversationID, cleanTimestamp: 0, cleanSequence: 0) {
-            // 清理未读数成功
-            
-        } fail: { code, desc in
-            
+        if let convID = conversation.conversationID {
+            V2TIMManager.shared.cleanConversationUnreadMessageCount(conversationID: convID, cleanTimestamp: 0, cleanSequence: 0) {
+                // 清理未读数成功
+                
+            } fail: { code, desc in
+                
+            }
         }
     }
     
@@ -151,6 +148,7 @@ extension ChatController {
                 LSLog("getUserPage data:\(resp.data)")
                 self.userPageData = resp.data
                 self.handleUserPage(self.userPageData)
+                
                 completion()
             } else {
                 LSLog("getUserPage fail")
@@ -196,6 +194,10 @@ extension ChatController {
     
     func addObservers() {
         V2TIMManager.shared.addAdvancedMsgListener(listener: self)
+    }
+    
+    func removeObservers() {
+        V2TIMManager.shared.removeAdvancedMsgListener(listener: self)
     }
 
     func loadMsgs(_ refresh: Bool = false, _ completion: @escaping(([V2TIMMessage]) -> ())) {
@@ -301,7 +303,7 @@ extension ChatController {
     
     // 处理其他数据
     func handleOtherData() {
-        if (dataList.count == 0 || memberDic.count == 0 || partyDetail.uniqueCode == nil) {
+        guard dataList.count != 0, memberDic.count != 0,  !partyDetail.uniqueCode.isEmpty else {
             return
         }
         
@@ -361,7 +363,7 @@ extension ChatController {
                 
                 case .LIMElemRedPacket:
                     if let redPacketId = item.redPacketElem?.id {
-                        let status = RedPacketManager.shared.getRedPacketStatusById(redPacketId)
+                        let status = SimpleDataManager.shared.getRedPacketStatusById(redPacketId)
                         item.redPacketElem?.status = status
                     }
                     
@@ -468,11 +470,25 @@ extension ChatController {
     }
     
     func handlePartyDetail() {
-        self.bottomView.setPartyDetail(partyDetail)
+        bottomView.setPartyDetail(partyDetail)
         // 设置导航栏图标、名称
         navigationView.avatar.kf.setImage(with: URL(string: partyDetail.cover), placeholder: PlaceHolderAvatar)
         let personCount = partyDetail.maleCnt + partyDetail.femaleCnt - partyDetail.maleRemainCount - partyDetail.femaleRemainCount
         navigationView.titleLabel.text = "\(conversation.showName ?? "")(\(personCount))"
+        navigationView.titleLabel.sizeToFit()
+        
+        // 判断此桔是否解散、结束
+        if partyDetail.state == 2 || partyDetail.state == 3 {
+            // 发送局状态变更通知给UI界面
+            LSNotification.postPartyStatusChange(partyDetail)
+            // IM删除会话
+            let conversationID = "group_\(partyDetail.uniqueCode)"
+            V2TIMManager.shared.deleteConversation(conversation: conversationID) {
+                LSLog("deleteConversation succ conversationID:\(conversationID)")
+            } fail: { code, desc in
+                LSLog("deleteConversation fail")
+            }
+        }
     }
     
     func addNewMessage(_ msg:V2TIMMessage) {
@@ -488,22 +504,22 @@ extension ChatController {
         // 跳转到最底部
         scrollToBottom()
         
-        // 判断是否是自己抽到了卡牌
+        // 判断是否需要展示 TaskView
         if limMsg.elemType == .LIMElemGameStatusSync {
+            
             if limMsg.isSelf ?? false, limMsg.gameElem?.action.actionId == .LIMGameStatusCard {
                 // 先关闭其他 TaskView
                 StoryTaskView.shared.removeTaskView()
                 // 打开需要的 TaskView
-                CardTaskView.shared.cardTaskBlock = { msg in
+                CardTaskView.shared.cardTaskBlock = { [weak self] in
                     LSLog("cardTaskBlock")
                     // 发红包逃避任务
-                    PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: msg.gameElem?.taskId ?? 0)
+                    PageManager.shared.pushToSendRedPacketController(self?.uniqueCode ?? "", personCount: self?.memberDic.count ?? 0, userId: self?.conversation.userID ?? "", taskId: limMsg.gameElem?.taskId ?? 0)
                     
                 }
                 CardTaskView.shared.showInWindow(limMsg)
-            }
-            
-            if limMsg.gameElem?.action.actionId == .LIMGameStatusStory {
+                
+            } else if limMsg.gameElem?.action.actionId == .LIMGameStatusStory {
                 // 先关闭其他 TaskView
                 CardTaskView.shared.removeTaskView()
                 // 打开需要的 TaskView
@@ -521,6 +537,11 @@ extension ChatController {
                     }
                 }
                 StoryTaskView.shared.showInWindow(limMsg)
+                
+            } else {
+                // 不是需要打开的，都关闭
+                StoryTaskView.shared.removeTaskView()
+                CardTaskView.shared.removeTaskView()
             }
         }
     }
@@ -574,21 +595,47 @@ extension ChatController {
     
     func sendMessage(_ msg: V2TIMMessage) {
         
+        if let userId = conversation.userID {
+            // 首先判断两者关系，若不是互关、或者被关注，则需要判断当日发送消息数
+            if !(userPageData.relation.follow == 2 || userPageData.relation.follow == 3) {
+                if !SimpleDataManager.shared.isCanC2CMsgById(userId) {
+                    LSHUD.showError("对方关注或回复你后，才可以继续聊天")
+                    return
+                }
+            }
+        }
+        
         _ = V2TIMManager.shared.sendMessage(message: msg, receiver: conversation.userID ?? "", groupID: conversation.groupID ?? "", priority: .V2TIM_PRIORITY_DEFAULT, onlineUserOnly: false, offlinePushInfo: nil, progress: { progress in
             LSLog("sendMessage progress:\(progress)")
         }, succ: {
             LSLog("sendMessage succ")
-            LSLog("msg status :\(msg.status)")
+            // 发送成功后，更新消息
             self.updateMessage(msg)
+            // 如果是私聊记录当日发送数量
+            if let userID = self.conversation.userID {
+                SimpleDataManager.shared.saveC2CMsgCountById(userID)
+            }
         }, fail: { code, desc in
             LSLog("sendMessage fail code:\(code), desc:\(desc)")
             LSLog("msg status :\(msg.status)")
-            // 发送失败 展示感叹号
+            // 发送失败 更新消息，用感叹号表示
             self.updateMessage(msg)
         })
         
         // 插入本地消息
-        self.updateMessage(msg)
+        updateMessage(msg)
+    }
+    
+    override func navAvatarDidClick() {
+        LSLog("navAvatarDidClick")
+        if uniqueCode.isEmpty {
+            // 个人用户
+            LSLog("userid:\(userPageData.user.userId)")
+            PageManager.shared.pushToUserPage(userPageData.user.userId)
+        } else {
+            // 群组
+            PageManager.shared.pushToPartyDetail(uniqueCode)
+        }
     }
     
     // 更多
@@ -597,7 +644,7 @@ extension ChatController {
          * 私聊展示举报、拉黑
          * 群聊展示举报、结束当前游戏、解散此桔
          */
-        if self.uniqueCode.isEmpty {
+        if uniqueCode.isEmpty {
             let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
             // 添加带有图标的动作
@@ -607,7 +654,7 @@ extension ChatController {
             action1.setValue(UIImage(named: "icon_report"), forKey: "image")
             action1.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
             
-            let action2Title = self.userPageData.relation.black ? "取消拉黑" : "拉黑"
+            let action2Title = userPageData.relation.black ? "取消拉黑" : "拉黑"
             let action2 = UIAlertAction(title: action2Title, style: .default) { (action) in
                 self.handleBlackList()
             }
@@ -670,8 +717,8 @@ extension ChatController {
     func handleReport() {
         // 选择举报理由
         let vc = ReportReasonListController()
-        vc.reasonConfirmBlock = { [self] reasonItem in
-            self.report(reasonItem)
+        vc.reasonConfirmBlock = { [weak self] reasonItem in
+            self?.report(reasonItem)
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
@@ -680,8 +727,8 @@ extension ChatController {
     func handleBlackList() {
         // 取消拉黑、拉黑
         LSHUD.showLoading()
-        if self.userPageData.relation.black {
-            NetworkManager.shared.removeBlackList(self.userPageData.user.userId) { resp in
+        if userPageData.relation.black {
+            NetworkManager.shared.removeBlackList(userPageData.user.userId) { resp in
                 LSHUD.hide()
                 if resp.status == .success {
                     LSLog("removeBlackList succ")
@@ -693,7 +740,7 @@ extension ChatController {
                 }
             }
         } else {
-            NetworkManager.shared.addBlackList(self.userPageData.user.userId) { resp in
+            NetworkManager.shared.addBlackList(userPageData.user.userId) { resp in
                 LSHUD.hide()
                 if resp.status == .success {
                     LSLog("addBlackList succ")
@@ -725,25 +772,25 @@ extension ChatController {
     
     func showEndAlert() {
         // 二次确认是否要结束当前游戏
-        let alertController = UIAlertController(title: "", message: "确定要结束当前游戏吗？", preferredStyle: .alert)
+        let alertController = BaseAlertController(title: "确定要结束当前游戏吗？", message: nil)
                 
-        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
-            self.endGame()
-        }
-        
-        let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
             // 处理取消按钮点击后的操作
         }
         
-        alertController.addAction(okAction)
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) {(action) in
+            self.endGame()
+        }
+        
         alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)
     }
     
     func endGame() {
         LSHUD.showLoading()
         // 结束当前游戏
-        NetworkManager.shared.endGame(self.uniqueCode, sceneId: self.sceneId) { resp in
+        NetworkManager.shared.endGame(uniqueCode, sceneId: sceneId) { resp in
             LSHUD.hide()
             if resp.status == .success {
                 LSLog("endGame succ")
@@ -757,31 +804,31 @@ extension ChatController {
     }
     
     func showDismissAlert() {
-        // 二次确认是否要解散
-        let alertController = UIAlertController(title: "", message: "确定要解散此桔吗？", preferredStyle: .alert)
+        // 二次确认是否要结束当前游戏
+        let alertController = BaseAlertController(title: "确定要解散此桔吗？", message: nil)
                 
-        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
-            self.dismissParty()
-        }
-        
-        let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
             // 处理取消按钮点击后的操作
         }
         
-        alertController.addAction(okAction)
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) { (action) in
+            self.dismissParty()
+        }
+        
         alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)
     }
     
     func dismissParty() {
         LSHUD.showLoading()
-        NetworkManager.shared.dismissParty(self.uniqueCode) { resp in
+        NetworkManager.shared.dismissParty(uniqueCode) { resp in
             LSHUD.hide()
             if resp.status == .success {
                 LSLog("dismissParty succ")
                 self.partyDetail.state = 2
                 // 发送局状态变更通知
-                LSNotification.postPartyStatusChange()
+                LSNotification.postPartyStatusChange(self.partyDetail)
                 // 返回
                 self.pop()
             } else {
@@ -875,7 +922,7 @@ extension ChatController: ChatKeyboardViewDelegate {
     private func restChatKeyboardSafeTop(_ offsetY: CGFloat) {
         LSLog("restChatKeyboardSafeTop offsetY:\(offsetY)")
         if (kScreenH - offsetY > kTabBarHeight) {
-            self.tableView.snp.remakeConstraints { (make) in
+            tableView.snp.remakeConstraints { (make) in
                 make.top.equalToSuperview().offset(kNavBarHeight)
                 make.centerX.equalToSuperview()
                 make.width.equalToSuperview()
@@ -885,11 +932,11 @@ extension ChatController: ChatKeyboardViewDelegate {
             view.layoutIfNeeded()
             scrollToBottom()
         } else {
-            self.tableView.snp.remakeConstraints { (make) in
+            tableView.snp.remakeConstraints { (make) in
                 make.top.equalToSuperview().offset(kNavBarHeight)
                 make.centerX.equalToSuperview()
                 make.width.equalToSuperview()
-                make.bottom.equalTo(self.bottomView.snp.top)
+                make.bottom.equalTo(bottomView.snp.top)
             }
             
             view.layoutIfNeeded()
@@ -904,7 +951,6 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         if offsetY <= 0 {
-//            loadMsgs(false)
             loadMoreData()
         }
     }
@@ -977,7 +1023,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                 item.redPacketElem?.status = 1
                                 tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
                                 if let redPacketId = item.redPacketElem?.id {
-                                    RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
+                                    SimpleDataManager.shared.saveRedPacketStatusById(redPacketId)
                                 }
                                 // 打开红包详情
                                 PageManager.shared.pushToRedPacketDetailController(item)
@@ -989,7 +1035,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                 item.redPacketElem?.status = 1
                                 tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
                                 if let redPacketId = item.redPacketElem?.id {
-                                    RedPacketManager.shared.saveRedPacketStatusById(redPacketId)
+                                    SimpleDataManager.shared.saveRedPacketStatusById(redPacketId)
                                 }
                             }
                         }
@@ -1023,11 +1069,11 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                     case .LIMGameStatusCard:
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameCardMessageCell", for: indexPath) as! GameCardMessageCell
                         tempCell.configure(item, party: partyDetail)
-                        tempCell.gameCardBlock = {
-                            CardTaskView.shared.cardTaskBlock = { msg in
+                        tempCell.gameCardBlock = { [weak self] in
+                            CardTaskView.shared.cardTaskBlock = { [weak self] in
                                 LSLog("cardTaskBlock")
                                 // 发红包逃避任务
-                                PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: msg.gameElem?.taskId ?? 0)
+                                PageManager.shared.pushToSendRedPacketController(self?.uniqueCode ?? "", personCount: self?.memberDic.count ?? 0, userId: self?.conversation.userID ?? "", taskId: item.gameElem?.taskId ?? 0)
                                 
                             }
                             CardTaskView.shared.showInWindow(item)
@@ -1039,7 +1085,6 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                 if resp.status == .success {
                                     LSLog("doneTask succ")
                                     item.gameElem?.status = 1
-//                                    tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
                                 } else {
                                     LSLog("doneTask fail")
                                     LSHUD.showError(resp.msg)
@@ -1052,10 +1097,10 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                         let tempCell = tableView.dequeueReusableCell(withIdentifier: "GameRedPacketMessageCell", for: indexPath) as! GameRedPacketMessageCell
                         tempCell.configure(item)
                         // 发红包
-                        tempCell.actionBlock = {
+                        tempCell.actionBlock = { [weak self] in
                             LSLog("actionBlock")
                             if let taskId = item.gameElem?.taskId {
-                                PageManager.shared.pushToSendRedPacketController(self.uniqueCode, personCount: self.memberDic.count, userId: self.conversation.userID ?? "", taskId: taskId)
+                                PageManager.shared.pushToSendRedPacketController(self?.uniqueCode ?? "", personCount: self?.memberDic.count ?? 0, userId: self?.conversation.userID ?? "", taskId: taskId)
                             }
                         }
                         cell = tempCell
@@ -1137,7 +1182,7 @@ extension ChatController {
     fileprivate func resetNavigation() {
         
         navigationView.showAvatar()
-        let rightImg = UIImage(named: "icon_more_action")
+        let rightImg = UIImage(named: "icon_more_black")
         let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
         navigationView.rightButton.setImage(shareImg, for: .normal)
     }

@@ -81,7 +81,7 @@ extension QRPartyView {
         self.uniqueCode = uniqueCode
         LSHUD.showLoading()
         if !self.uniqueCode.isEmpty {
-            let qrCodeUrl = "https://static.juzitang.net/detail?code=\(self.uniqueCode)"
+            let qrCodeUrl = "\(UNIVERSAL_LINK)/detail?code=\(self.uniqueCode)"
             // 调用生成二维码的方法
             if let qrCodeImage = LBXScanWrapper.createCode(codeType: "CIQRCodeGenerator", codeString: qrCodeUrl, size: qrSize, qrColor: .black, bkColor: .white) {
                 qrImageView.image = qrCodeImage

@@ -80,8 +80,7 @@ extension RechargeCell {
         }
         
         // 代币价值
-//        coinLabel.text = String(item.product.localizedTitle)
-        coinLabel.text = String(item.coinAmount)
+        coinLabel.text = String(item.coinAmount/100)
         coinLabel.sizeToFit()
         
         // 购买所需货币

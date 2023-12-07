@@ -1,5 +1,5 @@
 //
-//  CoinLogCell.swift
+//  CashOutLogCell.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -10,11 +10,11 @@ import UIKit
 import AVFoundation
 
 
-class CoinLogCell: UITableViewCell {
+class CashOutLogCell: UITableViewCell {
     
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 14.0
-    var item: CoinItem = CoinItem()
+    var item: CashOutItem = CashOutItem()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -27,17 +27,17 @@ class CoinLogCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // 收支名称
+    // 提现名称
     fileprivate lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = kFontMedium14
+        label.font = kFontMedium16
         label.textColor = UIColor.ls_color("#333333")
-        label.text = item.description
+        label.text = "等待提现"
         label.sizeToFit()
         return label
     }()
     
-    // 收支时间
+    // 提现时间
     fileprivate lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.font = kFontRegualer12
@@ -47,44 +47,50 @@ class CoinLogCell: UITableViewCell {
         return label
     }()
     
-    // 收支金额
+    // 提现金额
     fileprivate lazy var amountLabel: UILabel = {
         let label = UILabel()
         label.font = kFontBold18
-        label.textColor = UIColor.ls_color("#FE5B5B")
+        label.textColor = UIColor.ls_color("#333333")
         label.text = ""
         label.sizeToFit()
         return label
     }()
 }
 
-extension CoinLogCell {
+extension CashOutLogCell {
     
-    func configure(with citem: CoinItem) {
+    func configure(with citem: CashOutItem) {
         LSLog("configure citem:\(String(describing: citem))")
         item = citem
         
-        if item.amount > 0 {
-            amountLabel.textColor = UIColor.ls_color("#FE5B5B")
+        
+        // 提现描述，0 等待提现 1提现成功 2提现不通过
+        if item.state == 0 {
+            nameLabel.textColor = UIColor.ls_color("#333333")
+            nameLabel.text = "等待提现"
+        } else if item.state == 1 {
+            nameLabel.textColor = UIColor.ls_color("#333333")
+            nameLabel.text = "提现成功"
+        } else if item.state == 2 {
+            nameLabel.textColor = UIColor.ls_color("#FE5B5B")
+            nameLabel.text = item.detailStatus
         } else {
-            amountLabel.textColor = UIColor.ls_color("#333333")
+            nameLabel.textColor = UIColor.ls_color("#FE5B5B")
+            nameLabel.text = item.detailStatus
         }
         
-        // 收支名称
-        nameLabel.text = item.description
-        nameLabel.sizeToFit()
-        
-        // 收支时间
-        timeLabel.text = item.time
+        // 提现时间
+        timeLabel.text = item.createTime
         timeLabel.sizeToFit()
         
-        // 收支金额
-        amountLabel.text = String(item.amount/100)
+        // 提现金额
+        amountLabel.text = String(item.amount)
         amountLabel.sizeToFit()
     }
 }
 
-extension CoinLogCell {
+extension CashOutLogCell {
     
     fileprivate func setupUI() {
         

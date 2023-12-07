@@ -1,5 +1,5 @@
 //
-//  FansListController.swift
+//  CashOutLogController.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/10.
@@ -10,19 +10,28 @@ import UIKit
 import SnapKit
 import MJRefresh
 
-class FansListController: BaseController {
+class CashOutLogController: BaseController {
     
-    let CellHeight = 80.0
-    var fansList: FansListModel = FansListModel()
-    /// 回调闭包
-    public var followSelectedBlock: ((_ followItems:[FollowItem]) -> ())?
-    var needSelect:Bool = false
+    let CellHeight = 72.0
+    var dataList: CashOutLogModel = CashOutLogModel()
 
     override func viewDidLoad() {
-        title = "我的粉丝"
+        title = "提现历史"
         super.viewDidLoad()
         setupUI()
         
+        view.backgroundColor = UIColor.ls_color("#F6F6F6")
+        tableView.mj_header?.beginRefreshing()
+    }
+    
+    // 创建UITableView
+    fileprivate lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: view.bounds, style: .plain)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.separatorStyle = .singleLine
+        tableView.backgroundColor = UIColor.ls_color("#F6F6F6")
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据
@@ -35,27 +44,18 @@ class FansListController: BaseController {
             self?.loadMoreData()
         })
         
-        tableView.mj_header?.beginRefreshing()
-    }
-    
-    // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tv = UITableView(frame: view.bounds, style: .plain)
-        tv.dataSource = self
-        tv.delegate = self
-        tv.contentInsetAdjustmentBehavior = .never
-        
         // 注册UITableViewCell类
-        tv.register(FansCell.self, forCellReuseIdentifier: "FansCell")
-        return tv
+        tableView.register(CashOutLogCell.self, forCellReuseIdentifier: "CashOutLogCell")
+        return tableView
     }()
 }
 
-extension FansListController {
+extension CashOutLogController {
     
-    func getFansList(pageNum:Int64, pageSize:Int64) {
-        NetworkManager.shared.getFansList(pageNum, pageSize: pageSize) { resp in
-            LSLog("getFansList data:\(resp.data)")
+    func getCashOutLogs(pageNum:Int64, pageSize:Int64) {
+        
+        NetworkManager.shared.getCashOutLogs(pageNum, pageSize: pageSize) { resp in
+            LSLog("getCoinLogs data:\(String(describing: resp.data))")
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
@@ -65,27 +65,27 @@ extension FansListController {
             }
             
             if resp.status == .success {
-                LSLog("getFansList succ")
+                LSLog("getCashOutLogs succ")
                 
                 if let data = resp.data {
                     if pageNum == 1 {
-                        self.fansList = data
-                        self.fansList.pageNum = pageNum
-                        self.fansList.pageSize = pageSize
+                        self.dataList = data
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageSize = pageSize
                     } else {
-                        self.fansList.users.append(contentsOf: data.users)
-                        self.fansList.pageNum = pageNum
-                        self.fansList.pageTotal = data.pageTotal
-                        self.fansList.totalCount = data.totalCount
+                        self.dataList.logs.append(contentsOf: data.logs)
+                        self.dataList.pageNum = pageNum
+                        self.dataList.pageTotal = data.pageTotal
+                        self.dataList.totalCount = data.totalCount
                     }
                     
                     self.tableView.reloadData()
-                    if (self.fansList.totalCount <= self.fansList.pageNum * self.fansList.pageSize) {
+                    if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
                         self.tableView.mj_footer.endRefreshingWithNoMoreData()
                     }
                 }
             } else {
-                LSLog("getFollowList fail")
+                LSLog("getCashOutLogs fail")
             }
         }
     }
@@ -93,30 +93,29 @@ extension FansListController {
     func loadNewData() {
         // 在这里执行下拉刷新的操作
         self.tableView.mj_footer.resetNoMoreData()
-        getFansList(pageNum: 1, pageSize: fansList.pageSize)
+        getCashOutLogs(pageNum: 1, pageSize: dataList.pageSize)
     }
 
     func loadMoreData() {
         // 在这里执行上拉加载更多的操作
-        if (fansList.totalCount > fansList.pageNum * fansList.pageSize) {
-            let pn = fansList.pageNum + 1
-            getFansList(pageNum: pn, pageSize: fansList.pageSize)
+        if (dataList.totalCount > dataList.pageNum * dataList.pageSize) {
+            let pn = dataList.pageNum + 1
+            getCashOutLogs(pageNum: pn, pageSize: dataList.pageSize)
         }
     }
 }
 
 // UITableView 代理
-extension FansListController: UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
+extension CashOutLogController: UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
     
     // 实现UITableViewDataSource方法
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fansList.users.count
+        return dataList.logs.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "FansCell", for: indexPath) as! FansCell
-        var item = fansList.users[indexPath.row]
-        item.needSelect = needSelect
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CashOutLogCell", for: indexPath) as! CashOutLogCell
+        let item = dataList.logs[indexPath.row]
         cell.configure(with: item)
         return cell
     }
@@ -125,22 +124,15 @@ extension FansListController: UITableViewDataSource, UITableViewDelegate, UIScro
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return CellHeight
     }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 选中cell
-        let item = fansList.users[indexPath.row]
-        PageManager.shared.pushToUserPage(item.userId )
-    }
 }
 
-
-extension FansListController {
+extension CashOutLogController {
     
     fileprivate func setupUI() {
         
         view.addSubview(tableView)
         
-        tableView.snp.makeConstraints { (make) in
+        tableView.snp.remakeConstraints { (make) in
             make.top.equalToSuperview().offset(kNavBarHeight)
             make.centerX.equalToSuperview()
             make.width.equalToSuperview()

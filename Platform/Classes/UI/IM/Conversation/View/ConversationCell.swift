@@ -120,7 +120,7 @@ extension ConversationCell {
         // 未读消息
         if let unreadCount = item.originConversation?.unreadCount, unreadCount > 0  {
             unReadLabel.isHidden = false
-            unReadLabel.text = unreadCount > 99 ? "+99" : "\(String(describing: unreadCount))"
+            unReadLabel.text = unreadCount > 99 ? "+99" : "\(String(unreadCount))"
             unReadLabel.sizeToFit()
         } else {
             unReadLabel.isHidden = true

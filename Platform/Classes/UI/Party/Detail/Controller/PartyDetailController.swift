@@ -21,6 +21,7 @@ class PartyDetailController: BaseController {
     let CellHeight = 110.0
     let topHeight:CGFloat = 300.0
     let creatorAvatarWidth = 46.0
+    let ParticipateKey = "ParticipateKey"
     var uniCode: String = ""
     var partyDetail: PartyDetailModel?
     var participateData: ParticipateModel?
@@ -29,6 +30,8 @@ class PartyDetailController: BaseController {
     var tempIndexPath: IndexPath?
     var selectedIndexPath: IndexPath?
     var isOwner = false
+    var coverImage: UIImage?
+    var isActive: Bool = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +79,7 @@ class PartyDetailController: BaseController {
         return view
     }()
     
-    // 游戏封面
+    // 局封面
     fileprivate lazy var cover: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
@@ -535,6 +538,7 @@ extension PartyDetailController {
             if resp.status == .success {
                 LSLog("leaveParty succ")
                 self.joinStatusChanged()
+                self.pop()
             } else {
                 LSLog("joinParty fail")
                 LSHUD.showError(resp.msg)
@@ -545,15 +549,15 @@ extension PartyDetailController {
     // 解散组局
     func dismissParty() {
         LSHUD.showLoading()
-        NetworkManager.shared.dismissParty(uniCode) { resp in
+        NetworkManager.shared.dismissParty(uniCode) { [weak self] resp in
             LSHUD.hide()
             if resp.status == .success {
                 LSLog("dismissParty succ")
-                self.partyDetail?.state = 2
+                self?.partyDetail?.state = 2
                 // 发送局状态变更通知
-                LSNotification.postPartyStatusChange()
+                LSNotification.postPartyStatusChange(self?.partyDetail ?? PartyDetailModel())
                 // 返回
-                self.pop()
+                self?.pop()
             } else {
                 LSLog("dismissParty fail")
                 LSHUD.showError(resp.msg)
@@ -571,11 +575,11 @@ extension PartyDetailController {
             if resp.status == .success {
                 LSLog("prePayJoinOrder succ")
                 if let order = resp.data {
-                    WXApiManager.shared.payBlock = { oId, status in
+                    WXApiManager.shared.payBlock = { [weak self] oId, status in
                         LSLog("payBlock oId:\(oId), status:\(status)")
                         if oId == orderId {
-                            self.joinStatusChanged()
-                            self.showSuccAlert()
+                            self?.joinStatusChanged()
+                            self?.showSuccAlert()
                         }
                     }
                     WXApiManager.shared.sendPayRequest(order, orderId: orderId)
@@ -596,9 +600,10 @@ extension PartyDetailController {
     
     func showSuccAlert() {
         // 提示成功加入
-        let alertController = UIAlertController(title: "", message: "加入成功，请准时赴约。", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
-            
+        let alertController = BaseAlertController(title: "加入成功，请准时赴约。", message: nil)
+        
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) { (action) in
+
         }
         
         alertController.addAction(okAction)
@@ -609,24 +614,33 @@ extension PartyDetailController {
         if let detail = partyDetail {
             isOwner = userInfo?.userId == detail.userId
             // 封面
-            cover.kf.setImage(with: URL(string: detail.cover ?? ""), placeholder: PlaceHolderBig)
+            cover.kf.setImage(with: URL(string: detail.cover ), placeholder: PlaceHolderBig) { result in
+                switch result {
+                case .success(let value):
+                    LSLog("cover load succ")
+                    self.coverImage = value.image
+                case .failure(let error):
+                    LSLog("cover load error:\(error)")
+                }
+                
+            }
             
             // 创建者头像
-            creatorAvatar.kf.setImage(with: URL(string: detail.portrait ?? ""), placeholder: PlaceHolderAvatar)
+            creatorAvatar.kf.setImage(with: URL(string: detail.portrait ), placeholder: PlaceHolderAvatar)
             
             // 时间
             timeLabel.text = Date.formatDate(startTime: detail.startTime, endTime: detail.endTime)
             timeLabel.sizeToFit()
             
             // 费用
-            
             if detail.fee != 0 {
                 let newFee = String(format: "%.2f", Float(detail.fee)/100)
                 feeLabel.text = "费用：¥" + String(newFee)
+                feeLabel.sizeToFit()
             } else {
                 feeLabel.text = "费用免费"
+                feeLabel.sizeToFit()
             }
-            feeLabel.sizeToFit()
             
             // 组局介绍
             introductionLabel.text = detail.introduction
@@ -644,9 +658,22 @@ extension PartyDetailController {
             addressDetailLabel.text = detail.address
             addressDetailLabel.sizeToFit()
             
-            
             // 根据参数确认底部按钮
-            if (isOwner) {
+            if detail.state == 2 {
+                // 已解散
+                joinBtn.isEnabled = false
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#eeeeee")
+                joinBtn.setTitleColor(UIColor.ls_color("#999999"), for: .disabled)
+                joinBtn.setTitle("已解散", for: .normal)
+            } else if detail.state == 3 {
+                // 已解散
+                joinBtn.isEnabled = false
+                joinBtn.layer.borderWidth = 0
+                joinBtn.backgroundColor = UIColor.ls_color("#eeeeee")
+                joinBtn.setTitleColor(UIColor.ls_color("#999999"), for: .disabled)
+                joinBtn.setTitle("已结束", for: .normal)
+            } else if (isOwner) {
                 // 是自己创建的局，按钮文字展示为解散此桔
                 joinBtn.isEnabled = true
                 joinBtn.backgroundColor = UIColor.white
@@ -654,7 +681,6 @@ extension PartyDetailController {
                 joinBtn.layer.borderColor = UIColor.ls_color("#FE9C5B").cgColor
                 joinBtn.setTitleColor(UIColor.ls_color("#FE9C5B"), for: .normal)
                 joinBtn.setTitle("解散此桔", for: .normal)
-                
             } else if (detail.joinState == 1) {
                 // 已加入
                 joinBtn.layer.borderWidth = 0
@@ -711,33 +737,35 @@ extension PartyDetailController {
             for i in 0 ..< len {
                 let item = partData.participateList[i]
                 
-                let pcv = UIView()
-                pcv.layer.cornerRadius = 8
-                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
-                personContent.addSubview(pcv)
+                let pcBtn = UIButton()
+                pcBtn.layer.cornerRadius = 8
+                pcBtn.backgroundColor = UIColor.ls_color("#F9F9F9")
+                pcBtn.addTarget(self, action: #selector(clickPcBtn(_:)), for: .touchUpInside)
+                pcBtn.layer.setValue(i, forKey: ParticipateKey)
+                personContent.addSubview(pcBtn)
                 
                 let pIV = UIImageView()
                 pIV.layer.cornerRadius = 22
                 pIV.clipsToBounds = true
                 pIV.kf.setImage(with: URL(string: item.portrait), placeholder: PlaceHolderAvatar)
-                pcv.addSubview(pIV)
+                pcBtn.addSubview(pIV)
                 
                 let aIV = UIImageView()
                 aIV.image = UIImage(named: item.sex == 1 ? "icon_male" : "icon_female")
-                pcv.addSubview(aIV)
+                pcBtn.addSubview(aIV)
                 
                 let nick = UILabel()
                 nick.font = UIFont.ls_font(12)
                 nick.textColor = UIColor.ls_color("#333333")
                 nick.text = item.nick
                 nick.sizeToFit()
-                pcv.addSubview(nick)
+                pcBtn.addSubview(nick)
                 
                 
                 let v_left:CGFloat = CGFloat(i%h_count) * (v_width + h_margin)
                 let v_top:CGFloat = CGFloat(i/h_count) * (v_margin + v_height)
                 
-                pcv.snp.makeConstraints { (make) in
+                pcBtn.snp.makeConstraints { (make) in
                     make.left.equalTo(v_left)
                     make.top.equalTo(v_top)
                     make.width.equalTo(v_width)
@@ -762,59 +790,53 @@ extension PartyDetailController {
                 }
             }
             
+            // 邀请
             var finalLen = len
-            if ((pDetail.joinState == 1 || userInfo?.userId == pDetail.userId) && !(pDetail.maleRemainCount == 0 && pDetail.femaleRemainCount == 0)) {
-                finalLen += 1
-                // 已参与
-                let pcv = UIView()
-                pcv.layer.cornerRadius = 8
-                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
-                // 添加点击手势识别器
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleAddPersonTap))
-                pcv.addGestureRecognizer(tapGesture)
-                personContent.addSubview(pcv)
-                
-                let addIcon = UIImageView()
-                addIcon.layer.cornerRadius = 22
-                addIcon.clipsToBounds = true
-                addIcon.image = UIImage(named: "icon_add_person")
-                pcv.addSubview(addIcon)
-                
-                let v_left:CGFloat = CGFloat((finalLen-1)%h_count) * (v_width + h_margin)
-                let v_top:CGFloat = CGFloat((finalLen-1)/h_count) * (v_margin + v_height)
-                pcv.snp.makeConstraints { (make) in
-                    make.left.equalTo(v_left)
-                    make.top.equalTo(v_top)
-                    make.width.equalTo(v_width)
-                    make.height.equalTo(v_height)
-                }
-                
-                addIcon.snp.makeConstraints { (make) in
-                    make.center.equalToSuperview()
-                    make.size.equalTo(CGSize(width: 28, height: 28))
-                }
+            finalLen += 1
+            let pcBtn = UIButton()
+            pcBtn.layer.cornerRadius = 8
+            pcBtn.backgroundColor = UIColor.ls_color("#F9F9F9")
+            pcBtn.addTarget(self, action: #selector(handleAddPersonTap(_:)), for: .touchUpInside)
+            personContent.addSubview(pcBtn)
+            
+            let addIcon = UIImageView()
+            addIcon.layer.cornerRadius = 22
+            addIcon.clipsToBounds = true
+            addIcon.image = UIImage(named: "icon_add_person")
+            pcBtn.addSubview(addIcon)
+            
+            let v_left:CGFloat = CGFloat((finalLen-1)%h_count) * (v_width + h_margin)
+            let v_top:CGFloat = CGFloat((finalLen-1)/h_count) * (v_margin + v_height)
+            pcBtn.snp.makeConstraints { (make) in
+                make.left.equalTo(v_left)
+                make.top.equalTo(v_top)
+                make.width.equalTo(v_width)
+                make.height.equalTo(v_height)
             }
             
+            addIcon.snp.makeConstraints { (make) in
+                make.center.equalToSuperview()
+                make.size.equalTo(CGSize(width: 28, height: 28))
+            }
+            
+            // 踢除成员
             if (userInfo?.userId == pDetail.userId && partData.participateList.count >= 2) {
                 finalLen += 1
-                // 已参与
-                let pcv = UIView()
-                pcv.layer.cornerRadius = 8
-                pcv.backgroundColor = UIColor.ls_color("#F9F9F9")
-                // 添加点击手势识别器
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDelPersonTap))
-                pcv.addGestureRecognizer(tapGesture)
-                personContent.addSubview(pcv)
+                let pcBtn = UIButton()
+                pcBtn.layer.cornerRadius = 8
+                pcBtn.backgroundColor = UIColor.ls_color("#F9F9F9")
+                pcBtn.addTarget(self, action: #selector(handleDelPersonTap(_:)), for: .touchUpInside)
+                personContent.addSubview(pcBtn)
                 
                 let delIcon = UIImageView()
                 delIcon.layer.cornerRadius = 22
                 delIcon.clipsToBounds = true
                 delIcon.image = UIImage(named: "icon_del_person")
-                pcv.addSubview(delIcon)
+                pcBtn.addSubview(delIcon)
                 
                 let v_left:CGFloat = CGFloat((finalLen-1)%h_count) * (v_width + h_margin)
                 let v_top:CGFloat = CGFloat((finalLen-1)/h_count) * (v_margin + v_height)
-                pcv.snp.makeConstraints { (make) in
+                pcBtn.snp.makeConstraints { (make) in
                     make.left.equalTo(v_left)
                     make.top.equalTo(v_top)
                     make.width.equalTo(v_width)
@@ -943,36 +965,67 @@ extension PartyDetailController {
         LSLog("clickJoinBtn joinState:\(partyDetail?.joinState ?? -1)")
         // 根据状态处理，加入、解散
         if isOwner {
-            // 解散次桔
-            dismissParty()
+            // 二次确认解散
+            showDismissAlert()
         } else if (partyDetail?.joinState == 0 || partyDetail?.joinState == 2) {
             // 加入组局
             joinParty()
         } else if (partyDetail?.joinState == 1) {
-            // 已经加入的局，弹窗提示是否退出
-            let alertController = UIAlertController(title: "", message: "确定要退出此桔吗？", preferredStyle: .alert)
-                    
-            let okAction = UIAlertAction(title: "确定", style: .default) { (action) in
-                // 退出桔
-                self.leaveParty()
-            }
-            
-            let cancelAction = UIAlertAction(title: "取消", style: .default) { (action) in
-                // 处理取消按钮点击后的操作
-            }
-            
-            alertController.addAction(okAction)
-            alertController.addAction(cancelAction)
-            present(alertController, animated: true, completion: nil)
+            // 二次确认退出
+            showLeaveAlert()
         }
-        
     }
     
-    @objc func handleAddPersonTap() {
-        // 邀请好友
+    func showDismissAlert() {
+        // 二次确认是否要结束当前游戏
+        let alertController = BaseAlertController(title: "确定要解散此桔吗？", message: nil)
+                
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) { (action) in
+            // 解散次桔
+            self.dismissParty()
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func showLeaveAlert() {
+        // 二次确认是否退出
+        let alertController = BaseAlertController(title: "确定要退出此桔吗？", message: nil)
+                
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) { (action) in
+            // 退出桔
+            self.leaveParty()
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    // 点击成员
+    @objc func clickPcBtn(_ sender:UIButton) {
+        let index:Int = sender.layer.value(forKey: ParticipateKey) as! Int
+        if index >= 0, index < participateData?.participateList.count ?? 0 {
+            let partiUser = participateData?.participateList[index]
+            PageManager.shared.pushToUserPage(partiUser?.userId ?? "")
+        }
+    }
+    
+    // 邀请好友
+    @objc func handleAddPersonTap(_ sender:UIButton) {
         let vc = FollowListController()
         vc.setData(true)
-        vc.followSelectedBlock = { [self] followItems in
+        vc.followSelectedBlock = { [weak self] followItems in
             LSLog("followSelectedBlock followItems:\(followItems)")
             var peopleIds:[String] = []
             for i in 0 ..< followItems.count {
@@ -980,21 +1033,21 @@ extension PartyDetailController {
                 peopleIds.append(fItem.userId)
             }
             // 邀请加入局
-            inviteJoinParty(peopleIds)
+            self?.inviteJoinParty(peopleIds)
         }
         vc.hidesBottomBarWhenPushed = true
         PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
     }
     
-    @objc func handleDelPersonTap() {
-        // 移除成员
+    // 移除成员
+    @objc func handleDelPersonTap(_ sender:UIButton) {
         LSLog("handleDelPersonTap")
         if let uniCode = partyDetail?.uniqueCode {
             let vc = ParticipateListController()
             vc.setData(uniCode, mutiSelect: true)
-            vc.selectedBlock = { items in
+            vc.selectedBlock = { [weak self] items in
                 LSLog("selectedBlock items:\(items)")
-                self.kickOut(items)
+                self?.kickOut(items)
             }
             vc.hidesBottomBarWhenPushed = true
             PageManager.shared.currentVC()?.present(vc, animated: true)
@@ -1012,8 +1065,15 @@ extension PartyDetailController {
     }
     
     override func rightAction() {
+        LSLog("PartyDetail rightAction")
         // 分享
-        
+        if let party = partyDetail, let cImage = coverImage {
+            let title = "邀请你加入\(party.name)"
+            let desc = timeLabel.text!
+            let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(party.uniqueCode)"
+            
+            WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cImage)
+        }
     }
     
     func scrollToIndexPath(_ indexPath:IndexPath) {
@@ -1055,11 +1115,11 @@ extension PartyDetailController: UITableViewDataSource, UITableViewDelegate, UIS
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SubCommentCell", for: indexPath) as! SubCommentCell
-            cell.loadMoreBlock = { [self] citem, pitem in
+            cell.loadMoreBlock = { [weak self] citem, pitem in
                 LSLog("loadMoreBlock item:\(citem)")
                 let pageSize = 10
                 let pageNum = pitem.childComments.count/pageSize + 1
-                getComments(pageNum: Int64(pageNum), pageSize: Int64(pageSize), uniqueCode: uniCode, parentId: citem.parentId)
+                self?.getComments(pageNum: Int64(pageNum), pageSize: Int64(pageSize), uniqueCode: self?.uniCode ?? "", parentId: citem.parentId)
             }
             let pitem = commentData.comments[indexPath.section]
             let item = pitem.childComments[indexPath.row-1]

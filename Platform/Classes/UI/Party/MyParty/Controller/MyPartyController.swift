@@ -132,8 +132,11 @@ extension MyPartyController {
     }
     
     @objc func handlePartyStatusChange(_ notification: Notification) {
-        LSLog("---- MyPartyController handlePartyStatusChange ----")
-        loadNewData()
+        LSLog("---- handlePartyStatusChange ----")
+        // 切换到主线程执行UI操作
+        DispatchQueue.main.async {
+            self.loadNewData()
+        }
     }
 }
 

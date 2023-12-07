@@ -105,9 +105,9 @@ extension EditUserController {
         } else if optionValue == 3 {
             let vc = InputViewController()
             vc.setData(userInfo.intro , maxCount: 30)
-            vc.confirmBlock = { text in
+            vc.confirmBlock = { [weak self] text in
                 LSLog("confirmBlock text:\(text)")
-                self.updateIntro(text)
+                self?.updateIntro(text)
             }
             vc.hidesBottomBarWhenPushed = true
             PageManager.shared.currentNav()?.pushViewController(vc, animated: true)

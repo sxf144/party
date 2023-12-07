@@ -93,7 +93,7 @@ extension GiftCell {
         nameLabel.sizeToFit()
         
         // 价格
-        amountLabel.text = String(item.amount) + " JZ币"
+        amountLabel.text = String(item.amount/100) + " JZ币"
         amountLabel.sizeToFit()
     }
     

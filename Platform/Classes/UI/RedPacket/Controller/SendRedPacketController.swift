@@ -13,9 +13,12 @@ class SendRedPacketController: BaseController {
     
     let xMargin: CGFloat = 16
     let yMargin: CGFloat = 16
+    let errHeight: CGFloat = 30
     // type 1、拼手气红包，2、平分红包，默认为1
     var type: RedPacketType = .RedPacketTypeLuck
-    let maxCharacterCount = 10
+    let maxCountLength = 4
+    let maxAmountLength = 8
+    let maxAmount = 10000
     var uniqueCode: String = ""
     var personCount: Int = 1
     var userId: String = ""
@@ -28,6 +31,21 @@ class SendRedPacketController: BaseController {
         setupUI()
     }
     
+    // 错误提示
+    fileprivate lazy var errView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.ls_color("#FE9C5B")
+        return view
+    }()
+    
+    fileprivate lazy var errLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontMedium14
+        label.textColor = .white
+        label.text = ""
+        label.sizeToFit()
+        return label
+    }()
     
     // 红包类型选择
     fileprivate lazy var typeSelectBtn: UIButton = {
@@ -131,9 +149,16 @@ class SendRedPacketController: BaseController {
         textField.font = kFontRegualer16
         textField.textAlignment = .right
         textField.keyboardType = .decimalPad
-        textField.attributedPlaceholder = NSAttributedString(string: "¥0.00", attributes: [NSAttributedString.Key.foregroundColor: kColorTextTips])
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return textField
+    }()
+    
+    fileprivate lazy var amountPlaceHolderLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer16
+        label.textColor = kColorTextTips
+        label.text = "¥0.00"
+        label.sizeToFit()
+        return label
     }()
     
     fileprivate lazy var amountUnitLabel: UILabel = {
@@ -194,6 +219,13 @@ extension SendRedPacketController {
             typeSelectBtn.isHidden = false
             countView.isHidden = false
             personCountLabel.isHidden = false
+            if taskId == 0 {
+                countView.isUserInteractionEnabled = true
+            } else {
+                countView.isUserInteractionEnabled = false
+                countTextField.text = "\(personCount)"
+                navigationView.titleLabel.text = "发红包完成任务"
+            }
         }
     }
     
@@ -208,12 +240,14 @@ extension SendRedPacketController {
             // 处理选项1的操作
             self.type = .RedPacketTypeLuck
             self.typeLabel.text = action.title
+            self.typeLabel.sizeToFit()
         }
 
         let option2 = UIAlertAction(title: "普通红包", style: .default) { (action) in
             // 处理选项2的操作
             self.type = .RedPacketTypeAverage
             self.typeLabel.text = action.title
+            self.typeLabel.sizeToFit()
         }
 
         let cancelAction = UIAlertAction(title: "取消", style: .cancel) { (action) in
@@ -250,10 +284,10 @@ extension SendRedPacketController {
         } else {
             count = Int64(countTextField.text?.trim() ?? "") ?? 0
         }
-        
-        var amount = (Int64(amountTextField.text?.trim() ?? "") ?? 0)*100
+        LSHUD.showLoading()
+        let amount = (Int64(amountTextField.text?.trim() ?? "") ?? 0)*100
         NetworkManager.shared.sendRedPacket(taskId, uniqueCode: uniqueCode, toUserId: userId, count: count, amount: amount, getType: type.rawValue) { resp in
-            
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("sendRedPacket succ")
                 self.pop()
@@ -262,12 +296,6 @@ extension SendRedPacketController {
                 LSHUD.showError(resp.msg)
             }
         }
-    }
-    
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        let newWidth = textField.intrinsicContentSize.width
-        LSLog("textFieldDidChange newWidth:\(newWidth)")
-//        textField.widthAnchor.constraint(equalToConstant: newWidth).isActive = true
     }
     
     func checkParam() -> Bool {
@@ -291,29 +319,146 @@ extension SendRedPacketController {
         
         return true
     }
+    
+    func showError(_ errMsg:String) {
+        // 错误提示
+        errLabel.text = errMsg
+        errLabel.sizeToFit()
+        
+        // 展示错误提示
+        errView.snp.remakeConstraints { (make) in
+            make.top.equalToSuperview().offset(kNavBarHeight)
+            make.left.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalTo(errHeight)
+        }
+        
+        // 使用动画来平滑地改变布局
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    func hideError() {
+        
+        // 收起错误提示
+        errView.snp.remakeConstraints { (make) in
+            make.top.equalToSuperview().offset(kNavBarHeight-errHeight)
+            make.left.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalTo(errHeight)
+        }
+        
+        // 使用动画来平滑地改变布局
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
 }
 
 extension SendRedPacketController: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
+        var isError = false
+        var errMsg = ""
+        var result = true
+        
         if textField == amountTextField {
+            // 获取当前文本
+            if let currentText = textField.text as NSString? {
+                
+                // 将替换后的文本与当前文本合并
+                var newText = currentText.replacingCharacters(in: range, with: string)
+                LSLog("shouldChangeCharactersIn string:\(string)")
+                
+                // 小数点只允许存在一个，当第一个字符输入是“.”时，前方加 0
+                let p = "."
+                if string == p {
+                    if currentText.contains(p) {
+                        result = false
+                    } else if currentText.length == 0 {
+                        textField.text = "0"
+                        newText = "0."
+                    }
+                }
+                
+                // 检查是否小数点后超过2位
+                if result {
+                    let separator = "."
+                    let resultArray = newText.components(separatedBy: separator)
+                    if resultArray.count >= 2 {
+                        let lastStr = resultArray[1]
+                        result = lastStr.count <= 2
+                    }
+                }
+                
+                // 检查是否超过了最大字符数
+                if result {
+                    result = newText.count <= maxAmountLength
+                }
+                
+                // 结果有效，检查新文本是否合规，结果无效，检查老文本是否合规
+                if result {
+                    let inputValue = Double(newText)
+                    // 使用格式化字符串将Double值保留两位小数
+                    bigAmountLabel.text = String(format: "¥%.2f", inputValue ?? 0)
+                    bigAmountLabel.sizeToFit()
+                    
+                    amountUnitLabel.isHidden = newText.isEmpty
+                    
+                    // 判断金额是否超出限制
+                    isError = inputValue ?? 0 > Double(maxAmount)
+                    if isError {
+                        errMsg = "单次支付总额不可超过\(maxAmount)元"
+                    }
+                    
+                    // 自定义PlaceHolder
+                    amountPlaceHolderLabel.isHidden = !newText.isEmpty
+                } else {
+                    // 判断当前金额是否超出限制
+                    let inputValue = Double(currentText as String)
+                    isError = inputValue ?? 0 > Double(maxAmount)
+                    if isError {
+                        errMsg = "单次支付总额不可超过\(maxAmount)元"
+                    }
+                }
+            }
+        } else if textField == countTextField {
             // 获取当前文本
             if let currentText = textField.text as NSString? {
                 // 将替换后的文本与当前文本合并
                 let newText = currentText.replacingCharacters(in: range, with: string)
-                let inputValue = Double(newText)
-                // 使用格式化字符串将Double值保留两位小数
-                bigAmountLabel.text = String(format: "¥%.2f", inputValue ?? 0)
                 
-                amountUnitLabel.isHidden = newText.isEmpty
+                // 检查是否超过了最大字符数
+                result = newText.count <= maxCountLength
                 
-                return newText.count <= maxCharacterCount
+                // 结果有效，检查新文本是否合规，结果无效，检查老文本是否合规
+                if result {
+                    // 判断红包个数是否超出了人数限制
+                    let count:Int = Int(newText) ?? 0
+                    isError = count > personCount
+                    if isError {
+                        errMsg = "红包个数不可超过当前群聊人数"
+                    }
+                } else {
+                    // 判断红包个数是否超出了人数限制
+                    let count:Int = Int(currentText as String) ?? 0
+                    isError = count > personCount
+                    if isError {
+                        errMsg = "红包个数不可超过当前群聊人数"
+                    }
+                }
             }
         }
         
-        // 检查是否超过了最大字符数
-        return true
+        if isError {
+            showError(errMsg)
+        } else {
+            hideError()
+        }
+        
+        return result
     }
 }
 
@@ -321,6 +466,8 @@ extension SendRedPacketController {
     
     fileprivate func setupUI() {
         
+        view.addSubview(errView)
+        errView.addSubview(errLabel)
         view.addSubview(typeSelectBtn)
         typeSelectBtn.addSubview(typeLabel)
         typeSelectBtn.addSubview(typeArrow)
@@ -332,13 +479,25 @@ extension SendRedPacketController {
         view.addSubview(amountView)
         amountView.addSubview(amountLabel)
         amountView.addSubview(amountTextField)
+        amountView.addSubview(amountPlaceHolderLabel)
         amountView.addSubview(amountUnitLabel)
         view.addSubview(bigAmountLabel)
         view.addSubview(sendBtn)
         
         
+        errView.snp.makeConstraints { (make) in
+            make.top.equalToSuperview().offset(kNavBarHeight-errHeight)
+            make.left.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalTo(errHeight)
+        }
+        
+        errLabel.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
+        }
+        
         typeSelectBtn.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(kNavBarHeight+yMargin)
+            make.top.equalTo(errView.snp.bottom).offset(yMargin)
             make.left.equalToSuperview().offset(xMargin)
             make.size.equalTo(CGSize(width: 100, height: 24))
         }
@@ -383,7 +542,7 @@ extension SendRedPacketController {
         
         if uniqueCode.isEmpty {
             amountView.snp.makeConstraints { (make) in
-                make.top.equalToSuperview().offset(kNavBarHeight+yMargin)
+                make.top.equalTo(errView.snp.bottom).offset(yMargin)
                 make.left.equalToSuperview().offset(xMargin)
                 make.right.equalToSuperview().offset(-xMargin)
                 make.height.equalTo(58)
@@ -403,6 +562,11 @@ extension SendRedPacketController {
         }
         
         amountTextField.snp.makeConstraints { (make) in
+            make.right.equalToSuperview().offset(-xMargin)
+            make.centerY.equalToSuperview()
+        }
+        
+        amountPlaceHolderLabel.snp.makeConstraints { (make) in
             make.right.equalToSuperview().offset(-xMargin)
             make.centerY.equalToSuperview()
         }
