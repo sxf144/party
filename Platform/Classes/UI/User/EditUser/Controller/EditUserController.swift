@@ -46,11 +46,12 @@ class EditUserController: BaseController {
     }()
     
     fileprivate lazy var avatar:UIImageView = {
-        let iv = UIImageView()
-        iv.layer.cornerRadius = 57
-        iv.clipsToBounds = true
-        iv.kf.setImage(with: URL(string: userInfo.portrait ), placeholder: PlaceHolderAvatar)
-        return iv
+        let imageView = UIImageView()
+        imageView.layer.cornerRadius = 57
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFill
+        imageView.kf.setImage(with: URL(string: userInfo.portrait ), placeholder: PlaceHolderAvatar)
+        return imageView
     }()
     
     fileprivate lazy var iconAlbum:UIImageView = {
@@ -74,11 +75,21 @@ extension EditUserController {
             // your code
             if results.count > 0 {
                 let zlResultModel:ZLResultModel = results[0]
-                OSSManager.shared.uploadData(zlResultModel.image) { resp in
-                    LSLog("uploadData resp:\(resp)")
-                    // 刷新头像
-                    self?.currAvatarUrl = resp.fullUrl
-                    self?.avatar.kf.setImage(with: URL(string: self?.currAvatarUrl ?? ""), placeholder: PlaceHolderAvatar)
+                if let data = zlResultModel.image.pngData() {
+                    LSHUD.showLoading("上传中...")
+                    OSSManager.shared.uploadData(data, type: .portrait, suffix: ".png") { resp in
+                        LSLog("uploadData resp:\(resp)")
+                        LSHUD.hide()
+                        if resp.status == .success {
+                            // 刷新头像
+                            self?.currAvatarUrl = resp.fullUrl
+                            self?.avatar.kf.setImage(with: URL(string: self?.currAvatarUrl ?? ""), placeholder: PlaceHolderAvatar)
+                            self?.updateAvatar()
+                            
+                        } else {
+                            LSHUD.showInfo("上传失败")
+                        }
+                    }
                 }
             }
         }

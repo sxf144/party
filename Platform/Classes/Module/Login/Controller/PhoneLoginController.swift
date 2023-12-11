@@ -105,7 +105,7 @@ extension PhoneLoginController {
     @objc func startCountdown() {
         
         guard let phoneNum = phoneNumberTextField.text else {
-            LSHUD.showError("请输入电话号码")
+            LSHUD.showInfo("请输入电话号码")
             return
         }
         

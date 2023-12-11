@@ -31,6 +31,10 @@ class UserInfoModel {
     
     /// IM标识
     var userSig:String = ""
+    /// IM标识过期时间
+    var expiresIn:Int64 = 0
+    /// IM标识过期时间戳
+    var expireTimestamp:Int64 = 0
     /// 用户简介
     var intro:String = ""
     /// 用户手机号码
@@ -49,6 +53,8 @@ class UserInfoModel {
     
     init(_ json:JSON) {
         userSig = json["im"]["user_sig"].stringValue
+        expiresIn = json["im"]["expires_in"].int64Value
+        expireTimestamp = json["expire_timestamp"].int64Value
         intro = json["user"]["intro"].stringValue
         mobile = json["user"]["mobile"].stringValue
         nick = json["user"]["nick"].stringValue
@@ -63,7 +69,9 @@ class UserInfoModel {
     func modelToJson()->JSON{
         
         let json:JSON = [
-            "im": ["user_sig": userSig],
+            "im": ["user_sig": userSig,
+                   "expires_in": expiresIn,
+                   "expire_timestamp": expireTimestamp == 0 ? (Int64(Date().timeIntervalSince1970) + expiresIn) : expireTimestamp],
             "user": ["intro": intro,
                      "mobile": mobile,
                      "nick": nick,

@@ -50,8 +50,13 @@ extension NavigationController: UIGestureRecognizerDelegate,UINavigationControll
                 self.interactivePopGestureRecognizer?.isEnabled = true
             }
         }
-        
     }
     
+    override func pushViewController(_ viewController: UIViewController, animated: Bool) {
+        if (self.children.count == 1) {
+            viewController.hidesBottomBarWhenPushed = true;
+        }
+        super.pushViewController(viewController, animated: animated)
+    }
     
 }

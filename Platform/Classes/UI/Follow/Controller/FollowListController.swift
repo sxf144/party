@@ -91,6 +91,9 @@ extension FollowListController {
                     if (self.followList.totalCount <= self.followList.pageNum * self.followList.pageSize) {
                         self.tableView.mj_footer.endRefreshingWithNoMoreData()
                     }
+                    
+                    // 判断是否展示空页面
+                    self.isEmpty()
                 }
             } else {
                 LSLog("getFollowList fail")
@@ -109,6 +112,14 @@ extension FollowListController {
         if (followList.totalCount > followList.pageNum * followList.pageSize) {
             let pn = followList.pageNum + 1
             getFollowList(pageNum: pn, pageSize: followList.pageSize)
+        }
+    }
+    
+    func isEmpty() {
+        if followList.users.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
         }
     }
     
@@ -168,7 +179,7 @@ extension FollowListController: UITableViewDataSource, UITableViewDelegate, UISc
         if needSelect {
             followList.users[indexPath.row].selected = !item.selected
             resetSelectedNum()
-            tableView.reloadRows(at: [indexPath], with: .fade)
+            tableView.reloadRows(at: [indexPath], with: .automatic)
         } else {
             PageManager.shared.pushToUserPage(item.userId )
         }

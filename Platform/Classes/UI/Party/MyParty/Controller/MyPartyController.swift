@@ -16,11 +16,12 @@ class MyPartyController: BaseController {
     var partyList: MyPartyModel = MyPartyModel()
 
     override func viewDidLoad() {
-        showNavifationBar = false
-        slideBackEnabled = false
+//        showNavifationBar = false
+//        slideBackEnabled = false
         view.backgroundColor = UIColor.ls_color("#F8F8F8")
         
         super.viewDidLoad()
+        resetNavigation()
         setupUI()
         addObservers()
         
@@ -49,6 +50,7 @@ class MyPartyController: BaseController {
         tableView.separatorStyle = .none
         tableView.estimatedRowHeight = CellHeight
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 5))
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         } else {
@@ -93,6 +95,9 @@ extension MyPartyController {
                 if (self.partyList.totalCount <= self.partyList.pageNum * self.partyList.pageSize) {
                     self.tableView.mj_footer.endRefreshingWithNoMoreData()
                 }
+                
+                // 判断是否展示空页面
+                self.isEmpty()
             } else {
                 LSLog("getMyParty fail")
             }
@@ -113,10 +118,18 @@ extension MyPartyController {
         }
     }
     
+    func isEmpty() {
+        if partyList.plays.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
+        }
+    }
+    
     func handleData() {
         let len = partyList.plays.count
         for i in 0 ..< len {
-            var item  = partyList.plays[i]
+            let item  = partyList.plays[i]
             if (item.state == 2 || item.state == 3) {
                 item.firstInvalid = true
                 partyList.plays[i] = item
@@ -176,29 +189,43 @@ extension MyPartyController: UITableViewDataSource, UITableViewDelegate, UIScrol
         return kNavBarHeight
     }
     
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: kNavBarHeight))
-        headerView.backgroundColor = UIColor.ls_color("#F8F8F8")
-        let titleLabel = UILabel(frame: CGRect(x: 16, y: kStatusBarHeight + 10, width: headerView.frame.width, height: 24))
-        titleLabel.text = "我的桔"
-        titleLabel.font = UIFont.ls_mediumFont(18)
-        titleLabel.textColor = UIColor.ls_color("#333333")
-        headerView.addSubview(titleLabel)
-        return headerView
-    }
+//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: kNavBarHeight))
+//        headerView.backgroundColor = UIColor.ls_color("#F8F8F8")
+//        let titleLabel = UILabel(frame: CGRect(x: 16, y: kStatusBarHeight + 10, width: headerView.frame.width, height: 24))
+//        titleLabel.text = "我的桔"
+//        titleLabel.font = UIFont.ls_mediumFont(18)
+//        titleLabel.textColor = UIColor.ls_color("#333333")
+//        headerView.addSubview(titleLabel)
+//        return headerView
+//    }
 }
 
 
-extension MyPartyController{
-    fileprivate func setupUI(){
+extension MyPartyController {
+    
+    fileprivate func setupUI() {
         
         view.addSubview(tableView)
         
         tableView.snp.makeConstraints { (make) in
-            make.top.equalToSuperview()
+            make.top.equalToSuperview().offset(kNavBarHeight)
             make.left.equalToSuperview()
             make.right.equalToSuperview()
             make.bottom.equalToSuperview().offset(-kTabBarHeight)
+        }
+    }
+    
+    fileprivate func resetNavigation() {
+        navigationView.leftButton.isHidden = true
+        navigationView.rightButton.isHidden = true
+        navigationView.titleLabel.text = "我的桔"
+        navigationView.titleLabel.font = UIFont.ls_mediumFont(18)
+        navigationView.titleLabel.textColor = UIColor.ls_color("#333333")
+        
+        navigationView.titleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(16)
+            make.bottom.equalToSuperview().offset(-9)
         }
     }
 }

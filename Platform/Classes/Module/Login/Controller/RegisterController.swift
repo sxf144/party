@@ -174,23 +174,23 @@ class RegisterController: BaseController {
     
     @objc func registerBtnAction(){
         if !(topTextField.textField.text ?? "").ls_isMobile(){
-            LSHUD.showError("请输入11位手机号")
+            LSHUD.showInfo("请输入11位手机号")
             return
         }
         
         if centerTextField.textField.text?.count != codeLimit {
-            LSHUD.showError("请输入\(codeLimit)位验证码")
+            LSHUD.showInfo("请输入\(codeLimit)位验证码")
             return
         }
         
         if !((botttomTextField.textField.text ?? "").count >= 6 && (botttomTextField.textField.text ?? "").count <= 16) {
-            LSHUD.showError("请输入6-15位数字、大小写字母或符号")
+            LSHUD.showInfo("请输入6-15位数字、大小写字母或符号")
             return
         }
         
         if type == .register {
             if !agreeBtn.isSelected {
-                LSHUD.showError("请先勾选协议")
+                LSHUD.showInfo("请先勾选协议")
                 return
             }
         }
@@ -267,7 +267,7 @@ class RegisterController: BaseController {
     
     @objc func codeBtnAction(){
         if !(topTextField.textField.text ?? "").ls_isMobile() {
-            LSHUD.showError("请填写正确手机号")
+            LSHUD.showInfo("请填写正确手机号")
             return
         }
         //todo发送验证码，请求成功之后调用

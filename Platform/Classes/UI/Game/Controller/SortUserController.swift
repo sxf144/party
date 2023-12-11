@@ -224,12 +224,6 @@ extension SortUserController {
             
             if resp.status == .success {
                 LSLog("startGame succ")
-                // 返回到群聊
-//                let conv:LIMConversation = LIMConversation()
-//                conv.type = .LIM_GROUP
-//                conv.groupID = self.uniqueCode
-//                conv.conversationID = "group_\(conv.groupID ?? "")"
-//                PageManager.shared.pushToChatController(conv)
                 // 返回到堆栈中的某个特定视图控制器
                 if let targetViewController = PageManager.shared.currentNav()?.viewControllers.first(where: { $0 is ChatController }) {
                     PageManager.shared.currentNav()?.popToViewController(targetViewController, animated: true)

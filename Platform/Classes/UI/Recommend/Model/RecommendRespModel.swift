@@ -55,11 +55,14 @@ struct RecommendItem {
     var latitude:Double = 0
     var longitude: Double = 0
     var likeCnt: Int = 0
+    var like: Bool = true
     var nick: String = ""
     var playName: String = ""
     var portrait: String = ""
     var uniqueCode: String = ""
     var userId: String = ""
+    var startTime: String = ""
+    var endTime: String = ""
     
     init(_ json:JSON) {
         address = json["address"].stringValue
@@ -72,11 +75,14 @@ struct RecommendItem {
         latitude = json["latitude"].doubleValue
         longitude = json["longitude"].doubleValue
         likeCnt = json["like_cnt"].intValue
+        like = json["like"].boolValue
         nick = json["nick"].stringValue
         playName = json["play_name"].stringValue
         portrait = json["portrait"].stringValue
         uniqueCode = json["unique_code"].stringValue
         userId = json["user_id"].stringValue
+        startTime = json["start_time"].stringValue
+        endTime = json["end_time"].stringValue
     }
 }
 

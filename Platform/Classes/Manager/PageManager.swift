@@ -36,35 +36,42 @@ class PageManager: NSObject {
     func pushToPhoneLogin(_ type:PhoneLoginController.ActionType) {
         let vc = PhoneLoginController()
         vc.setType(type)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 完善资料
     func pushToSupplyUser() {
         let vc = SupplyUserController()
-        vc.hidesBottomBarWhenPushed = true
-        currentNav()?.pushViewController(vc, animated: true)
+        // 如果没有头像就跳转入完善资料
+        if let nav = currentNav() {
+            if nav.viewControllers.contains(vc) {
+                nav.pushViewController(vc, animated: true)
+            }
+        }
     }
     
     /// 组个局
     func pushToPublishParty() {
         let vc = PublishPartyController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 游戏列表
     func pushToGameList() {
         let vc = GameListController()
-        vc.hidesBottomBarWhenPushed = true
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    /// 游戏详情
+    func pushToGameDetail(_ item:GameItem) {
+        let vc = GameDetailController()
+        vc.setData(item)
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 发布成功
     func pushToPublishSucc(_ uniqueCode:String, startTime:String, endTime:String, name:String, cover:UIImage?) {
         let vc = PublishSuccController()
-        vc.hidesBottomBarWhenPushed = true
         vc.setData(startTime: startTime, endTime: endTime, uniqueCode: uniqueCode, name: name, cover:cover)
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -73,28 +80,24 @@ class PageManager: NSObject {
     func pushToPartyDetail(_ uniqueCode:String) {
         let vc = PartyDetailController()
         vc.setData(uniqueCode: uniqueCode)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 关注列表
     func pushToFollowListController() {
         let vc = FollowListController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 粉丝列表
     func pushToFansListController() {
         let vc = FansListController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 个人主页
     func pushToUserPage(_ userId:String) {
         let vc = UserPageController()
-        vc.hidesBottomBarWhenPushed = true
         vc.setData(userId: userId)
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -102,7 +105,6 @@ class PageManager: NSObject {
     /// 地图搜索Controller
     func moveInMapSearch() {
         let vc = MapSearchController()
-        vc.hidesBottomBarWhenPushed = true
 
         let transition = CATransition()
         transition.duration = 0.5 // 设置动画持续时间
@@ -121,14 +123,12 @@ class PageManager: NSObject {
     func pushToMapNavigationController(_ landMark:String, address:String, lat:Double, lon:Double) {
         let vc = MapNavigationController()
         vc.setData(landMark, address: address, lat: lat, lon: lon)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 聊天页
     func pushToChatController(_ conv:LIMConversation) {
         let vc = ChatController()
-        vc.hidesBottomBarWhenPushed = true
         vc.setData(conv: conv)
         currentNav()?.pushViewController(vc, animated: true)
     }
@@ -137,7 +137,6 @@ class PageManager: NSObject {
     func presentWebViewController(_ uri:String) {
         let vc = WebViewController()
         vc.setUri(uri)
-        vc.hidesBottomBarWhenPushed = true
         currentVC()?.present(vc, animated: true, completion: nil)
     }
     
@@ -145,7 +144,6 @@ class PageManager: NSObject {
     func presentGameRoundListController(_ gameItem:GameItem) {
         let vc = GameRoundListController()
         vc.setData(gameItem)
-        vc.hidesBottomBarWhenPushed = true
         currentVC()?.present(vc, animated: true, completion: nil)
     }
     
@@ -153,7 +151,6 @@ class PageManager: NSObject {
     func pushToSortUserController(_ uniCode:String, gameItem:GameItem, rounds:[[String:Any]]) {
         let vc = SortUserController()
         vc.setData(uniCode, gameItem: gameItem, rounds: rounds)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
@@ -161,7 +158,6 @@ class PageManager: NSObject {
     func pushToSendRedPacketController(_ uniCode:String, personCount:Int, userId:String, taskId:Int64) {
         let vc = SendRedPacketController()
         vc.setData(uniCode, personCount: personCount, userId: userId, taskId: taskId)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
@@ -169,70 +165,60 @@ class PageManager: NSObject {
     func pushToRedPacketDetailController(_ limMsg:LIMMessage) {
         let vc = RedPacketDetailController()
         vc.setData(limMsg)
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 我的钱包
     func pushToMyBagController(_ userPageData:UserPageModel) {
         let vc = MyBagController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 编辑资料
     func pushToEditUserController() {
         let vc = EditUserController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 收支记录
     func pushToCoinLogController() {
         let vc = CoinLogController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 礼物记录
     func pushToGiftLogController() {
         let vc = GiftLogController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 提现记录
     func pushToCashOutLogController() {
         let vc = CashOutLogController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 提现
     func pushToCashOutController() {
         let vc = CashOutController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 设置
     func pushToSettingController() {
         let vc = SettingController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
     /// 账号管理
     func pushToAccountManagerController() {
         let vc = AccountManagerController()
-        vc.hidesBottomBarWhenPushed = true
         currentNav()?.pushViewController(vc, animated: true)
     }
     
 //    /// 账号管理
 //    func pushToLBXScanViewController() {
 //        let vc = LBXScanviewco()
-//        vc.hidesBottomBarWhenPushed = true
 //        currentNav()?.pushViewController(vc, animated: true)
 //    }
     

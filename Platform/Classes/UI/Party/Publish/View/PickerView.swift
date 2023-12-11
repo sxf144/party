@@ -17,9 +17,12 @@ private let FONTSYS14 = UIFont.systemFont(ofSize: 14)       //H9：28px
 private let TOOL_HEIGHT: CGFloat = 40
 // PickerView高度
 private let PICKER_HEIGHT: CGFloat = SCREEN_HEIGHT/3
+// Slider 高度
+private let SLIDER_HEIGHT: CGFloat = 60
+// 安全区域高度
 private let BOTTOM_HEIGHT: CGFloat = 34
 // PickerView高度
-private let CONTENT_HEIGHT: CGFloat = PICKER_HEIGHT + TOOL_HEIGHT*2 + BOTTOM_HEIGHT
+private let CONTENT_HEIGHT: CGFloat = PICKER_HEIGHT + TOOL_HEIGHT + SLIDER_HEIGHT + BOTTOM_HEIGHT
 
 
 class PickerView: UIView {
@@ -61,9 +64,19 @@ class PickerView: UIView {
         return pickerview
     }()
     
+    /// 持续时间
+    fileprivate lazy var timeIntervalLabel: UILabel = {
+        let label = UILabel(frame: CGRect(x: 20, y: pickerView.frame.maxY, width: SCREEN_WIDTH - 40, height: SLIDER_HEIGHT - TOOL_HEIGHT))
+        label.font = kFontRegualer14
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "持续时间：\(hourCnt ?? 0)h"
+        label.sizeToFit()
+        return label
+    }()
+    
     /// progress
     fileprivate lazy var timeSlider: UISlider = {
-        let slider = UISlider(frame: CGRect(x: 20, y: pickerView.frame.maxY + 20, width: SCREEN_WIDTH - 40, height: TOOL_HEIGHT))
+        let slider = UISlider(frame: CGRect(x: 20, y: timeIntervalLabel.frame.maxY, width: SCREEN_WIDTH - 40, height: TOOL_HEIGHT))
         // 设置UISlider的属性
         slider.minimumValue = 0 // 最小值
         slider.maximumValue = 10 // 最大值
@@ -143,6 +156,9 @@ class PickerView: UIView {
         
         //添加时间选择器
         contentView.addSubview(pickerView)
+        
+        //添加时间提示
+        contentView.addSubview(timeIntervalLabel)
         
         //添加进度条
         contentView.addSubview(timeSlider)
@@ -285,8 +301,8 @@ extension PickerView
         hourCnt = Int(roundedValue)
 
         // 更新标签显示的值
-//        updateValueLabel()
-        LSLog("当前值: \(String(describing: hourCnt))")
+        timeIntervalLabel.text = "持续时间：\(hourCnt ?? 0)h"
+        LSLog("当前值: \(hourCnt ?? 0)")
     }
 }
 

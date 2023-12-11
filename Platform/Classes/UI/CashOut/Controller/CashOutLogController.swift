@@ -32,6 +32,7 @@ class CashOutLogController: BaseController {
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = UIColor.ls_color("#F6F6F6")
+        
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据

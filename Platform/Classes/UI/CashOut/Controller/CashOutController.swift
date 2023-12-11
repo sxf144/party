@@ -267,26 +267,26 @@ extension CashOutController {
         
         if (amountTextField.text!.isEmpty) {
             LSLog("checkParam amount err")
-            LSHUD.showError("未填写「提现金额」")
+            LSHUD.showInfo("未填写「提现金额」")
             return false
         }
         
         let amount = (Int64(amountTextField.text?.trim() ?? "") ?? 0)*100
         if (amount > userPageData.user.coinBalance) {
             LSLog("checkParam amount err")
-            LSHUD.showError("您的余额不足")
+            LSHUD.showInfo("您的余额不足")
             return false
         }
         
         if (alipayAccountTextField.text!.isEmpty) {
             LSLog("checkParam amount err")
-            LSHUD.showError("未填写「支付宝账号」")
+            LSHUD.showInfo("未填写「支付宝账号」")
             return false
         }
         
         if (alipayRealNameTextField.text!.isEmpty) {
             LSLog("checkParam amount err")
-            LSHUD.showError("未填写「真实姓名」")
+            LSHUD.showInfo("未填写「真实姓名」")
             return false
         }
         

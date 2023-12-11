@@ -14,9 +14,20 @@ extension UILabel {
         self.font = textFont
     }
     
-    func ls_set_background_black() {
-        self.backgroundColor = UIColor.ls_color("#000000", alpha: 0.3)
-        self.layer.shadowColor = UIColor.black.cgColor
+    func ls_shadow(_ text: String) {
+        self.clipsToBounds = false
+        self.backgroundColor = .Color_Black_333333
+//        // 设置阴影
+//        let shadow = NSShadow()
+//        shadow.shadowBlurRadius = 3;
+//        shadow.shadowColor = UIColor.red
+//        shadow.shadowOffset = CGSize(width: 2, height: 2)
+//        
+//        self.attributedText = NSAttributedString(string: text, attributes: [NSAttributedString.Key.shadow: shadow])
+        
+        self.layer.shadowColor = UIColor.red.cgColor
+        self.layer.shadowOffset = CGSize(width: 2, height: 2)
         self.layer.shadowOpacity = 0.5
+        self.layer.shadowRadius = 2
     }
 }

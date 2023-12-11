@@ -217,7 +217,16 @@ extension ChatController {
         option.count = PageCount                        // 返回时间范围内所有的消息
         option.userID = conversation.userID
         option.groupID = conversation.groupID
-        option.lastMsg = dataList.count > 0 ? dataList[0].originMessage : nil
+        var lastMsg: V2TIMMessage?
+        for i in 0 ..< dataList.count {
+            let item = dataList[i]
+            if (item.elemType == .LIMElemSystemMsg && item.sysElem?.flag == 1) {
+                continue
+            }
+            lastMsg = item.originMessage
+            break
+        }
+        option.lastMsg = lastMsg
 
         V2TIMManager.shared.getHistoryMessageList(option: option) { msgs in
             LSLog("getHistoryMessageList msgs:\(msgs)")
@@ -303,13 +312,21 @@ extension ChatController {
     
     // 处理其他数据
     func handleOtherData() {
-        guard dataList.count != 0, memberDic.count != 0,  !partyDetail.uniqueCode.isEmpty else {
-            return
+        
+        if uniqueCode.isEmpty {
+            guard dataList.count != 0, memberDic.count != 0 else {
+                return
+            }
+        } else {
+            guard dataList.count != 0, memberDic.count != 0,  !partyDetail.uniqueCode.isEmpty else {
+                return
+            }
         }
         
         // 判断是否是最后一条游戏消息
         var lastGameElemExist = false
-        
+        // 时间分组
+        var lastTimestamp: TimeInterval = 0
         // 从dataList.count-1倒序到0，步长为1
         for i in stride(from: dataList.count-1, through: 0, by: -1) {
             let item = dataList[i]
@@ -349,7 +366,6 @@ extension ChatController {
                     if let toAccount = item.giftElem?.toAccount, memberDic.count > 0 {
                         let toUserInfo:SimpleUserInfo = memberDic[toAccount] ?? SimpleUserInfo()
                         item.giftElem?.toUserName = toUserInfo.nick
-                        LSLog("toUserName:\(item.giftElem?.toUserName ?? ""),nickName:\(toUserInfo.nick)")
                     }
                 
                 case .LIMElemInvite:
@@ -420,6 +436,52 @@ extension ChatController {
             }
             
             dataList[i] = item
+            
+            if let currDate = item.timestamp {
+                if i == 0, !(item.elemType == .LIMElemSystemMsg && item.sysElem?.flag == 1) {
+                    let lastMsg = dataList[i]
+                    let tempSysMsg = LIMMessage()
+                    tempSysMsg.elemType = .LIMElemSystemMsg
+                    if let sysDate = lastMsg.timestamp {
+                        tempSysMsg.timestamp = sysDate
+                        let tempSysElem = LIMSysElem()
+                        tempSysElem.flag = 1
+                        tempSysElem.content = sysDate.ls_formatSysStr()
+                        tempSysMsg.sysElem = tempSysElem
+                    }
+                    
+                    dataList.insert(tempSysMsg, at: 0)
+                } else if lastTimestamp == 0 {
+                    LSLog("lastTimestamp:\(lastTimestamp)")
+                    lastTimestamp = currDate.timeIntervalSince1970
+                } else {
+                    let currTimestamp = currDate.timeIntervalSince1970
+                    // 大于5分钟，插入一条系统消息，重置lastTimestamp
+                    LSLog("currTimestamp:\(currTimestamp), lastTimestamp:\(lastTimestamp)")
+                    if lastTimestamp - currTimestamp > 300 {
+                        let j = i + 1
+                        if j >= 0, j < dataList.count {
+                            let lastMsg = dataList[j]
+                            if (lastMsg.elemType == .LIMElemSystemMsg && lastMsg.sysElem?.flag == 1) {
+                                lastTimestamp = currTimestamp
+                                continue
+                            }
+                            let tempSysMsg = LIMMessage()
+                            tempSysMsg.elemType = .LIMElemSystemMsg
+                            if let sysDate = lastMsg.timestamp {
+                                tempSysMsg.timestamp = sysDate
+                                let tempSysElem = LIMSysElem()
+                                tempSysElem.flag = 1
+                                tempSysElem.content = sysDate.ls_formatSysStr()
+                                tempSysMsg.sysElem = tempSysElem
+                            }
+                            
+                            lastTimestamp = currTimestamp
+                            dataList.insert(tempSysMsg, at: j)
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -472,7 +534,7 @@ extension ChatController {
     func handlePartyDetail() {
         bottomView.setPartyDetail(partyDetail)
         // 设置导航栏图标、名称
-        navigationView.avatar.kf.setImage(with: URL(string: partyDetail.cover), placeholder: PlaceHolderAvatar)
+        navigationView.avatar.kf.setImage(with: URL(string: partyDetail.coverThumbnail), placeholder: PlaceHolderAvatar)
         let personCount = partyDetail.maleCnt + partyDetail.femaleCnt - partyDetail.maleRemainCount - partyDetail.femaleRemainCount
         navigationView.titleLabel.text = "\(conversation.showName ?? "")(\(personCount))"
         navigationView.titleLabel.sizeToFit()
@@ -532,7 +594,7 @@ extension ChatController {
                             limMsg.gameElem?.status = 1
                         } else {
                             LSLog("doneTask fail")
-                            LSHUD.showError(resp.msg)
+                            LSHUD.showInfo(resp.msg)
                         }
                     }
                 }
@@ -595,11 +657,11 @@ extension ChatController {
     
     func sendMessage(_ msg: V2TIMMessage) {
         
-        if let userId = conversation.userID {
+        if let userId = conversation.userID, !userId.isEmpty {
             // 首先判断两者关系，若不是互关、或者被关注，则需要判断当日发送消息数
             if !(userPageData.relation.follow == 2 || userPageData.relation.follow == 3) {
                 if !SimpleDataManager.shared.isCanC2CMsgById(userId) {
-                    LSHUD.showError("对方关注或回复你后，才可以继续聊天")
+                    LSHUD.showInfo("对方关注或回复你后，才可以继续聊天")
                     return
                 }
             }
@@ -756,8 +818,15 @@ extension ChatController {
     
     func report(_ resonItem:ReportReasonItem) {
         // objType 1用户，2局
-        let objType:Int64 = 2
-        let objId:String = uniqueCode
+        var objType: Int64 = 0
+        var objId: String = ""
+        if uniqueCode.isEmpty {
+            objType = 1
+            objId = userPageData.user.userId
+        } else {
+            objType = 2
+            objId = uniqueCode
+        }
         
         NetworkManager.shared.report(objType, objId: objId, reasonId: resonItem.reasonId) { resp in
             if resp.status == .success {
@@ -844,6 +913,18 @@ extension ChatController: V2TIMAdvancedMsgListener {
     
     func onRecvNewMessage(msg: ImSDK_Plus_Swift.V2TIMMessage) {
         LSLog("onRecvNewMessage")
+        // 判断是否当前聊天窗口信息
+        if uniqueCode.isEmpty {
+            guard msg.userID == conversation.userID else {
+                return
+            }
+        } else {
+            guard msg.groupID == conversation.groupID else {
+                return
+            }
+        }
+        
+        // 更新数据
         updateMessage(msg)
         // 清除未读数
         cleanUnread()
@@ -995,6 +1076,34 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "ImageMessageCell", for: indexPath) as! ImageMessageCell
                 tempCell.configure(item, party: partyDetail)
                 tempCell.delegate = self
+                tempCell.imageClickBlock = {
+                    if let imagePath = item.imageElem?.path, !imagePath.isEmpty {
+                        let images = [UIImage(contentsOfFile: imagePath)]
+                        let vc = ZLImagePreviewController(datas: images as [Any], showSelectBtn: false, showBottomView: false)
+                        PageManager.shared.currentNav()?.pushViewController(vc)
+                        
+                    } else if (item.imageElem?.imageList.count ?? 0 > 0) {
+                        
+                        if let imageList = item.imageElem?.imageList, imageList.count > 0 {
+                            var datas: [Any] = []
+                            for image in imageList {
+                                datas.append(URL(string: image.url)!)
+                            }
+                            
+                            let vc = ZLImagePreviewController(datas: datas, index: 0, showSelectBtn: false, showBottomView: false) { url -> ZLURLType in
+                                return .image
+                            } urlImageLoader: { url, imageView, progress, loadFinish in
+                                imageView.kf.setImage(with: url) { receivedSize, totalSize in
+                                    let percentage = (CGFloat(receivedSize) / CGFloat(totalSize))
+                                    progress(percentage)
+                                } completionHandler: { _ in
+                                    loadFinish()
+                                }
+                            }
+                            PageManager.shared.currentNav()?.pushViewController(vc)
+                        }
+                    }
+                }
                 cell = tempCell
                 
             case .LIMElemGift:
@@ -1021,7 +1130,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                             if resp.status == .success {
                                 LSLog("fetchRedPacket succ")
                                 item.redPacketElem?.status = 1
-                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
                                 if let redPacketId = item.redPacketElem?.id {
                                     SimpleDataManager.shared.saveRedPacketStatusById(redPacketId)
                                 }
@@ -1030,11 +1139,12 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                             } else {
                                 // 红包已抢完，红包已领取，红包已过期，其他未知错误，都算已读
                                 LSLog("fetchRedPacket fail")
-                                LSHUD.showError(resp.msg)
+                                LSHUD.showInfo(resp.msg)
                                 // 处理红包已处理的状态
                                 item.redPacketElem?.status = 1
-                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+                                tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
                                 if let redPacketId = item.redPacketElem?.id {
+                                    LSLog("redPacketId:\(redPacketId)")
                                     SimpleDataManager.shared.saveRedPacketStatusById(redPacketId)
                                 }
                             }
@@ -1060,7 +1170,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
     //                                    tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
                                 } else {
                                     LSLog("doneTask fail")
-                                    LSHUD.showError(resp.msg)
+                                    LSHUD.showInfo(resp.msg)
                                 }
                             }
                         }
@@ -1087,7 +1197,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                     item.gameElem?.status = 1
                                 } else {
                                     LSLog("doneTask fail")
-                                    LSHUD.showError(resp.msg)
+                                    LSHUD.showInfo(resp.msg)
                                 }
                             }
                         }
@@ -1143,7 +1253,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                         item.gameElem?.status = 1
                     } else {
                         LSLog("doneTask fail")
-                        LSHUD.showError(resp.msg)
+                        LSHUD.showInfo(resp.msg)
                     }
                 }
             }

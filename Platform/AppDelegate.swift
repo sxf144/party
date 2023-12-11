@@ -218,7 +218,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if (rootClassName == className) {
                 // 登录成功，判断是否跳转入完善资料界面
                 let userInfo = LoginManager.shared.getUserInfo()
-                // 如果没有头像就跳转入完善资料
                 if (userInfo?.portrait == nil || userInfo?.portrait == "") {
                     PageManager.shared.pushToSupplyUser()
                 }

@@ -29,6 +29,8 @@ class PublishPartyController: BaseController {
     var selectGameItem: GameItem = GameListResp.defaultGameItem()
     var coverImage: UIImage?
     var coverUrl: String = ""
+    var videoData: Data?
+    var suffix: String = ""
     var publicType: Int64 = 1
     var locationItem: AMapPOI?
     
@@ -39,8 +41,11 @@ class PublishPartyController: BaseController {
         
         // 初始化条件
         clickType1Btn(type1Btn)
-        // 弹出照片选择
-        imageTapped()
+        
+        // 弹出照片选择，延迟是因为直接弹出，会导致tab不会消失的bug
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            self.imageTapped()
+        }
     }
     
     // scrollView
@@ -85,7 +90,7 @@ class PublishPartyController: BaseController {
     // 创建占位文本的UILabel
     fileprivate lazy var introducePlaceHolderLabel: UILabel = {
         let label = UILabel()
-        label.text = "简单介绍一下~"
+        label.text = "简单介绍一下～"
         label.textColor = UIColor.ls_color("#aaaaaa") // 自定义字体颜色
         label.font = UIFont.ls_font(14) // 自定义字体
         
@@ -380,8 +385,13 @@ class PublishPartyController: BaseController {
 
 extension PublishPartyController {
     
+    // 显示图片选择器
     @objc func imageTapped() {
         resignResponders()
+        // 重置数据
+        coverImage = nil
+        videoData = nil
+        
         let pickerConfig = ZLPhotoConfiguration.default()
         pickerConfig.maxSelectCount = 1 // 设置最大选择数量为 1
         let ps = ZLPhotoPreviewSheet()
@@ -389,8 +399,30 @@ extension PublishPartyController {
             // your code
             if results.count > 0 {
                 let zlResultModel:ZLResultModel = results[0]
+                let asset = zlResultModel.asset
                 self?.coverImage = zlResultModel.image
                 self?.cover.image = self?.coverImage
+                PhotoManager.shared.fetchAssetData(asset: asset) { (data, duration, fileExtension) in
+                    if let data = data {
+                        // 处理获取到的图片或视频数据
+                        LSLog("Successfully fetched data.")
+                        if let duration = duration {
+                            LSLog("Video duration: \(duration) seconds")
+                        }
+                        if let fileExtension = fileExtension {
+                            LSLog("File extension: \(fileExtension)")
+                            self?.suffix = ".\(fileExtension)"
+                        }
+                        
+                        if asset.mediaType == .video {
+                            self?.videoData = data
+                        }
+                        
+                    } else {
+                        // 处理获取数据失败的情况
+                        LSLog("Failed to fetch data.")
+                    }
+                }
             }
         }
         
@@ -478,19 +510,27 @@ extension PublishPartyController {
         
         // 检查各个字段是否有效
         if !checkParam() {
-            LSHUD.hide()
             return
         }
         
-        // 检查参数完毕，先上传图片到阿里oss
-        LSHUD.showLoading()
-        if let image = coverImage {
-            OSSManager.shared.uploadData(image) { [weak self] resp in
+        // 检查参数完毕，先上传图片/视频到阿里oss
+        var type = OBJECT_KEY_TYPE.img
+        var finalData: Data?
+        if let data = videoData {
+            type = OBJECT_KEY_TYPE.video
+            finalData = data
+        } else if let data = coverImage?.pngData() {
+            type = OBJECT_KEY_TYPE.img
+            finalData = data
+        }
+        
+        if finalData != nil {
+            LSHUD.showLoading("发布中...")
+            OSSManager.shared.uploadData(finalData, type: type, suffix: suffix) { [weak self] resp in
                 LSLog("uploadData resp:\(resp)")
                 if (resp.status == .success) {
-                    // 刷新图片
+                    //
                     self?.coverUrl = resp.fullUrl
-                    self?.cover.kf.setImage(with: URL(string: self?.coverUrl))
                     
                     // 发布
                     self?.publishParty()
@@ -538,37 +578,37 @@ extension PublishPartyController {
     func checkParam() -> Bool {
         if (coverImage == nil) {
             LSLog("checkParam coverImage err")
-            LSHUD.showError("请选择图片")
+            LSHUD.showInfo("请选择图片/视频")
             return false
         }
         
 //        if (introduce.text.isEmpty) {
 //            LSLog("checkParam introduce err")
-//            LSHUD.showError("请添加描述")
+//            LSHUD.showInfo("请添加描述")
 //            return false
 //        }
         
         if (beginTime.isEmpty) {
             LSLog("checkParam beginTime err")
-            LSHUD.showError("请选择时间")
+            LSHUD.showInfo("请选择时间")
             return false
         }
         
 //        if (endTime.isEmpty) {
 //            LSLog("checkParam endTime err")
-//            LSHUD.showError("请选择时间")
+//            LSHUD.showInfo("请选择时间")
 //            return false
 //        }
         
         if ((locationItem == nil) || (locationItem?.location == nil)) {
             LSLog("checkParam locationItem err")
-            LSHUD.showError("请选择位置")
+            LSHUD.showInfo("请选择位置")
             return false
         }
         
         if (maleCnt == 0 || femaleCnt == 0) {
             LSLog("checkParam maleCnt err")
-            LSHUD.showError("请设置人数")
+            LSHUD.showInfo("请设置人数")
             return false
         }
         

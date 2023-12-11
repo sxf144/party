@@ -31,6 +31,10 @@ class PartyDetailModel {
     var commentCnt: Int64 = 0
     /// 图片或者视频
     var cover: String = ""
+    /// 图片或者视频
+    var coverThumbnail: String = ""
+    /// 媒体类别
+    var coverType: Int64 = 0
     /// 开始时间
     var startTime: String = ""
     /// 结束时间
@@ -80,6 +84,8 @@ class PartyDetailModel {
         cityName = json["city_name"].stringValue
         commentCnt = json["comment_cnt"].int64Value
         cover = json["cover"].stringValue
+        coverThumbnail = json["cover_thumbnail"].stringValue
+        coverType = json["cover_type"].int64Value
         startTime = json["start_time"].stringValue
         endTime = json["end_time"].stringValue
         fee = json["fee"].int64Value

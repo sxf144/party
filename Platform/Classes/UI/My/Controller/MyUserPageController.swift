@@ -173,7 +173,7 @@ class MyUserPageController: BaseController {
         let label = UILabel()
         label.font = UIFont.ls_boldFont(18)
         label.textColor = .white
-        label.text = " "
+        label.text = ""
         label.textAlignment = .center
         return label
     }()

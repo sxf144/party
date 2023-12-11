@@ -55,6 +55,10 @@ extension SimpleDataManager {
     
     // 保存发送私聊信息
     func saveC2CMsgCountById(_ id: String) {
+        if id.isEmpty {
+            return
+        }
+        
         let dateStr = Date().ls_formatterStr()
         let keyUser: String = "\(id)\(dateStr)"
         let keyTotal: String = "\(dateStr)"
@@ -83,7 +87,11 @@ extension SimpleDataManager {
         let key: String = "\(id)\(dateStr)"
         var count: Int = 0
         if localC2CMsgCount.count > 0, !key.isEmpty {
-            count = localC2CMsgCount[key] as! Int
+            if let obj:Int = localC2CMsgCount[key] as? Int {
+                count = obj
+            } else {
+                count = 0
+            }
         }
         return count
     }
@@ -97,13 +105,19 @@ extension SimpleDataManager {
         let key: String = "\(dateStr)"
         var count: Int = 0
         if localC2CMsgCount.count > 0, !key.isEmpty {
-            count = localC2CMsgCount[key] as! Int
+            if let obj:Int = localC2CMsgCount[key] as? Int {
+                count = obj
+            } else {
+                count = 0
+            }
         }
         return count
     }
     
     func isCanC2CMsgById(_ id: String) -> Bool {
-        
+        if (id.isEmpty) {
+            return false
+        }
         if localC2CMsgCount.count == 0 {
             localC2CMsgCount = UserDefaults.standard.dictionary(forKey: C2C_RECORD) ?? [String: Any]()
         }
@@ -113,11 +127,19 @@ extension SimpleDataManager {
         
         var countUser: Int = 0
         if localC2CMsgCount.count > 0, !keyUser.isEmpty {
-            countUser = localC2CMsgCount[keyUser] as! Int
+            if let obj:Int = localC2CMsgCount[keyUser] as? Int {
+                countUser = obj
+            } else {
+                countUser = 0
+            }
         }
         var countTotal: Int = 0
         if localC2CMsgCount.count > 0, !keyTotal.isEmpty {
-            countTotal = localC2CMsgCount[keyTotal] as! Int
+            if let obj:Int = localC2CMsgCount[keyTotal] as? Int {
+                countTotal = obj
+            } else {
+                countTotal = 0
+            }
         }
         
         return countUser < 1 && countTotal < 10

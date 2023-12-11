@@ -26,7 +26,7 @@ class MapNavigationController: BaseController {
         super.viewDidLoad()
         setupUI()
         
-        AMapNaviWalkManager.sharedInstance().delegate = self
+//        AMapNaviWalkManager.sharedInstance().delegate = self
     }
     
     
@@ -112,20 +112,70 @@ extension MapNavigationController {
     // 导航
     @objc func clickNavigationBtn(_ sender:UIButton) {
         LSLog("clickNavigationBtn")
-        let startLat = MyLocationManager.shared.currLocation.coordinate.latitude
-        let startLon = MyLocationManager.shared.currLocation.coordinate.longitude
-        let startPoint:AMapNaviPoint = AMapNaviPoint()
-        startPoint.latitude = startLat
-        startPoint.longitude = startLon
+        // 规划路径
+//        let startLat = MyLocationManager.shared.currLocation.coordinate.latitude
+//        let startLon = MyLocationManager.shared.currLocation.coordinate.longitude
+//        let startPoint:AMapNaviPoint = AMapNaviPoint()
+//        startPoint.latitude = startLat
+//        startPoint.longitude = startLon
+//        
+//        let endLat = self.latitude
+//        let endLon = self.longitude
+//        let endPoint:AMapNaviPoint = AMapNaviPoint()
+//        endPoint.latitude = endLat
+//        endPoint.longitude = endLon
+//        
+//        let ret = AMapNaviWalkManager.sharedInstance().calculateWalkRoute(withStart: [startPoint], end: [endPoint])
+//        LSLog("calculateWalkRoute ret:\(ret)")
         
-        let endLat = self.latitude
-        let endLon = self.longitude
-        let endPoint:AMapNaviPoint = AMapNaviPoint()
-        endPoint.latitude = endLat
-        endPoint.longitude = endLon
+        // 跳转到外部导航
+        showNavigationActionSheet()
+    }
+    
+    func showNavigationActionSheet() {
+        // 创建一个UIAlertController
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        // 添加操作按钮
+        let option1 = UIAlertAction(title: "高德地图", style: .default) { (action) in
+            if let url = URL(string: "iosamap://navi?sourceApplication=juzitang&lat=\(self.latitude)&lon=\(self.longitude)&dev=0&style=2") {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                // 处理URL创建失败的情况
+                LSHUD.showInfo("位置错误")
+            }
+        }
+
+        let option2 = UIAlertAction(title: "百度地图", style: .default) { (action) in
+            if let url = URL(string: "baidumap://map/direction?origin=latlng:0,0|name:我的位置&destination=latlng:\(self.latitude),\(self.longitude)|name:目的地&mode=driving&coord_type=gcj02") {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                // 处理URL创建失败的情况
+                LSHUD.showInfo("位置错误")
+            }
+        }
         
-        let ret = AMapNaviWalkManager.sharedInstance().calculateWalkRoute(withStart: [startPoint], end: [endPoint])
-        LSLog("calculateWalkRoute ret:\(ret)")
+        let option3 = UIAlertAction(title: "腾讯地图", style: .default) { (action) in
+            if let url = URL(string: "qqmap://map/routeplan?type=drive&from=我的位置&fromcoord=0,0&tocoord=\(self.latitude),\(self.longitude)&to=目的地") {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                // 处理URL创建失败的情况
+                LSHUD.showInfo("位置错误")
+            }
+        }
+
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel) { (action) in
+            // 处理取消的操作
+        }
+
+        // 将操作按钮添加到UIAlertController
+        alertController.addAction(option1)
+        alertController.addAction(option2)
+        alertController.addAction(option3)
+        alertController.addAction(cancelAction)
+
+        // 显示UIAlertController
+        present(alertController, animated: true, completion: nil)
     }
 }
 

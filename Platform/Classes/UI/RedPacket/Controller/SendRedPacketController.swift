@@ -306,14 +306,14 @@ extension SendRedPacketController {
         } else {
             if (countTextField.text!.isEmpty) {
                 LSLog("checkParam count err")
-                LSHUD.showError("未填写「红包个数」")
+                LSHUD.showInfo("未填写「红包个数」")
                 return false
             }
         }
         
         if (amountTextField.text!.isEmpty) {
             LSLog("checkParam amount err")
-            LSHUD.showError("未填写「总金额」")
+            LSHUD.showInfo("未填写「总金额」")
             return false
         }
         

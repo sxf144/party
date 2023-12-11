@@ -161,7 +161,7 @@ extension GameListController {
     @objc func clickCardBtn(_ sender:UIButton) {
         LSLog("clickCardBtn")
         if (selectedIndex < 0 || selectedIndex >= gameList.items.count) {
-            LSHUD.showError("请选择游戏")
+            LSHUD.showInfo("请选择游戏")
             return
         }
         let gameItem = gameList.items[selectedIndex]
@@ -181,7 +181,7 @@ extension GameListController {
     @objc func clickNextBtn(_ sender:UIButton) {
         LSLog("clickNextBtn")
         if (selectedIndex < 0 || selectedIndex >= gameList.items.count) {
-            LSHUD.showError("请选择游戏")
+            LSHUD.showInfo("请选择游戏")
             return
         }
         let gameItem = gameList.items[selectedIndex]

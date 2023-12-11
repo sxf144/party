@@ -162,10 +162,10 @@ extension ParticipateListController: UITableViewDataSource, UITableViewDelegate,
         if mutiSelect {
             participateList[indexPath.row].selected = !item.selected
             resetSelectedNum()
-            tableView.reloadRows(at: [indexPath], with: .fade)
+            tableView.reloadRows(at: [indexPath], with: .automatic)
         } else {
             item.selected = true
-            tableView.reloadRows(at: [indexPath], with: .none)
+            tableView.reloadRows(at: [indexPath], with: .automatic)
             
             if let selectedBlock = selectedBlock {
                 selectedBlock([item])

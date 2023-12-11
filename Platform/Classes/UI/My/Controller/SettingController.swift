@@ -92,7 +92,7 @@ extension SettingController {
         }
         
         let okAction = BaseAlertAction(title: "确定", style: .destructive) {(action) in
-            LoginManager.shared.logout()
+            LoginManager.shared.loginExpird()
         }
         
         alertController.addAction(cancelAction)

@@ -124,7 +124,7 @@ extension RedPacketMessageCell {
             
             contentBtn.snp.remakeConstraints { (make) in
                 make.right.equalToSuperview().offset(-xMargin)
-                make.top.equalToSuperview().offset(yMargin + 22)
+                make.top.equalToSuperview().offset(yMargin)
                 make.size.equalTo(CGSize(width: ContentWidth, height: 70))
                 make.bottom.equalToSuperview().offset(-yMargin)
             }

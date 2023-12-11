@@ -13,7 +13,7 @@ let DAY_SECOND = 60*60*24
 /// 一天的毫秒数
 let DAY_MILLION_SECOND = 1000*60*60*24
 
-extension Date{
+extension Date {
    /// 获取当前 秒级 时间戳 - 10位
     var ls_timeStamp : String {
         let timeInterval: TimeInterval = self.timeIntervalSince1970
@@ -150,6 +150,26 @@ extension Date{
                 formatter.dateFormat = "MM-dd HH:mm"
                 str = formatter.string(from: date)
             }
+        }
+        
+        return str
+    }
+    
+    /// 日期格式化字符串
+    func ls_formatSysStr() -> String {
+        var str = ""
+        let timeInterval: TimeInterval = self.timeIntervalSince1970
+        let now = Date().timeIntervalSince1970
+        let interval = now - timeInterval
+        let formatter = DateFormatter.init()
+        if (interval < (24 * 60 * 60)) {
+            // 按时间格式输出
+            formatter.dateFormat = "HH:mm"
+            str = formatter.string(from: self)
+        } else {
+            // 按时间格式输出
+            formatter.dateFormat = "MM-dd HH:mm"
+            str = formatter.string(from: self)
         }
         
         return str

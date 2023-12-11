@@ -51,6 +51,8 @@ class GameStoryMessageCell: UITableViewCell {
         label.textColor = UIColor.ls_color("#A1826E")
         label.text = ""
         label.textAlignment = .left
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         label.sizeToFit()
         return label
     }()
@@ -83,7 +85,6 @@ extension GameStoryMessageCell {
         // 消息内容
         messageLabel.text = item.gameElem?.action.roundInfo.introduction
         messageLabel.sizeToFit()
-        
         
         // 是否展示确认按钮
         if item.gameElem?.action.roundInfo.showSeconds == 0 {

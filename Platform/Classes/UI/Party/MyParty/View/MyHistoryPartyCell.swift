@@ -130,7 +130,7 @@ extension MyHistoryPartyCell {
         item = citem
         
         // 桔封面
-        cover.kf.setImage(with: URL(string: item.cover), placeholder: PlaceHolderSmall)
+        cover.kf.setImage(with: URL(string: item.coverThumbnail), placeholder: PlaceHolderSmall)
 
         // 桔名称
         nameLabel.text = item.name

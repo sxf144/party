@@ -16,6 +16,7 @@ class RedPacketDetailController: BaseController {
     let topHeight: CGFloat = 336.0
     let redViewHeight: CGFloat = 124.0
     let CellHeight: CGFloat = 62
+    let userInfo: UserInfoModel = LoginManager.shared.getUserInfo() ?? UserInfoModel()
     var redPacketDetail: QueryRedPacketModel = QueryRedPacketModel()
     var limMsg: LIMMessage = LIMMessage()
     
@@ -196,13 +197,26 @@ extension RedPacketDetailController {
         nickLabel.text = "\(limMsg.nickName ?? "")发出的红包"
         nickLabel.sizeToFit()
         
-        // 金额
-        let unitString: String = "元"
-        let amountString: String = String(format: "%.2f\(unitString)", Double(redPacketDetail.amount)/100 )
-        let attributedText = NSMutableAttributedString(string: amountString)
-        attributedText.addAttributes([.font: kFontRegualer14], range: NSRange(location: attributedText.length - unitString.count, length: unitString.count))
-        myAmountLabel.attributedText = attributedText
-        myAmountLabel.sizeToFit()
+        // 自己领取的金额
+        var amount:Int64 = 0
+        for item in redPacketDetail.logs {
+            if item.userId == userInfo.userId {
+                amount = item.amount
+                break
+            }
+        }
+        
+        if amount == 0 {
+            myAmountLabel.isHidden = true
+        } else {
+            myAmountLabel.isHidden = false
+            let unitString: String = "元"
+            let amountString: String = String(format: "%.2f\(unitString)", Double(amount)/100 )
+            let attributedText = NSMutableAttributedString(string: amountString)
+            attributedText.addAttributes([.font: kFontRegualer14], range: NSRange(location: attributedText.length - unitString.count, length: unitString.count))
+            myAmountLabel.attributedText = attributedText
+            myAmountLabel.sizeToFit()
+        }
         
         // 记录标题
         logTitleLabel.text = String(format: "\(redPacketDetail.count)个红包，总金额：¥%.2f", Double(redPacketDetail.amount)/100 )

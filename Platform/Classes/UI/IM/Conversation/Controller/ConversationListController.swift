@@ -17,11 +17,11 @@ class ConversationListController: BaseController, V2TIMSDKListener {
     var dataList: [LIMConversation] = []
 
     override func viewDidLoad() {
-        showNavifationBar = false
-        slideBackEnabled = false
+//        showNavifationBar = false
+//        slideBackEnabled = false
         view.backgroundColor = UIColor.ls_color("#F8F8F8")
-        
         super.viewDidLoad()
+        resetNavigation()
         setupUI()
         IMManager.shared.conversationDelegate = self
         
@@ -61,12 +61,24 @@ class ConversationListController: BaseController, V2TIMSDKListener {
 extension ConversationListController {
 
     func loadNewData() {
+        
         IMManager.shared.loadConversationList {
             self.dataList = IMManager.shared.conversationList
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
             self.tableView.reloadData()
+        }
+        
+        // 判断是否展示空页面
+        self.isEmpty()
+    }
+    
+    func isEmpty() {
+        if dataList.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
         }
     }
 }
@@ -101,16 +113,16 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
         return kNavBarHeight
     }
     
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: kNavBarHeight))
-        headerView.backgroundColor = UIColor.ls_color("#F8F8F8")
-        let titleLabel = UILabel(frame: CGRect(x: 16, y: kStatusBarHeight + 10, width: headerView.frame.width, height: 24))
-        titleLabel.text = "聊天"
-        titleLabel.font = UIFont.ls_mediumFont(18)
-        titleLabel.textColor = UIColor.ls_color("#333333")
-        headerView.addSubview(titleLabel)
-        return headerView
-    }
+//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: kNavBarHeight))
+//        headerView.backgroundColor = UIColor.ls_color("#F8F8F8")
+//        let titleLabel = UILabel(frame: CGRect(x: 16, y: kStatusBarHeight + 10, width: headerView.frame.width, height: 24))
+//        titleLabel.text = "聊天"
+//        titleLabel.font = UIFont.ls_mediumFont(18)
+//        titleLabel.textColor = UIColor.ls_color("#333333")
+//        headerView.addSubview(titleLabel)
+//        return headerView
+//    }
     
     // 启用左滑删除
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -133,7 +145,7 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
             
             // 删除当前数据
             dataList.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
     
@@ -143,16 +155,30 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
     }
 }
 
-extension ConversationListController{
-    fileprivate func setupUI(){
+extension ConversationListController {
+    
+    fileprivate func setupUI() {
         
         view.addSubview(tableView)
         
         tableView.snp.makeConstraints { (make) in
-            make.top.equalToSuperview()
+            make.top.equalToSuperview().offset(kNavBarHeight)
             make.left.equalToSuperview()
             make.right.equalToSuperview()
             make.bottom.equalToSuperview().offset(-kTabBarHeight)
+        }
+    }
+    
+    fileprivate func resetNavigation() {
+        navigationView.leftButton.isHidden = true
+        navigationView.rightButton.isHidden = true
+        navigationView.titleLabel.text = "聊天"
+        navigationView.titleLabel.font = UIFont.ls_mediumFont(18)
+        navigationView.titleLabel.textColor = UIColor.ls_color("#333333")
+        
+        navigationView.titleLabel.snp.makeConstraints { (make) in
+            make.left.equalToSuperview().offset(16)
+            make.bottom.equalToSuperview().offset(-9)
         }
     }
 }

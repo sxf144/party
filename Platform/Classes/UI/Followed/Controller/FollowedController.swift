@@ -30,6 +30,17 @@ class FollowedController: BaseController {
         getFollowed()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        LSLog("FollowedController viewDidDisappear")
+        super.viewDidDisappear(animated)
+        // 停止当前cell 播放
+        let visiableIndexPaths = tableView.visibleCells
+        for cell in tableView.visibleCells {
+            let recommendCell = cell as! RecommendCell
+            recommendCell.inactivity()
+        }
+    }
+    
     // 创建UITableView
     fileprivate lazy var tableView: UITableView = {
         let tableView = UITableView(frame: view.bounds, style: .plain)
@@ -77,6 +88,9 @@ extension FollowedController {
                     self.handleCurrentCell()
                 }
                 
+                // 判断是否展示空页面
+                self.isEmpty()
+                
             } else {
                 LSLog("getFollowed fail")
             }
@@ -101,6 +115,14 @@ extension FollowedController {
                     }
                 }
             }
+        }
+    }
+    
+    func isEmpty() {
+        if recommendData.items?.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
         }
     }
 }
@@ -134,12 +156,6 @@ extension FollowedController: UITableViewDataSource, UITableViewDelegate, UIScro
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         LSLog("scrollViewDidEndDecelerating ...")
         handleCurrentCell()
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let item = recommendData.items?[indexPath.row]
-        // 跳转到局详情
-        PageManager.shared.pushToPartyDetail(item?.uniqueCode ?? "")
     }
 }
 

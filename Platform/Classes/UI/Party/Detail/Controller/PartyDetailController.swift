@@ -177,8 +177,11 @@ class PartyDetailController: BaseController {
     
     // 主打游戏
     fileprivate lazy var gameView: UIView = {
-        let v = UIView()
-        return v
+        let view = UIView()
+        // 添加点击手势识别器
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleGameTap))
+        view.addGestureRecognizer(tapGesture)
+        return view
     }()
     
     fileprivate lazy var gameTitleLabel: UILabel = {
@@ -613,8 +616,9 @@ extension PartyDetailController {
     func refreshData() {
         if let detail = partyDetail {
             isOwner = userInfo?.userId == detail.userId
+            
             // 封面
-            cover.kf.setImage(with: URL(string: detail.cover ), placeholder: PlaceHolderBig) { result in
+            cover.kf.setImage(with: URL(string: detail.coverThumbnail ), placeholder: PlaceHolderBig) { result in
                 switch result {
                 case .success(let value):
                     LSLog("cover load succ")
@@ -747,6 +751,7 @@ extension PartyDetailController {
                 let pIV = UIImageView()
                 pIV.layer.cornerRadius = 22
                 pIV.clipsToBounds = true
+                pIV.contentMode = .scaleAspectFill
                 pIV.kf.setImage(with: URL(string: item.portrait), placeholder: PlaceHolderAvatar)
                 pcBtn.addSubview(pIV)
                 
@@ -1051,6 +1056,23 @@ extension PartyDetailController {
             }
             vc.hidesBottomBarWhenPushed = true
             PageManager.shared.currentVC()?.present(vc, animated: true)
+        }
+    }
+    
+    // 查看游戏
+    @objc func handleGameTap() {
+        if let relationGame = partyDetail?.relationGame{
+            var item = GameItem()
+            item.id = relationGame.gameId
+            item.name = relationGame.name
+            item.cover = relationGame.cover
+            item.personCountMin = relationGame.personCountMin
+            item.personCountMax = relationGame.personCountMax
+            item.introduction = relationGame.introduction
+            item.interactPersonCount = relationGame.interactPersonCount
+            PageManager.shared.pushToGameDetail(item)
+        } else {
+            
         }
     }
     

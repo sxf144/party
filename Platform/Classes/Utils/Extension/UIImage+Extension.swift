@@ -11,7 +11,7 @@ import UIKit
 extension UIImage {
     
     /// 绘制纯色图片
-    class func ls_image(_ color: UIColor, viewSize: CGSize = CGSize(width: 10, height: 10)) -> UIImage{
+    class func ls_image(_ color: UIColor, viewSize: CGSize = CGSize(width: 10, height: 10)) -> UIImage {
         let rect: CGRect = CGRect(x: 0, y: 0, width: viewSize.width, height: viewSize.height)
         UIGraphicsBeginImageContext(rect.size)
         let context: CGContext = UIGraphicsGetCurrentContext()!

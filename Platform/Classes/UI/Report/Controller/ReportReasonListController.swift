@@ -91,7 +91,7 @@ extension ReportReasonListController {
     @objc func clickConfirmBtn(_ sender:UIButton) {
         LSLog("clickConfirmBtn")
         if (selectedIndex < 0 || selectedIndex >= dataList.reasonList.count) {
-            LSHUD.showError("请选择举报理由")
+            LSHUD.showInfo("请选择举报理由")
             return
         }
         

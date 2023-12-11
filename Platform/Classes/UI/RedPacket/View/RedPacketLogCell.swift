@@ -56,6 +56,16 @@ class RedPacketLogCell: UITableViewCell {
         return label
     }()
     
+    // 时间
+    fileprivate lazy var timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontRegualer12
+        label.textColor = UIColor.ls_color("#999999")
+        label.text = ""
+        label.sizeToFit()
+        return label
+    }()
+    
     // 手气最佳
     fileprivate lazy var maxTipLabel: UILabel = {
         let label = UILabel()
@@ -81,9 +91,13 @@ extension RedPacketLogCell {
         nameLabel.text = item.nick
         nameLabel.sizeToFit()
         
-        // 简介
+        // 金额
         amountLabel.text = String(format: "%.2f元", Double(item.amount)/100)
         amountLabel.sizeToFit()
+        
+        // 时间
+        timeLabel.text = item.fetchTime
+        timeLabel.sizeToFit()
         
         // 判断手气最佳是否展示
         maxTipLabel.isHidden = !item.isMax
@@ -97,6 +111,7 @@ extension RedPacketLogCell {
         contentView.addSubview(avatar)
         contentView.addSubview(nameLabel)
         contentView.addSubview(amountLabel)
+        contentView.addSubview(timeLabel)
         contentView.addSubview(maxTipLabel)
         
         avatar.snp.makeConstraints { (make) in
@@ -107,17 +122,22 @@ extension RedPacketLogCell {
         
         nameLabel.snp.makeConstraints { (make) in
             make.left.equalTo(avatar.snp.right).offset(10)
-            make.centerY.equalToSuperview()
+            make.top.equalToSuperview().offset(10)
         }
         
         amountLabel.snp.makeConstraints { (make) in
             make.right.equalToSuperview().offset(-leftMargin)
-            make.centerY.equalToSuperview()
+            make.centerY.equalTo(nameLabel)
+        }
+        
+        timeLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(avatar.snp.right).offset(10)
+            make.bottom.equalToSuperview().offset(-10)
         }
         
         maxTipLabel.snp.makeConstraints { (make) in
             make.right.equalToSuperview().offset(-leftMargin)
-            make.top.equalTo(amountLabel.snp.bottom).offset(2)
+            make.centerY.equalTo(timeLabel)
         }
     }
 }

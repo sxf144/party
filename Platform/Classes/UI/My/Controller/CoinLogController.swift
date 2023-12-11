@@ -109,6 +109,9 @@ extension CoinLogController {
                     if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
                         self.tableView.mj_footer.endRefreshingWithNoMoreData()
                     }
+                    
+                    // 判断是否展示空页面
+                    self.isEmpty()
                 }
             } else {
                 LSLog("getCoinLogs fail")
@@ -127,6 +130,14 @@ extension CoinLogController {
         if (dataList.totalCount > dataList.pageNum * dataList.pageSize) {
             let pn = dataList.pageNum + 1
             getCoinLogs(pageNum: pn, pageSize: dataList.pageSize)
+        }
+    }
+    
+    func isEmpty() {
+        if dataList.items.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
         }
     }
     

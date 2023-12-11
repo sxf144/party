@@ -27,6 +27,7 @@ class AccountManagerController: BaseController {
         setupUI()
         addObservers()
         
+        // 获取账号绑定信息
         getBindInfo()
     }
     
@@ -35,6 +36,22 @@ class AccountManagerController: BaseController {
         let view = UIView()
         view.backgroundColor = UIColor.white
         return view
+    }()
+    
+    // 注销账号
+    fileprivate lazy var deleteBtn: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.setTitleColor(UIColor.ls_color("#666666"), for: .normal)
+        button.titleLabel?.font = kFontMedium16
+        button.clipsToBounds = true
+        let str = "注销账号"
+        // 创建一个带有下划线的AttributedString
+        let attributedString = NSAttributedString(string: str, attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
+        // 将AttributedString设置为按钮的标题
+        button.setAttributedTitle(attributedString, for: .normal)
+        button.addTarget(self, action: #selector(clickDeleteBtn(_:)), for: .touchUpInside)
+        return button
     }()
 }
 
@@ -105,6 +122,45 @@ extension AccountManagerController {
         LSLog("handleAccountBindStatusChange")
         self.getBindInfo()
     }
+    
+    @objc func clickDeleteBtn(_ sender: UIButton) {
+        LSLog("clickDeleteBtn")
+        // 二次确认
+        showDeleteAlert()
+    }
+    
+    func showDeleteAlert() {
+        // 二次确认是否要退出
+        let alertController = BaseAlertController(title: "确定要注销账号吗？", message: nil)
+                
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        let okAction = BaseAlertAction(title: "确定", style: .destructive) {(action) in
+            self.deleteAccount()
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func deleteAccount() {
+        NetworkManager.shared.deleteAccount() { resp in
+            if resp.status == .success {
+                LSLog("deleteAccount succ")
+                // 删除成功，调用退出登录
+                LSHUD.showInfo("注销成功")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    LoginManager.shared.loginExpird()
+                }
+            } else {
+                LSLog("deleteAccount fail")
+                LSHUD.showInfo(resp.msg)
+            }
+        }
+    }
 }
 
 extension AccountManagerController {
@@ -112,12 +168,19 @@ extension AccountManagerController {
     fileprivate func setupUI() {
         
         view.addSubview(optionView)
+        view.addSubview(deleteBtn)
         
         
         optionView.snp.makeConstraints { (make) in
             make.top.equalToSuperview().offset(kNavBarHeight)
             make.left.right.equalToSuperview()
             make.height.equalTo(OptionHeight*CGFloat(options.count))
+        }
+        
+        deleteBtn.snp.makeConstraints { (make) in
+            make.bottom.equalToSuperview().offset(-kSafeAreaHeight)
+            make.centerX.equalToSuperview()
+            make.size.equalTo(CGSize(width: 66, height: 24))
         }
         
         setupOptions()

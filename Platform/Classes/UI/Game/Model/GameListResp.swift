@@ -60,26 +60,26 @@ struct GameItem {
     var cover: String = ""
     var createTime: String = ""
     var id: Int64 = 0
-    var interactPersonCount: Int = 0
+    var interactPersonCount: Int64 = 0
     var introduction: String = ""
     var name: String = ""
-    var personCountMax: Int = 0
-    var personCountMin: Int = 0
-    var sort: Int = 0
-    var state: Int = 0
+    var personCountMax: Int64 = 0
+    var personCountMin: Int64 = 0
+    var sort: Int64 = 0
+    var state: Int64 = 0
     var selected: Bool = false
     
     init(_ json:JSON) {
         cover = json["cover"].stringValue
         createTime = json["create_time"].stringValue
         id = json["id"].int64Value
-        interactPersonCount = json["interact_person_count"].intValue
+        interactPersonCount = json["interact_person_count"].int64Value
         introduction = json["introduction"].stringValue
         name = json["name"].stringValue
-        personCountMax = json["person_count_max"].intValue
-        personCountMin = json["person_count_min"].intValue
-        sort = json["sort"].intValue
-        state = json["state"].intValue
+        personCountMax = json["person_count_max"].int64Value
+        personCountMin = json["person_count_min"].int64Value
+        sort = json["sort"].int64Value
+        state = json["state"].int64Value
     }
     
     init() {}

@@ -13,13 +13,13 @@
 import UIKit
 import AliyunOSSiOS
 
+enum OBJECT_KEY_TYPE: String {
+    case portrait = "portrait"
+    case img = "img"
+    case video = "video"
+}
+
 class OSSManager: NSObject {
-    
-    enum OBJECT_KEY: String {
-        case portrait = "portrait"
-        case img = "img"
-        case video = "video"
-    }
     
     static let shared = OSSManager()
     
@@ -32,15 +32,15 @@ class OSSManager: NSObject {
 }
 
 //MARK: -文件上传
-extension OSSManager{
+extension OSSManager {
     /// 上传图片
-    func uploadData(_ image: UIImage, _ complete:@escaping(OSSUploadResult)->()){
+    func uploadData(_ data: Data?, type: OBJECT_KEY_TYPE, suffix:String, _ complete:@escaping(OSSUploadResult)->()){
         DispatchQueue.global().async {
             var uploadResult = OSSUploadResult()
             self.ossInfoCanUse { (canUse) in
                 if canUse {
                     let request = OSSPutObjectRequest()
-                    guard let data = image.pngData() else {
+                    guard let data = data else {
                         // 失败
                         DispatchQueue.main.async {
                             uploadResult.status = .failed
@@ -52,8 +52,8 @@ extension OSSManager{
                     request.uploadingData = data
                     request.bucketName = self.bucketName()
                     let sha1Str = OSSUtil.sha1(with: data) ?? "aaa"
-                    let objectKey = self.getAvatarImageFileName(".png", sha1Str: sha1Str)
-                    
+//                    let objectKey = self.getAvatarImageFileName(".png", sha1Str: sha1Str)
+                    let objectKey = self.getFileName(type, sha1Str: sha1Str, suffix: suffix)
                     request.objectKey = objectKey
                     uploadResult.objectKey = objectKey
                     uploadResult.baseUrl = self.baseUrl()
@@ -94,7 +94,8 @@ extension OSSManager{
     }
 }
 
-fileprivate extension OSSManager{
+fileprivate extension OSSManager {
+    
     func bucketName()->String{
         guard let name = ossInfo?.bucketName else { return "" }
         return name
@@ -105,7 +106,7 @@ fileprivate extension OSSManager{
         return baseUrl
     }
     
-    func getImageFileName(_ suffix:String)->String{
+    func getImageFileName(_ suffix:String)->String {
         let timeStamp = Date().ls_milliStamp
         let basePath = ossInfo?.imgPrefix ?? ""
         
@@ -113,13 +114,34 @@ fileprivate extension OSSManager{
         return name
     }
     
+    func getVideoFileName() -> String {
+        let timeStamp = Date().ls_milliStamp
+        let name = "\(OBJECT_KEY_TYPE.video)/\(timeStamp)"
+        return name
+    }
+    
     func getAvatarImageFileName(_ suffix:String, sha1Str:String)->String{
-        let name = "\(OBJECT_KEY.portrait)/\(sha1Str.prefix(2))/\(sha1Str)\(suffix)"
+        let name = "\(OBJECT_KEY_TYPE.portrait)/\(sha1Str.prefix(2))/\(sha1Str)\(suffix)"
+        return name
+    }
+    
+    func getFileSuffix(_ path:String) -> String {
+        let arr = path.components(separatedBy: ".")
+        if arr.count >= 2 {
+            return ".\(arr.last ?? "")"
+        } else {
+            return ""
+        }
+    }
+    
+    func getFileName(_ type: OBJECT_KEY_TYPE, sha1Str:String, suffix:String)->String{
+        let timeStamp = Date().ls_milliStamp
+        let name = "\(type)/\(sha1Str.prefix(2))/\(sha1Str)\(suffix)"
         return name
     }
 }
 
-extension OSSManager{
+extension OSSManager {
     
     func updateClient(){
         

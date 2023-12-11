@@ -30,6 +30,8 @@ class RecommendCell: UITableViewCell {
         self.selectionStyle = .none
         setupUI()
         addObservers()
+        // 添加点击事件
+        addGesture()
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -66,7 +68,7 @@ class RecommendCell: UITableViewCell {
     // 视频作者头像
     fileprivate lazy var avatar: UIButton = {
         let button = UIButton()
-        button.contentMode = .scaleAspectFill
+        button.imageView?.contentMode = .scaleAspectFill
         button.clipsToBounds = true
         button.layer.cornerRadius = CGFloat(RightToolWidth/2)
         button.kf.setImage(with: URL(string: ""), for: .normal, placeholder: PlaceHolderAvatar)
@@ -200,6 +202,21 @@ extension RecommendCell {
         // 设置头像
         avatar.kf.setImage(with: URL(string: item?.portrait ?? ""), for: .normal, placeholder: PlaceHolderAvatar)
         
+        // 是否点赞
+        likeBtn.isSelected = item?.like ?? false
+        
+        // 点赞数
+        likeLabel.isHidden = item?.likeCnt ?? 0 <= 0
+//        likeLabel.text = "\(item?.likeCnt ?? 0)"
+//        likeLabel.sizeToFit()
+        likeLabel.ls_shadow("\(item?.likeCnt ?? 0)")
+        likeLabel.sizeToFit()
+        
+        // 评论数
+        commentLabel.isHidden = item?.commentCnt ?? 0 <= 0
+        commentLabel.text = "\(item?.commentCnt ?? 0)"
+        commentLabel.sizeToFit()
+        
         // coverType 1、图片，2、视频
         if (item?.coverType == CoverType.image.rawValue) {
             videoImageView.kf.setImage(with: URL(string: item?.cover ?? "")) { result in
@@ -252,6 +269,9 @@ extension RecommendCell {
         
         likeLabel.text = String(item!.likeCnt)
         likeLabel.sizeToFit()
+        
+        // 发送给服务器修改
+        playLike(!sender.isSelected)
     }
     
     @objc func clickCommentBtn(_ sender:UIButton) {
@@ -262,10 +282,10 @@ extension RecommendCell {
         // 分享
         if let reItem = item, let cImage = coverImage {
             let title = "邀请你加入\(reItem.playName)"
-//            let desc = item.ti
+            let desc = Date.formatDate(startTime: item?.startTime, endTime: item?.endTime)
             let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(reItem.uniqueCode)"
             
-            WXApiManager.shared.shareToWX(title, description: "", pageUrl: pageUrl, image: cImage)
+            WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cImage)
         }
     }
     
@@ -280,7 +300,6 @@ extension RecommendCell {
     
     func activity() {
         if item?.coverType == CoverType.video.rawValue {
-            
             // 开始播放
             avPlayer.play()
         }
@@ -300,6 +319,63 @@ extension RecommendCell {
     @objc func playerDidFinishPlaying() {
         avPlayer.seek(to: CMTime.zero) // 将播放头重置到视频的开始位置
         avPlayer.play() // 重新开始播放
+    }
+    
+    func addGesture() {
+        let tapGes = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        self.addGestureRecognizer(tapGes)
+    }
+    
+    @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+        guard let cell = gesture.view as? UITableViewCell else {
+            return
+        }
+
+        let touchLocation = gesture.location(in: cell)
+        let halfCellHeight = cell.bounds.size.height / 2
+
+        if touchLocation.y < halfCellHeight {
+            // 上半部分被点击
+            handleUpHalf()
+        } else {
+            // 下半部分被点击
+            handleLowHalf()
+        }
+    }
+    
+    // 播放/暂停
+    func handleUpHalf() {
+        // 图片、跳转进入详情，视频、播放/暂停
+        if item?.coverType == CoverType.image.rawValue {
+            
+        } else if (item?.coverType == CoverType.video.rawValue) {
+            // 检查播放状态
+            if avPlayer.rate > 0 && avPlayer.error == nil {
+                // 正在播放，停止
+                avPlayer.pause()
+            } else {
+                // 没有播放，播放
+                avPlayer.play()
+            }
+        }
+    }
+    
+    // 进入详情
+    func handleLowHalf() {
+        // 跳转到局详情
+        PageManager.shared.pushToPartyDetail(item?.uniqueCode ?? "")
+    }
+    
+    func playLike(_ cancel:Bool) {
+        if let uniCode = item?.uniqueCode {
+            NetworkManager.shared.playLike( uniCode, cancel: cancel) { resp in
+                if resp.status == .success {
+                    LSLog("playLike succ")
+                } else {
+                    LSLog("playLike fail")
+                }
+            }
+        }
     }
 }
 

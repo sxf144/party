@@ -74,6 +74,8 @@ class TextMessageCell: UITableViewCell {
     fileprivate lazy var messageView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
+        let longPressGes = UILongPressGestureRecognizer(target: self, action: #selector(messageCopyed))
+        view.addGestureRecognizer(longPressGes)
         return view
     }()
     
@@ -166,6 +168,15 @@ extension TextMessageCell {
     @objc private func avatarTaped(_ tap: UITapGestureRecognizer) {
         if let pid = item.sender {
             PageManager.shared.pushToUserPage(pid)
+        }
+    }
+    
+    // 复制内容
+    @objc private func messageCopyed() {
+        if let textToCopy = item.textElem?.text {
+            UIPasteboard.general.string = textToCopy
+            // 提示用户已成功复制
+            LSHUD.showSuccess("已复制")
         }
     }
 }

@@ -371,12 +371,16 @@ extension UserPageController {
     
     // 发送私信
     @objc func clickChatBtn(_ sender:UIButton) {
-        let conv:LIMConversation = LIMConversation()
-        conv.userID = peopleId
-        conv.type = .LIM_C2C
-        conv.conversationID = "c2c_\(conv.userID ?? "")"
-        conv.showName = userPageData.user.nick
-        PageManager.shared.pushToChatController(conv)
+        if userPageData.user.userId.isEmpty {
+            LSHUD.showInfo("用户已注销")
+        } else {
+            let conv:LIMConversation = LIMConversation()
+            conv.userID = userPageData.user.userId
+            conv.type = .LIM_C2C
+            conv.conversationID = "c2c_\(conv.userID ?? "")"
+            conv.showName = userPageData.user.nick
+            PageManager.shared.pushToChatController(conv)
+        }
     }
 }
 

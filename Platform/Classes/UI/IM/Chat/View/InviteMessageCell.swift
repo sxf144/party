@@ -131,9 +131,27 @@ extension InviteMessageCell {
             
             contentBtn.snp.remakeConstraints { (make) in
                 make.right.equalToSuperview().offset(-xMargin)
-                make.top.equalToSuperview().offset(yMargin + 22)
+                make.top.equalToSuperview().offset(yMargin)
                 make.size.equalTo(CGSize(width: ContentWidth, height: 74))
                 make.bottom.equalToSuperview().offset(-yMargin)
+            }
+            
+            iconIV.snp.remakeConstraints { (make) in
+                make.left.equalToSuperview()
+                make.centerY.equalToSuperview()
+                make.size.equalTo(CGSize(width: 74, height: 74))
+            }
+            
+            titleLabel.snp.remakeConstraints { (make) in
+                make.left.equalTo(iconIV.snp.right).offset(12)
+                make.right.equalToSuperview().offset(-12)
+                make.top.equalToSuperview().offset(10)
+            }
+            
+            tipLabel.snp.remakeConstraints { (make) in
+                make.left.equalTo(iconIV.snp.right).offset(12)
+                make.right.equalToSuperview().offset(-12)
+                make.bottom.equalToSuperview().offset(-5)
             }
             
         } else {
@@ -153,6 +171,24 @@ extension InviteMessageCell {
                 make.bottom.equalToSuperview().offset(-yMargin)
             }
             
+            iconIV.snp.remakeConstraints { (make) in
+                make.right.equalToSuperview()
+                make.centerY.equalToSuperview()
+                make.size.equalTo(CGSize(width: 74, height: 74))
+            }
+            
+            titleLabel.snp.remakeConstraints { (make) in
+                make.left.equalToSuperview().offset(12)
+                make.right.equalTo(iconIV.snp.left).offset(-12)
+                make.top.equalToSuperview().offset(10)
+            }
+            
+            tipLabel.snp.remakeConstraints { (make) in
+                make.left.equalToSuperview().offset(12)
+                make.right.equalTo(iconIV.snp.left).offset(-12)
+                make.bottom.equalToSuperview().offset(-5)
+            }
+            
             // 用户头像
             avatar.kf.setImage(with: URL(string: item.faceURL ?? ""), placeholder: PlaceHolderAvatar)
 
@@ -165,13 +201,7 @@ extension InviteMessageCell {
         iconIV.kf.setImage(with: URL(string: item.inviteElem?.coverThumbnail ?? ""), placeholder: PlaceHolderSmall)
 
         // 邀请标题
-        var fromName = item.inviteElem?.userName ?? ""
-        let userInfo = LoginManager.shared.getUserInfo()
-        if (userInfo?.userId == item.inviteElem?.userId) {
-            fromName = userInfo?.nick ?? ""
-        }
-        
-        titleLabel.text = "邀请你加入" + fromName + "的桔，快来～"
+        titleLabel.text = "邀请你加入\(item.inviteElem?.name ?? "")"
         titleLabel.sizeToFit()
 
         // 邀请时间

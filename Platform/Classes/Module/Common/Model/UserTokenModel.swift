@@ -22,7 +22,8 @@ struct UserTokenModel {
     var scope = ""
     /// 用户tokenType
     var tokenType = ""
-    
+    /// 用户失效到期时间，(客户端使用)
+    var expireTimestamp: Int64 = 0
     
     init(_ json:JSON) {
         accessToken = json["access_token"].stringValue
@@ -30,6 +31,7 @@ struct UserTokenModel {
         refreshToken = json["refresh_token"].stringValue
         scope = json["scope"].stringValue
         tokenType = json["token_type"].stringValue
+        expireTimestamp = json["expire_timestamp"].int64Value
     }
     
     init() {}
@@ -41,7 +43,8 @@ struct UserTokenModel {
             "expires_in":expiresIn,
             "refresh_token":refreshToken,
             "scope":scope,
-            "token_type":tokenType
+            "token_type":tokenType,
+            "expire_timestamp": expireTimestamp == 0 ? (Int64(Date().timeIntervalSince1970) + expiresIn) : expireTimestamp
         ]
         return json
     }

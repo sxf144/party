@@ -186,9 +186,21 @@ extension GameCardMessageCell {
             if item.isSelf ?? false {
                 contentBtn.snp.remakeConstraints { (make) in
                     make.right.equalToSuperview().offset(-xMargin)
-                    make.top.equalToSuperview().offset(yMargin + 22)
+                    make.top.equalToSuperview().offset(yMargin)
                     make.size.equalTo(CGSize(width: ContentWidth, height: 74))
                     make.bottom.equalToSuperview().offset(-yMargin)
+                }
+                
+                iconIV.snp.remakeConstraints { (make) in
+                    make.left.equalToSuperview()
+                    make.centerY.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 74, height: 74))
+                }
+                
+                titleLabel.snp.remakeConstraints { (make) in
+                    make.left.equalTo(iconIV.snp.right).offset(16)
+                    make.right.equalToSuperview().offset(-20)
+                    make.centerY.equalToSuperview()
                 }
             } else {
                 contentBtn.snp.remakeConstraints { (make) in
@@ -196,6 +208,18 @@ extension GameCardMessageCell {
                     make.top.equalToSuperview().offset(yMargin + 22)
                     make.size.equalTo(CGSize(width: ContentWidth, height: 74))
                     make.bottom.equalToSuperview().offset(-yMargin)
+                }
+                
+                iconIV.snp.remakeConstraints { (make) in
+                    make.right.equalToSuperview()
+                    make.centerY.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 74, height: 74))
+                }
+                
+                titleLabel.snp.remakeConstraints { (make) in
+                    make.left.equalToSuperview().offset(20)
+                    make.right.equalTo(iconIV.snp.left).offset(-16)
+                    make.centerY.equalToSuperview()
                 }
             }
         } else {
@@ -204,14 +228,38 @@ extension GameCardMessageCell {
             if item.isSelf ?? false {
                 contentBtn.snp.remakeConstraints { (make) in
                     make.right.equalToSuperview().offset(-xMargin)
-                    make.top.equalToSuperview().offset(yMargin + 22)
+                    make.top.equalToSuperview().offset(yMargin)
                     make.size.equalTo(CGSize(width: ContentWidth, height: 74))
+                }
+                
+                iconIV.snp.remakeConstraints { (make) in
+                    make.left.equalToSuperview()
+                    make.centerY.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 74, height: 74))
+                }
+                
+                titleLabel.snp.remakeConstraints { (make) in
+                    make.left.equalTo(iconIV.snp.right).offset(16)
+                    make.right.equalToSuperview().offset(-20)
+                    make.centerY.equalToSuperview()
                 }
             } else {
                 contentBtn.snp.remakeConstraints { (make) in
                     make.left.equalTo(avatar.snp.right).offset(12)
                     make.top.equalToSuperview().offset(yMargin + 22)
                     make.size.equalTo(CGSize(width: ContentWidth, height: 74))
+                }
+                
+                iconIV.snp.remakeConstraints { (make) in
+                    make.right.equalToSuperview()
+                    make.centerY.equalToSuperview()
+                    make.size.equalTo(CGSize(width: 74, height: 74))
+                }
+                
+                titleLabel.snp.remakeConstraints { (make) in
+                    make.left.equalToSuperview().offset(20)
+                    make.right.equalTo(iconIV.snp.left).offset(-16)
+                    make.centerY.equalToSuperview()
                 }
             }
             
@@ -240,6 +288,7 @@ extension GameCardMessageCell {
         if let gameCardBlock = gameCardBlock {
             gameCardBlock()
         }
+        
     }
     
     // 主持人确认

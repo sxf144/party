@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import AVFoundation
 
 class CardTaskView: UIView {
     
@@ -23,10 +24,16 @@ class CardTaskView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        addObservers()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        // 移除所有状态观察者
+        avPlayer.currentItem?.removeObserver(self, forKeyPath: "status")
     }
     
     /// 背景
@@ -56,13 +63,19 @@ class CardTaskView: UIView {
         return imageView
     }()
     
-    // 卡牌
-    fileprivate lazy var cardImageView: UIImageView = {
+    // 内容区域
+    fileprivate lazy var cardContentView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 16
+        return view
+    }()
+    
+    // 卡牌背景图
+    fileprivate lazy var cardContentBg: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 16
-        imageView.kf.setImage(with: URL(string: ""), placeholder: CardImageDefault)
+        imageView.image = CardImageDefault
         return imageView
     }()
     
@@ -76,6 +89,46 @@ class CardTaskView: UIView {
         label.numberOfLines = 4
         label.lineBreakMode = .byWordWrapping
         return label
+    }()
+    
+    // 媒体资源
+    fileprivate lazy var mediaView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        let tapGes = UITapGestureRecognizer(target: self, action: #selector(mediaViewClicked))
+        view.addGestureRecognizer(tapGes)
+        return view
+    }()
+    
+    // 卡牌图片
+    fileprivate lazy var cardImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    // 创建视频播放器并将其添加到videoPlayerView上
+    fileprivate lazy var avPlayer: AVPlayer = {
+        let player = AVPlayer()
+        return player
+    }()
+    
+    fileprivate lazy var avPlayerLayer: AVPlayerLayer = {
+        let playerLayer = AVPlayerLayer(player: avPlayer)
+        playerLayer.frame = cardImageView.bounds
+        playerLayer.videoGravity = .resizeAspectFill
+        return playerLayer
+    }()
+    
+    // 播放按钮
+    fileprivate lazy var playBtn: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "icon_play"), for: .normal)
+        button.layer.cornerRadius = 27
+        button.clipsToBounds = true
+        button.addTarget(self, action: #selector(clickPlayBtn(_:)), for: .touchUpInside)
+        return button
     }()
     
     // 红包按钮
@@ -104,10 +157,46 @@ extension CardTaskView {
         }
     }
     
+    // 播放/暂停
+    @objc fileprivate func clickPlayBtn(_ sender:UIButton) {
+        playOrPause()
+    }
+    
     // 取消
     @objc fileprivate func cancelDidClick(){
         LSLog("cancelDidClick")
         removeTaskView()
+    }
+    
+    // 媒体资源被惦记
+    @objc fileprivate func mediaViewClicked(){
+        LSLog("mediaViewClicked")
+        if let limMsg = limMsg, limMsg.gameElem?.action.cardInfo.introductionMediaType == 2 {
+            playOrPause()
+        }
+    }
+    
+    func playOrPause() {
+        // 检查播放状态
+        if avPlayer.rate > 0 && avPlayer.error == nil {
+            // 正在播放，停止
+            avPlayer.pause()
+            playBtn.isHidden = false
+        } else {
+            // 没有播放，播放
+            avPlayer.play()
+            playBtn.isHidden = true
+        }
+    }
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying), name: .AVPlayerItemDidPlayToEndTime, object: avPlayer.currentItem)
+    }
+    
+    @objc func playerDidFinishPlaying() {
+        // 将播放头重置到视频的开始位置，不播放，展示播放按钮
+        avPlayer.seek(to: CMTime.zero)
+        playBtn.isHidden = false
     }
     
     /// 显示 view
@@ -128,8 +217,50 @@ extension CardTaskView {
             redPacketBtn.isHidden = true
         }
         
-        // 卡牌图片
-        cardImageView.kf.setImage(with: URL(string: limMsg.gameElem?.action.cardInfo.introductionThumbnail ), placeholder: CardImageDefault)
+        // 判断是否有媒体资源
+        if let mediaUrl = limMsg.gameElem?.action.cardInfo.introductionMedia, !mediaUrl.isEmpty {
+            
+            mediaView.isHidden = false
+            
+            nameLabel.snp.remakeConstraints { (make) in
+                make.width.lessThanOrEqualToSuperview().offset(-xMargin*2)
+                make.centerX.equalToSuperview()
+                make.centerY.equalTo(41)
+            }
+            
+            // introductionMediaType 1图片，2视频
+            if limMsg.gameElem?.action.cardInfo.introductionMediaType == 1 {
+                cardImageView.isHidden = false
+                avPlayerLayer.isHidden = true
+                playBtn.isHidden = true
+                // 卡牌图片
+                cardImageView.kf.setImage(with: URL(string: mediaUrl))
+            } else if limMsg.gameElem?.action.cardInfo.introductionMediaType == 2 {
+                cardImageView.isHidden = true
+                avPlayerLayer.isHidden = false
+                // 播放按钮先隐藏，视频已准备好播放时再显示
+                playBtn.isHidden = true
+                // 卡牌视频
+                avPlayerLayer.frame = contentView.bounds
+                if let videoURL = URL(string: mediaUrl) {
+                    // 创建AVPlayerItem，加载视频，但此处不播放
+                    let playerItem = AVPlayerItem(url: videoURL)
+                    avPlayer.replaceCurrentItem(with: playerItem)
+                    LSHUD.showLoading()
+                    // 添加新的观察者
+                    playerItem.addObserver(self, forKeyPath: "status", options: .new, context: nil)
+                }
+            }
+            
+        } else {
+            //
+            mediaView.isHidden = true
+            
+            nameLabel.snp.remakeConstraints { (make) in
+                make.width.lessThanOrEqualToSuperview().offset(-xMargin*2)
+                make.center.equalToSuperview()
+            }
+        }
         
         // 卡牌名称
         nameLabel.text = limMsg.gameElem?.action.cardInfo.name
@@ -150,6 +281,7 @@ extension CardTaskView {
     
     /// 移除 view
     func removeTaskView() {
+        avPlayer.pause()
         UIView.animate(withDuration: 0.3, animations: {
             self.bgView.alpha = 0.0
             self.contentView.alpha = 0.0
@@ -158,9 +290,27 @@ extension CardTaskView {
             self.removeFromSuperview()
         }
     }
+    
+    // 观察者回调
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "status" {
+            if let playerItem = object as? AVPlayerItem {
+                LSHUD.hide()
+                if playerItem.status == .readyToPlay {
+                    // 视频已准备好播放
+                    LSLog("视频已准备好播放")
+                    playBtn.isHidden = false
+                } else if playerItem.status == .failed {
+                    // 播放失败
+                    LSLog("播放失败")
+                } else if playerItem.status == .unknown {
+                    // 未知状态
+                    LSLog("未知状态")
+                }
+            }
+        }
+    }
 }
-
-
 
 extension CardTaskView {
     
@@ -169,10 +319,14 @@ extension CardTaskView {
         addSubview(bgView)
         addSubview(contentView)
         contentView.addSubview(titleImageView)
-        contentView.addSubview(cardImageView)
-        contentView.addSubview(nameLabel)
+        contentView.addSubview(cardContentView)
+        cardContentView.addSubview(cardContentBg)
+        cardContentView.addSubview(nameLabel)
+        cardContentView.addSubview(mediaView)
+        mediaView.addSubview(cardImageView)
+        mediaView.layer.addSublayer(avPlayerLayer)
+        mediaView.addSubview(playBtn)
         contentView.addSubview(redPacketBtn)
-        
         
         bgView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
@@ -188,15 +342,35 @@ extension CardTaskView {
             make.size.equalTo(CGSize(width: 138, height: 26))
         }
         
-        cardImageView.snp.makeConstraints { (make) in
+        cardContentView.snp.makeConstraints { (make) in
             make.top.equalTo(titleImageView.snp.bottom).offset(36)
             make.centerX.equalToSuperview()
             make.size.equalTo(CGSize(width: 318, height: 538))
         }
         
+        cardContentBg.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
         nameLabel.snp.makeConstraints { (make) in
             make.width.lessThanOrEqualToSuperview().offset(-xMargin*2)
             make.center.equalToSuperview()
+        }
+        
+        mediaView.snp.makeConstraints { (make) in
+            make.centerX.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalToSuperview().offset(-82)
+            make.bottom.equalToSuperview()
+        }
+        
+        cardImageView.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        
+        playBtn.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
+            make.size.equalTo(CGSize(width: 54, height: 54))
         }
         
         redPacketBtn.snp.makeConstraints { (make) in

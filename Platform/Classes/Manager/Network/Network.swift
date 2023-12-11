@@ -330,6 +330,8 @@ fileprivate extension Network {
     func handleResponseResult(json:JSON){
         let code = ResultCode(rawValue: json["state"].intValue)
         if code == ResultCode.token_expired {
+            LSLog("---- request token expired ----")
+            LSLog("---- start refresh token ----")
             LoginManager.shared.refreshToken()
         }
     }

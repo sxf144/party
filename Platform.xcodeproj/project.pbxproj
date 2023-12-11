@@ -40,6 +40,8 @@
 		0F4F3EF62AA8740E000AF5BD /* RecommendCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4F3EF52AA8740E000AF5BD /* RecommendCell.swift */; };
 		0F4F3EF82AAB2176000AF5BD /* MyLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4F3EF72AAB2176000AF5BD /* MyLocationManager.swift */; };
 		0F6138242AA6DA1700E5DB1A /* RecommendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6138232AA6DA1700E5DB1A /* RecommendController.swift */; };
+		0F683D1D2B22F4E50068BD87 /* GameDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F683D1C2B22F4E50068BD87 /* GameDetailController.swift */; };
+		0F683D1F2B2312660068BD87 /* PhotoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F683D1E2B2312660068BD87 /* PhotoManager.swift */; };
 		0F76D9EC2ACFBB4F0031DADE /* MyPartyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F76D9E72ACFBB4F0031DADE /* MyPartyController.swift */; };
 		0F76D9ED2ACFBB4F0031DADE /* MyPartyResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F76D9E92ACFBB4F0031DADE /* MyPartyResp.swift */; };
 		0F76D9EE2ACFBB4F0031DADE /* MyPartyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F76D9EB2ACFBB4F0031DADE /* MyPartyCell.swift */; };
@@ -153,6 +155,7 @@
 		0FBDBACA2AE00B7900E0A0CB /* SysMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBDBAC92AE00B7900E0A0CB /* SysMessageCell.swift */; };
 		0FCDD2002B0CD9CB00F720F3 /* InputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCDD1FF2B0CD9CB00F720F3 /* InputViewController.swift */; };
 		0FD8D0AB2AFF2E8500FB0915 /* SendRedPacketController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */; };
+		0FDADCFA2B26CEB700F00F88 /* UITableView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDADCF92B26CEB700F00F88 /* UITableView+Extension.swift */; };
 		0FDC58F52B1F142700022ABA /* CashOutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F42B1F142700022ABA /* CashOutController.swift */; };
 		0FDC58FA2B1F2D3800022ABA /* CashOutLogModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F72B1F2D3800022ABA /* CashOutLogModel.swift */; };
 		0FDC58FB2B1F2D3800022ABA /* CashOutLogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDC58F92B1F2D3800022ABA /* CashOutLogCell.swift */; };
@@ -281,6 +284,8 @@
 		0F4F3EF52AA8740E000AF5BD /* RecommendCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecommendCell.swift; sourceTree = "<group>"; };
 		0F4F3EF72AAB2176000AF5BD /* MyLocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyLocationManager.swift; sourceTree = "<group>"; };
 		0F6138232AA6DA1700E5DB1A /* RecommendController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecommendController.swift; sourceTree = "<group>"; };
+		0F683D1C2B22F4E50068BD87 /* GameDetailController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDetailController.swift; sourceTree = "<group>"; };
+		0F683D1E2B2312660068BD87 /* PhotoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoManager.swift; sourceTree = "<group>"; };
 		0F76D9E72ACFBB4F0031DADE /* MyPartyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyPartyController.swift; sourceTree = "<group>"; };
 		0F76D9E92ACFBB4F0031DADE /* MyPartyResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyPartyResp.swift; sourceTree = "<group>"; };
 		0F76D9EB2ACFBB4F0031DADE /* MyPartyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyPartyCell.swift; sourceTree = "<group>"; };
@@ -396,6 +401,7 @@
 		0FBDBAC92AE00B7900E0A0CB /* SysMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SysMessageCell.swift; sourceTree = "<group>"; };
 		0FCDD1FF2B0CD9CB00F720F3 /* InputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewController.swift; sourceTree = "<group>"; };
 		0FD8D0AA2AFF2E8500FB0915 /* SendRedPacketController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendRedPacketController.swift; sourceTree = "<group>"; };
+		0FDADCF92B26CEB700F00F88 /* UITableView+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UITableView+Extension.swift"; sourceTree = "<group>"; };
 		0FDC58F42B1F142700022ABA /* CashOutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutController.swift; sourceTree = "<group>"; };
 		0FDC58F72B1F2D3800022ABA /* CashOutLogModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutLogModel.swift; sourceTree = "<group>"; };
 		0FDC58F92B1F2D3800022ABA /* CashOutLogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashOutLogCell.swift; sourceTree = "<group>"; };
@@ -770,6 +776,7 @@
 		0F8E1B982AC7DA3400C67D62 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				0F683D1C2B22F4E50068BD87 /* GameDetailController.swift */,
 				0FA6470D2AF25B8700AC5787 /* SortUserController.swift */,
 				0FDD98252AF0F49200EBA619 /* GameRoundListController.swift */,
 				0F8E1B992AC7DA3400C67D62 /* GameListController.swift */,
@@ -1577,6 +1584,7 @@
 		49FBBF6F268DA6A5000C851E /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				0FDADCF92B26CEB700F00F88 /* UITableView+Extension.swift */,
 				49FBBF70268DA6A5000C851E /* UIFont+Extension.swift */,
 				49FBBF71268DA6A5000C851E /* UIColor+Extension.swift */,
 				49FBBF72268DA6A5000C851E /* Date+Extension.swift */,
@@ -1595,6 +1603,7 @@
 		49FBBF94268DA6D2000C851E /* Manager */ = {
 			isa = PBXGroup;
 			children = (
+				0F683D1E2B2312660068BD87 /* PhotoManager.swift */,
 				0F3743A52B148856008F6B31 /* WXApiManager.swift */,
 				0FA9A9092B03770E005D2780 /* SimpleDataManager.swift */,
 				0F07B9032AD187C7009B5FFB /* IMManager.swift */,
@@ -1962,12 +1971,14 @@
 			files = (
 				0FBDBABD2ADFEB1D00E0A0CB /* ConversationListResp.swift in Sources */,
 				0F8E1BB12AC9213E00C67D62 /* PublishSuccController.swift in Sources */,
+				0FDADCFA2B26CEB700F00F88 /* UITableView+Extension.swift in Sources */,
 				0FB10EA52AF88BEE00E64777 /* ChatEmotionHelper.swift in Sources */,
 				49FBBF9E268DA6D2000C851E /* NetworkManager.swift in Sources */,
 				0F4DFE792AECD6BF00DD158A /* GiftCell.swift in Sources */,
 				49FBBF84268DA6A5000C851E /* UIViewController+Extension.swift in Sources */,
 				0FEBF59C2AA07E7800CB43BF /* HomeController.swift in Sources */,
 				49FBBFBB268DA772000C851E /* PhoneLoginController.swift in Sources */,
+				0F683D1D2B22F4E50068BD87 /* GameDetailController.swift in Sources */,
 				0FA0B0482ACD5C54001F20DB /* FollowListResp.swift in Sources */,
 				0F8E1BC22ACBDFA800C67D62 /* ParticipateResp.swift in Sources */,
 				0FA9A90A2B03770E005D2780 /* SimpleDataManager.swift in Sources */,
@@ -2097,6 +2108,7 @@
 				49FBBFDF268DA7BE000C851E /* UserInfoModel.swift in Sources */,
 				0FFF000A2B08B22F0072FCFA /* MyBagController.swift in Sources */,
 				49FBBFBC268DA772000C851E /* LoginModel.swift in Sources */,
+				0F683D1F2B2312660068BD87 /* PhotoManager.swift in Sources */,
 				0FA6470E2AF25B8700AC5787 /* SortUserController.swift in Sources */,
 				49FBBF90268DA6C0000C851E /* ConfigColor.swift in Sources */,
 				0FE2DB992B18609B00826222 /* StoryTaskView.swift in Sources */,

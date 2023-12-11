@@ -108,7 +108,6 @@ extension ConversationCell {
             timeLabel.text = item.draftTimestamp?.ls_formatStr()
             timeLabel.sizeToFit()
         } else {
-            LSLog("elemType")
             lastMessageLabel.text = LIMModel.getContentByElem(item.lastMessage )
             
             // 最后一条消息时间

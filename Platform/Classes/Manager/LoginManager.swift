@@ -18,13 +18,13 @@ class LoginManager: NSObject {
     
     static let shared = LoginManager()
     
-    // 防止重复请求
     var tokenRefreshing:Bool = false
     var isLoginSuceess = false
     var uid:Int = 0
     var tokenInfo: UserTokenModel?
     var userInfo: UserInfoModel?
     var userPageInfo: UserPageModel?
+    var lastRefreshTokenTimestamp: Int64 = 0
     
     private override init() {
         super.init()
@@ -68,12 +68,23 @@ extension LoginManager{
     }
     
     /// 登录失效
-    func loginExpird(){
+    func loginExpird() {
         logout()
     }
 }
 
 extension LoginManager {
+    
+    func isTokenValid() -> Bool {
+        var valid = false
+        let token = LoginManager.shared.getUserToken()
+        let currTimestamp = Date().timeIntervalSince1970
+        if let expireTimestamp = token?.expireTimestamp {
+            valid = expireTimestamp > Int64(currTimestamp)
+        }
+        
+        return valid
+    }
     
     //保存用户信息
     func saveUserToken(_ token: UserTokenModel){
@@ -89,7 +100,7 @@ extension LoginManager {
     }
     
     //本地的用户信息
-    func getUserToken()->UserTokenModel?{
+    func getUserToken()->UserTokenModel? {
         if (tokenInfo != nil) {
             return tokenInfo
         }
@@ -110,12 +121,23 @@ extension LoginManager {
     }
     
     /// 清除token
-    func removeUserToken(){
+    func removeUserToken() {
         UserDefaults.standard.removeObject(forKey: KEY_USER_LOGIN_TOKEN)
+    }
+    
+    func isUserSigValid() -> Bool {
+        var valid = false
+        let userInfo = LoginManager.shared.getUserInfo()
+        let currTimestamp = Date().timeIntervalSince1970
+        if let expireTimestamp = userInfo?.expireTimestamp {
+            valid = expireTimestamp > Int64(currTimestamp)
+        }
+        
+        return valid
     }
 
     //保存用户信息
-    func saveUserInfo(_ user: UserInfoModel){
+    func saveUserInfo(_ user: UserInfoModel) {
         userInfo = user
         let json = user.modelToJson()
         var data: Data?
@@ -200,7 +222,7 @@ extension LoginManager {
                 
                 // 发送登录成功通知
                 LSNotification.postLoginSuccess()
-                LSHUD.showSuccess("授权登录成功")
+//                LSHUD.showSuccess("授权登录成功")
             } else {
                 //错误提示，获取用户信息失败
                 LSHUD.showError(uresp.msg)
@@ -212,7 +234,15 @@ extension LoginManager {
         if (tokenRefreshing) {
             return
         }
+        
+        let currTimestamp = Int64(Date().timeIntervalSince1970)
+        if currTimestamp - lastRefreshTokenTimestamp <= 20 {
+            return
+        }
+        
+        lastRefreshTokenTimestamp = currTimestamp
         tokenRefreshing = true
+        
         // 登录失效的统一处理
         if let token = getUserToken() {
             let grantType = GrantType.refreshToken.rawValue
@@ -231,7 +261,7 @@ extension LoginManager {
                     loginExpird()
                 }
                 
-                self.tokenRefreshing = false
+                tokenRefreshing = false
             }
         } else {
             tokenRefreshing = false

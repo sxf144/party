@@ -20,7 +20,6 @@ class RecommendController: BaseController {
         self.slideBackEnabled = false
         self.showNavifationBar = false
         title = "推荐"
-        
         super.viewDidLoad()
         setupUI()
         // 添加监听
@@ -30,6 +29,16 @@ class RecommendController: BaseController {
         getRecommend(cursor: "", cityCode: 5101)
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        LSLog("RecommendController viewDidDisappear")
+        super.viewDidDisappear(animated)
+        // 停止当前cell 播放
+        for cell in tableView.visibleCells {
+            let recommendCell = cell as! RecommendCell
+            recommendCell.inactivity()
+        }
+    }
+    
     // 创建UITableView
     fileprivate lazy var tableView: UITableView = {
         let tableView = UITableView(frame: view.bounds, style: .plain)
@@ -37,7 +46,7 @@ class RecommendController: BaseController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
-        tableView.backgroundColor = .black
+        tableView.backgroundColor = .white
         
         // 注册UITableViewCell类
         tableView.register(RecommendCell.self, forCellReuseIdentifier: "RecommendCell")
@@ -113,8 +122,12 @@ extension RecommendController {
     }
     
     func getRecommend(cursor:String, cityCode:Int) {
+        if cursor.isEmpty {
+            LSHUD.showLoading()
+        }
         NetworkManager.shared.recommend(cursor, cityCode:cityCode, pageSize: 10) { resp in
             LSLog("getRecommend data:\(String(describing: resp.data))")
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("getRecommend succ")
                 self.recommendData = resp.data
@@ -133,6 +146,9 @@ extension RecommendController {
                     // 例如，你可以更新UI或执行其他任务
                     self.handleCurrentCell()
                 }
+                
+                // 判断是否展示空页面
+                self.isEmpty()
                 
             } else {
                 LSLog("getRecommend fail")
@@ -182,6 +198,14 @@ extension RecommendController {
             onGoingLabel.sizeToFit()
         }
     }
+    
+    func isEmpty() {
+        if recommendData.items?.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
+        }
+    }
 }
 
 // 配合父view实现横向滚动的容器代理
@@ -213,12 +237,6 @@ extension RecommendController: UITableViewDataSource, UITableViewDelegate, UIScr
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         LSLog("scrollViewDidEndDecelerating ...")
         handleCurrentCell()
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let item = recommendData.items?[indexPath.row]
-        // 跳转到局详情
-        PageManager.shared.pushToPartyDetail(item?.uniqueCode ?? "")
     }
 }
 

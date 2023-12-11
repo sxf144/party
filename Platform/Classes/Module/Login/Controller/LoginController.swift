@@ -126,10 +126,10 @@ extension LoginController: ASAuthorizationControllerDelegate {
                   8.realUserStatus
                     */
                     // Create an account in your system.
-                    let userIdentifier = appleIDCredential.user
-                    let fullName = appleIDCredential.fullName
-                    let email = appleIDCredential.email
-                    let code = appleIDCredential.authorizationCode
+//                    let userIdentifier = appleIDCredential.user
+//                    let fullName = appleIDCredential.fullName
+//                    let email = appleIDCredential.email
+//                    let code = appleIDCredential.authorizationCode
                     let token = appleIDCredential.identityToken
 //                    // For the purpose of this demo app, store the `userIdentifier` in the keychain.
 //                    self.saveUserInKeychain(userIdentifier)

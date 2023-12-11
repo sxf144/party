@@ -70,6 +70,8 @@ public class LIMSysElem {
     
     /// content
     var content:String = ""
+    /// flag，0为普通系统消息，1为时间，客户端专用
+    var flag: Int64 = 0
     
     init(_ json: JSON) {
         content = json["content"].stringValue

@@ -12,6 +12,8 @@ import ImSDK_Plus_Swift
 
 class ImageMessageCell: UITableViewCell {
     
+    /// 回调闭包
+    public var imageClickBlock: (() -> ())?
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 10.0
     let HeadWidth: CGFloat = 44.0
@@ -77,6 +79,9 @@ class ImageMessageCell: UITableViewCell {
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
         imageView.kf.setImage(with: URL(string: ""), placeholder: PlaceHolderSmall)
+        let imageTap = UITapGestureRecognizer(target: self, action: #selector(imageTaped(_:)))
+        imageView.addGestureRecognizer(imageTap)
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -156,6 +161,13 @@ extension ImageMessageCell {
     @objc private func avatarTaped(_ tap: UITapGestureRecognizer) {
         if let pid = item.sender {
             PageManager.shared.pushToUserPage(pid)
+        }
+    }
+    
+    // 点击图片
+    @objc private func imageTaped(_ tap: UITapGestureRecognizer) {
+        if let imageClickBlock = imageClickBlock {
+            imageClickBlock()
         }
     }
 }

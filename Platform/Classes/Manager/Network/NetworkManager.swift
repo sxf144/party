@@ -54,6 +54,14 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 删除账号
+    func deleteAccount(_ response: @escaping((RespModel) -> ()) ){
+        Network.shared.httpGetRequest(path: "/user/delete", para: nil) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
     /// 获取用户信息
     func login(_ response: @escaping((UserInfoResp) -> ()) ){
         Network.shared.httpGetRequest(path: "/user/login", para: nil) { (json) in
@@ -123,6 +131,16 @@ class NetworkManager: NSObject {
         let para:[String:Any] = ["page_size": pageSize]
         Network.shared.httpPostRequest(path: "/play/followed", para: para) { (json) in
             let resp = RecommendResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 点赞/取消
+    func playLike(_ uniqueCode:String = "", cancel:Bool = false, _ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["unique_code": uniqueCode]
+        para["cancel"] = cancel
+        Network.shared.httpPostRequest(path: "/play/like", para: para) { (json) in
+            let resp = RespModel(json)
             response(resp)
         }
     }

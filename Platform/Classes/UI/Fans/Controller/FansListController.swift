@@ -55,7 +55,7 @@ extension FansListController {
     
     func getFansList(pageNum:Int64, pageSize:Int64) {
         NetworkManager.shared.getFansList(pageNum, pageSize: pageSize) { resp in
-            LSLog("getFansList data:\(resp.data)")
+            
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
@@ -83,6 +83,9 @@ extension FansListController {
                     if (self.fansList.totalCount <= self.fansList.pageNum * self.fansList.pageSize) {
                         self.tableView.mj_footer.endRefreshingWithNoMoreData()
                     }
+                    
+                    // 判断是否展示空页面
+                    self.isEmpty()
                 }
             } else {
                 LSLog("getFollowList fail")
@@ -101,6 +104,14 @@ extension FansListController {
         if (fansList.totalCount > fansList.pageNum * fansList.pageSize) {
             let pn = fansList.pageNum + 1
             getFansList(pageNum: pn, pageSize: fansList.pageSize)
+        }
+    }
+    
+    func isEmpty() {
+        if fansList.users.count == 0 {
+            tableView.ls_showEmpty()
+        } else {
+            tableView.ls_hideEmpty()
         }
     }
 }

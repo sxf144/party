@@ -23,8 +23,6 @@ class HomeController: BaseController {
         slideBackEnabled = false
         super.viewDidLoad()
         
-        view.backgroundColor = .black
-        
         // 初始化controllers
         setupControllers()
         
