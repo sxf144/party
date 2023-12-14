@@ -126,24 +126,42 @@ extension SupplyUserController: UITextFieldDelegate {
         
         let pickerConfig = ZLPhotoConfiguration.default()
         pickerConfig.maxSelectCount = 1 // 设置最大选择数量为 1
+        pickerConfig.allowSelectVideo = false   //不允许选择视频
         let ps = ZLPhotoPreviewSheet()
         ps.selectImageBlock = { [weak self] results, isOriginal in
             LSLog("selectImageBlock:\(results)")
             // your code
             if results.count > 0 {
                 let zlResultModel:ZLResultModel = results[0]
-                if let data = zlResultModel.image.pngData() {
-                    LSHUD.showLoading("上传中...")
-                    OSSManager.shared.uploadData(data, type: .portrait, suffix: ".png") { resp in
-                        LSLog("uploadData resp:\(resp)")
-                        LSHUD.hide()
-                        if resp.status == .success {
-                            // 刷新头像
-                            self?.currAvatarUrl = resp.fullUrl
-                            self?.avatar.kf.setImage(with: URL(string: self?.currAvatarUrl ?? ""), placeholder: PlaceHolderAvatar)
-                        } else {
-                            LSHUD.showInfo("上传失败")
+                let asset = zlResultModel.asset
+                PhotoManager.shared.fetchAssetData(asset: asset) { (data, duration, fileExtension) in
+                    if let data = data {
+                        // 处理获取到的图片或视频数据
+                        LSLog("Successfully fetched data.")
+                        var suffix = ""
+                        if let duration = duration {
+                            LSLog("Video duration: \(duration) seconds")
                         }
+                        if let fileExtension = fileExtension {
+                            LSLog("File extension: \(fileExtension)")
+                            suffix = ".\(fileExtension)"
+                        }
+                        
+                        LSHUD.showLoading("上传中...")
+                        OSSManager.shared.uploadData(data, type: .portrait, suffix: suffix) { resp in
+                            LSLog("uploadData resp:\(resp)")
+                            LSHUD.hide()
+                            if resp.status == .success {
+                                // 刷新头像
+                                self?.currAvatarUrl = resp.fullUrl
+                                self?.avatar.kf.setImage(with: URL(string: self?.currAvatarUrl ?? ""), placeholder: PlaceHolderAvatar)
+                            } else {
+                                LSHUD.showInfo("上传失败")
+                            }
+                        }
+                    } else {
+                        // 处理获取数据失败的情况
+                        LSLog("Failed to fetch data.")
                     }
                 }
             }

@@ -10,13 +10,7 @@ import UIKit
 
 extension UITableView {
     
-    /// 设置无数据
-    func ls_setEmpty(_ bgColor: UIColor = .white) {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "icon_empty")
-        self.backgroundView?.addSubview(imageView)
-    }
-    
+    /// 设置无数据UI
     func ls_showEmpty() {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height))
         let imageWidth = 375
@@ -25,9 +19,18 @@ extension UITableView {
         imageView.image = UIImage(named: "icon_empty")
         view.addSubview(imageView)
         
+        let label = UILabel()
+        label.font = kFontRegualer14
+        label.textColor = UIColor.ls_color("#aaaaaa")
+        label.text = "这里什么也没有"
+        label.sizeToFit()
+        label.frame.origin = CGPoint(x: (self.frame.width - label.frame.size.width)/2, y: imageView.frame.maxY - 30)
+        view.addSubview(label)
+        
         self.backgroundView = view
     }
     
+    /// 隐藏无数据UI
     func ls_hideEmpty() {
         self.backgroundView = nil
     }

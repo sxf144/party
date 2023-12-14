@@ -289,6 +289,11 @@ extension ChatController {
     func handleData(msgs:[V2TIMMessage], refresh:Bool) {
         if refresh {
             dataList = []
+        } else {
+            // 删除第一条时间消息
+            if dataList.count > 0, dataList[0].elemType == .LIMElemSystemMsg, dataList[0].sysElem?.flag == 1 {
+                dataList.remove(at: 0)
+            }
         }
         
         for i in 0 ..< msgs.count {
@@ -438,6 +443,7 @@ extension ChatController {
             dataList[i] = item
             
             if let currDate = item.timestamp {
+                LSLog("---- lastTimestamp i:\(i) ----")
                 if i == 0, !(item.elemType == .LIMElemSystemMsg && item.sysElem?.flag == 1) {
                     let lastMsg = dataList[i]
                     let tempSysMsg = LIMMessage()
@@ -459,6 +465,7 @@ extension ChatController {
                     // 大于5分钟，插入一条系统消息，重置lastTimestamp
                     LSLog("currTimestamp:\(currTimestamp), lastTimestamp:\(lastTimestamp)")
                     if lastTimestamp - currTimestamp > 300 {
+                        LSLog("---- currTimestamp:\(currTimestamp), lastTimestamp:\(lastTimestamp) ----")
                         let j = i + 1
                         if j >= 0, j < dataList.count {
                             let lastMsg = dataList[j]
@@ -1136,6 +1143,8 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                 }
                                 // 打开红包详情
                                 PageManager.shared.pushToRedPacketDetailController(item)
+                                // 更新余额
+                                LoginManager.shared.getUserPage()
                             } else {
                                 // 红包已抢完，红包已领取，红包已过期，其他未知错误，都算已读
                                 LSLog("fetchRedPacket fail")

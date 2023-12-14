@@ -37,19 +37,49 @@ extension PhotoManager {
     func fetchImageData(for asset: PHAsset, completion: @escaping (Data?, TimeInterval?, String?) -> Void) {
         let options = PHImageRequestOptions()
         options.isSynchronous = false
+        options.deliveryMode = .highQualityFormat
         
-        // 获取文件后缀
-        PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
-            var fileExtension:String?
-            // 获取资源的文件名
-            let assetResources = PHAssetResource.assetResources(for: asset)
-            // 如果资源存在
-            if let firstResource = assetResources.first {
-                // 获取文件名的扩展（后缀）
-                fileExtension = firstResource.originalFilename.pathExtension
+        /**
+         * 获取原图方式
+         */
+//        // 获取文件数据
+//        PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { (data, _, _, _) in
+//            // 获取后缀
+//            var fileExtension:String?
+//            // 获取资源的文件名
+//            let assetResources = PHAssetResource.assetResources(for: asset)
+//            // 如果资源存在
+//            if let firstResource = assetResources.first {
+//                // 获取文件名的扩展（后缀）
+//                fileExtension = firstResource.originalFilename.pathExtension
+//            }
+//            
+//            completion(data, nil, fileExtension)
+//        }
+        
+        /**
+         * 压缩图片为jpg方式
+         */
+        // 获取图像的原始尺寸
+        var targetSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        // 需要压缩尺寸，最小边不能大于1080
+        let limitMin: Double = 1080
+        if targetSize.width > limitMin && targetSize.height > limitMin {
+            if targetSize.width > targetSize.height {
+                targetSize.height = limitMin
+                targetSize.width = targetSize.width/targetSize.height*limitMin
+            } else {
+                targetSize.width = limitMin
+                targetSize.height = targetSize.height/targetSize.width*limitMin
             }
-            
-            completion(data, nil, fileExtension)
+        }
+        PHImageManager.default().requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { (image, info) in
+            guard let image = image, let imageData = image.jpegData(compressionQuality: 0.8) else {
+                completion(nil, nil, nil)
+                return
+            }
+
+            completion(imageData, nil, "jpg")
         }
     }
 

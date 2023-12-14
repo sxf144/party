@@ -216,6 +216,12 @@ class PageManager: NSObject {
         currentNav()?.pushViewController(vc, animated: true)
     }
     
+    /// 城市选择
+    func pushToCitySelectController() {
+        let vc = CitySelectController()
+        currentNav()?.pushViewController(vc, animated: true)
+    }
+    
 //    /// 账号管理
 //    func pushToLBXScanViewController() {
 //        let vc = LBXScanviewco()

@@ -84,6 +84,9 @@ extension CashOutLogController {
                     if (self.dataList.totalCount <= self.dataList.pageNum * self.dataList.pageSize) {
                         self.tableView.mj_footer.endRefreshingWithNoMoreData()
                     }
+                    
+                    // 判断是否展示空页面
+                    self.isEmpty()
                 }
             } else {
                 LSLog("getCashOutLogs fail")
@@ -102,6 +105,16 @@ extension CashOutLogController {
         if (dataList.totalCount > dataList.pageNum * dataList.pageSize) {
             let pn = dataList.pageNum + 1
             getCashOutLogs(pageNum: pn, pageSize: dataList.pageSize)
+        }
+    }
+    
+    func isEmpty() {
+        if dataList.logs.count == 0 {
+            tableView.ls_showEmpty()
+            tableView.mj_footer.isHidden = true
+        } else {
+            tableView.ls_hideEmpty()
+            tableView.mj_footer.isHidden = false
         }
     }
 }

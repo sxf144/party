@@ -66,6 +66,7 @@ class StoryTaskView: UIView {
         label.sizeToFit()
         label.numberOfLines = 4
         label.lineBreakMode = .byWordWrapping
+        label.ls_shadow()
         return label
     }()
     
@@ -78,6 +79,7 @@ class StoryTaskView: UIView {
         label.sizeToFit()
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
+        label.ls_shadow()
         return label
     }()
     

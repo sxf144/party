@@ -18,6 +18,7 @@ class MyLocationManager: NSObject {
     static let shared = MyLocationManager()
     lazy var myLocationManager = AMapLocationManager()
     var currLocation = CLLocation()
+    var currPlacemark: CLPlacemark?
     
     private override init() {
         super.init()
@@ -38,6 +39,10 @@ extension MyLocationManager {
         myLocationManager.locationTimeout = 10 // 定位超时时间，单位秒
         myLocationManager.reGeocodeTimeout = 10 // 逆地理编码超时时间，单位秒
         myLocationManager.startUpdatingLocation()
+    }
+    
+    func stopLocation() {
+        myLocationManager.stopUpdatingLocation()
     }
     
     /*
@@ -74,6 +79,58 @@ extension MyLocationManager: AMapLocationManagerDelegate {
     func amapLocationManager(_ manager: AMapLocationManager!, didUpdate location: CLLocation!, reGeocode: AMapLocationReGeocode!) {
         LSLog("amapLocationManager didUpdate location:\(String(describing: location))")
         self.currLocation = location
+        // 获取位置信息
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if let error = error {
+                LSLog("Reverse geocoding failed with error: \(error.localizedDescription)")
+                return
+            }
+
+            // 获取位置信息中的城市
+            if let placemark = placemarks?.first {
+                // 定位城市信息不存在，或者与当前定位的城市不同，则需要遍历更新
+                var needUpdate = false
+                if let cityInfo = CityDataManager.shared.getCityInfo(), cityInfo.sections.count > 0, let locality = placemark.locality {
+                    if let locationCity = CityDataManager.shared.locationCity {
+                        if locality != self.currPlacemark?.locality {
+                            needUpdate = true
+                        }
+                    } else {
+                        needUpdate = true
+                    }
+                    
+                    if needUpdate {
+                        var isFind = false
+                        var tempCity: CityItem?
+                        for sectionItem in cityInfo.sections {
+                            for cityItem in sectionItem.cityList {
+                                if locality.contains(cityItem.name) {
+                                    tempCity = cityItem
+                                    isFind = true
+                                    break
+                                }
+                            }
+                            if isFind {
+                                break
+                            }
+                        }
+                        if let tempCity = tempCity {
+                            // 设置当前定位城市信息
+                            CityDataManager.shared.locationCity = tempCity
+                            // 判断当前选择城市是否存在，若不存在，把定位城市作为当前选择城市
+                            if CityDataManager.shared.getCurrCity() == nil {
+                                CityDataManager.shared.saveCurrCity(tempCity)
+                            }
+                        }
+                    }
+                }
+                
+                self.currPlacemark = placemark
+                // 定位信息更新
+                LSNotification.postLocationDidUpdate()
+            }
+        }
     }
     
     func amapLocationManager(_ manager: AMapLocationManager!, didFailWithError error: Error!) {

@@ -151,7 +151,7 @@ extension InviteMessageCell {
             tipLabel.snp.remakeConstraints { (make) in
                 make.left.equalTo(iconIV.snp.right).offset(12)
                 make.right.equalToSuperview().offset(-12)
-                make.bottom.equalToSuperview().offset(-5)
+                make.top.equalTo(titleLabel.snp.bottom).offset(4)
             }
             
         } else {
@@ -186,7 +186,7 @@ extension InviteMessageCell {
             tipLabel.snp.remakeConstraints { (make) in
                 make.left.equalToSuperview().offset(12)
                 make.right.equalTo(iconIV.snp.left).offset(-12)
-                make.bottom.equalToSuperview().offset(-5)
+                make.top.equalTo(titleLabel.snp.bottom).offset(4)
             }
             
             // 用户头像
@@ -280,7 +280,7 @@ extension InviteMessageCell{
         tipLabel.snp.makeConstraints { (make) in
             make.left.equalTo(iconIV.snp.right).offset(12)
             make.right.equalToSuperview().offset(-12)
-            make.bottom.equalToSuperview().offset(-5)
+            make.top.equalTo(titleLabel.snp.bottom).offset(4)
         }
     }
 }

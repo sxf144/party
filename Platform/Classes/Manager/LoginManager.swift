@@ -80,7 +80,8 @@ extension LoginManager {
         let token = LoginManager.shared.getUserToken()
         let currTimestamp = Date().timeIntervalSince1970
         if let expireTimestamp = token?.expireTimestamp {
-            valid = expireTimestamp > Int64(currTimestamp)
+            // 提前10分钟刷新
+            valid = expireTimestamp > Int64(currTimestamp) + 600
         }
         
         return valid
@@ -88,6 +89,8 @@ extension LoginManager {
     
     //保存用户信息
     func saveUserToken(_ token: UserTokenModel){
+        var token = token
+        token.expireTimestamp = (Int64(Date().timeIntervalSince1970) + token.expiresIn)
         tokenInfo = token
         let json = token.modelToJson()
         var data: Data?
@@ -270,7 +273,6 @@ extension LoginManager {
     }
     
     func getUserPage() {
-        
         NetworkManager.shared.getUserPage () { resp in
             if resp.status == .success {
                 LSLog("getUserPage data:\(resp.data)")

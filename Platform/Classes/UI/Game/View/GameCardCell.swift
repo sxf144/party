@@ -15,7 +15,6 @@ class GameCardCell: UICollectionViewCell {
     
     let leftMargin: CGFloat = 16.0
     let normalBg: UIImage = UIImage(named: "card_item_bg")!
-    let grayBg: UIImage = UIImage.convertToGrayScale(UIImage(named: "card_item_bg")!)!
     var item: GameCardItem = GameCardItem()
     
     override init(frame: CGRect) {
@@ -33,7 +32,7 @@ class GameCardCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
-        imageView.image = grayBg
+        imageView.image = normalBg
         return imageView
     }()
     
@@ -61,8 +60,8 @@ extension GameCardCell {
         // 根据字段改变整体状态
         contentView.alpha = item.selected ? 1 : 0.5
         
-        // 卡牌背景
-        cardBg.kf.setImage(with: URL(string: item.introductionMedia), placeholder: normalBg)
+//        // 卡牌背景
+//        cardBg.kf.setImage(with: URL(string: item.introductionMedia), placeholder: normalBg)
         
         // 卡牌名称
         nameLabel.text = item.name

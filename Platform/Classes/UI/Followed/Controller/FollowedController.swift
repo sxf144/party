@@ -34,7 +34,6 @@ class FollowedController: BaseController {
         LSLog("FollowedController viewDidDisappear")
         super.viewDidDisappear(animated)
         // 停止当前cell 播放
-        let visiableIndexPaths = tableView.visibleCells
         for cell in tableView.visibleCells {
             let recommendCell = cell as! RecommendCell
             recommendCell.inactivity()
@@ -74,8 +73,7 @@ extension FollowedController {
     }
     
     func getFollowed() {
-        let pageSize:Int64 = 10
-        NetworkManager.shared.followed(pageSize) { resp in
+        NetworkManager.shared.followed() { resp in
             LSLog("getFollowed data:\(String(describing: resp.data))")
             if resp.status == .success {
                 LSLog("getFollowed succ")

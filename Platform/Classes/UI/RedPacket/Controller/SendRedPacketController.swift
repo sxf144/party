@@ -290,6 +290,8 @@ extension SendRedPacketController {
             LSHUD.hide()
             if resp.status == .success {
                 LSLog("sendRedPacket succ")
+                // 更新余额
+                LoginManager.shared.getUserPage()
                 self.pop()
             } else {
                 LSLog("sendRedPacket fail")

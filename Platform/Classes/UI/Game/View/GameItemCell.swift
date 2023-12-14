@@ -102,7 +102,7 @@ extension GameItemCell {
         nameLabel.sizeToFit()
         
         // 游戏人数
-        personCntLabel.text = "\(item.personCountMin)-\(item.personCountMax)"
+        personCntLabel.text = "\(item.personCountMin)-\(item.personCountMax)人"
         personCntLabel.sizeToFit()
         
         // 游戏介绍

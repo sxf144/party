@@ -29,10 +29,11 @@ class PublishPartyController: BaseController {
     var selectGameItem: GameItem = GameListResp.defaultGameItem()
     var coverImage: UIImage?
     var coverUrl: String = ""
-    var videoData: Data?
+    var mediaData: Data?
     var suffix: String = ""
     var publicType: Int64 = 1
     var locationItem: AMapPOI?
+    var mediaType: OBJECT_KEY_TYPE = .img
     
     override func viewDidLoad() {
         title = "组个桔"
@@ -390,7 +391,7 @@ extension PublishPartyController {
         resignResponders()
         // 重置数据
         coverImage = nil
-        videoData = nil
+        mediaData = nil
         
         let pickerConfig = ZLPhotoConfiguration.default()
         pickerConfig.maxSelectCount = 1 // 设置最大选择数量为 1
@@ -414,10 +415,12 @@ extension PublishPartyController {
                             self?.suffix = ".\(fileExtension)"
                         }
                         
-                        if asset.mediaType == .video {
-                            self?.videoData = data
+                        if asset.mediaType == .image {
+                            self?.mediaType = .img
+                        } else if asset.mediaType == .video {
+                            self?.mediaType = .video
                         }
-                        
+                        self?.mediaData = data
                     } else {
                         // 处理获取数据失败的情况
                         LSLog("Failed to fetch data.")
@@ -513,30 +516,17 @@ extension PublishPartyController {
             return
         }
         
-        // 检查参数完毕，先上传图片/视频到阿里oss
-        var type = OBJECT_KEY_TYPE.img
-        var finalData: Data?
-        if let data = videoData {
-            type = OBJECT_KEY_TYPE.video
-            finalData = data
-        } else if let data = coverImage?.pngData() {
-            type = OBJECT_KEY_TYPE.img
-            finalData = data
-        }
-        
-        if finalData != nil {
-            LSHUD.showLoading("发布中...")
-            OSSManager.shared.uploadData(finalData, type: type, suffix: suffix) { [weak self] resp in
-                LSLog("uploadData resp:\(resp)")
-                if (resp.status == .success) {
-                    //
-                    self?.coverUrl = resp.fullUrl
-                    
-                    // 发布
-                    self?.publishParty()
-                } else {
-                    LSHUD.hide()
-                }
+        LSHUD.showLoading("发布中...")
+        OSSManager.shared.uploadData(mediaData, type: mediaType, suffix: suffix) { [weak self] resp in
+            LSLog("uploadData resp:\(resp)")
+            if (resp.status == .success) {
+                //
+                self?.coverUrl = resp.fullUrl
+                
+                // 发布
+                self?.publishParty()
+            } else {
+                LSHUD.hide()
             }
         }
     }
@@ -576,8 +566,8 @@ extension PublishPartyController {
     }
     
     func checkParam() -> Bool {
-        if (coverImage == nil) {
-            LSLog("checkParam coverImage err")
+        if (mediaData == nil) {
+            LSLog("checkParam mediaData err")
             LSHUD.showInfo("请选择图片/视频")
             return false
         }

@@ -23,6 +23,7 @@ class RechargeView: UIView {
     var dataList: [RechargeItem] = []
     var userPageInfo: UserPageModel? = LoginManager.shared.getUserPageInfo()
     var dataLoaded: Bool = false
+    var orderId: String = ""
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -189,10 +190,24 @@ extension RechargeView {
         
         if selectedIndex >= 0, selectedIndex < dataList.count {
             LSHUD.showLoading()
-            // 启动购买
+            // 重置orderId
+            self.orderId = ""
             let item = dataList[selectedIndex]
-            let payment = SKPayment(product: item.product)
-            SKPaymentQueue.default().add(payment)
+            // 先创建订单
+            NetworkManager.shared.createOrder(item.id) { resp in
+                LSLog("createOrder data:\(resp.data)")
+                if resp.status == .success {
+                    LSLog("createOrder succ")
+                    self.orderId = resp.data.orderId
+                    // 启动购买
+                    let payment = SKPayment(product: item.product)
+                    SKPaymentQueue.default().add(payment)
+                } else {
+                    LSHUD.hide()
+                    LSHUD.showInfo(resp.msg)
+                    LSLog("createOrder fail")
+                }
+            }
         }
     }
     
@@ -225,7 +240,6 @@ extension RechargeView {
     
     // 拉取数据
     func getRechargeList() {
-        
         LSHUD.showLoading()
         NetworkManager.shared.getRechargeList { resp in
             LSLog("getRechargeList data:\(resp.data)")
@@ -341,9 +355,9 @@ extension RechargeView: SKPaymentTransactionObserver, SKProductsRequestDelegate 
     func completeTransaction(transaction: SKPaymentTransaction) {
         // 处理购买成功的逻辑
         // 比如：解锁功能，提供内容等
-        LSLog("购买成功")
-        LSHUD.hide()
         SKPaymentQueue.default().finishTransaction(transaction)
+        // 通知服务端
+        payNotify(transaction)
     }
 
     // 处理购买失败的交易
@@ -385,6 +399,39 @@ extension RechargeView: SKPaymentTransactionObserver, SKProductsRequestDelegate 
                 SKPaymentQueue.default().finishTransaction(transaction)
                 break
             }
+        }
+    }
+    
+    // 支付成功通知后端
+    func payNotify(_ transaction: SKPaymentTransaction) {
+        let item = dataList[selectedIndex]
+        let fee: Int64 = Int64(Int(truncating: item.product.price)*100)
+        if let receiptURL = Bundle.main.appStoreReceiptURL, let receiptData = try? Data(contentsOf: receiptURL) {
+            // receiptData 包含了票据信息，可以使用它进行验证
+            let receiptString = receiptData.base64EncodedString(options: [])
+            let orderId = orderId
+            let transactionId = transaction.transactionIdentifier ?? ""
+            let originalTransactionId = transaction.original?.transactionIdentifier ?? ""
+            
+            if !receiptString.isEmpty, !transactionId.isEmpty {
+                NetworkManager.shared.payNotify(orderId, transactionId: transactionId, originalTransactionId: originalTransactionId, receiptData: receiptString, totalFee: fee) { resp in
+                    LSHUD.hide()
+                    if resp.status == .success {
+                        LSLog("payNotify succ")
+                        LSLog("购买成功")
+                        // 支付成功，刷新个人信息
+                        LoginManager.shared.getUserPage()
+                    } else {
+                        LSLog("payNotify fail")
+                        LSHUD.showError(resp.msg)
+                        // 检查订单结果
+                    }
+                }
+            } else {
+                // 参数问题
+            }
+        } else {
+            // 票据获取失败
         }
     }
 }

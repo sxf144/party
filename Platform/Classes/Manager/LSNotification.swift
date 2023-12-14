@@ -27,6 +27,8 @@ struct NotificationName {
     static let partyStatusChange = NSNotification.Name("kNotification_partyStatusChange")
     /// 账号绑定状态变化
     static let accountBindStatusChange = NSNotification.Name("kNotification_accountBindStatusChange")
+    /// 定位城市发生变化
+    static let locationDidUpdate = NSNotification.Name("kNotification_locationDidUpdate")
 }
 
 class LSNotification: NSObject {
@@ -81,5 +83,10 @@ class LSNotification: NSObject {
     /// 账号绑定状态更新
     static func postAccountBindStatusChange() {
         NotificationCenter.default.post(name: NotificationName.accountBindStatusChange, object: nil)
+    }
+    
+    /// 定位城市发生变化，通知首页
+    static func postLocationDidUpdate() {
+        NotificationCenter.default.post(name: NotificationName.locationDidUpdate, object: nil)
     }
 }

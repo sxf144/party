@@ -144,6 +144,7 @@ extension GameRoundListController {
                     allDataList.append(item)
                 }
             }
+            
             // 过滤数据
             filterData()
             options[0]["value"] = valueArray
@@ -229,7 +230,7 @@ extension GameRoundListController {
     func filterData() {
         dataList = []
         dataList = allDataList.filter { object in
-            return (filter1.contains(object.index)) && (filter2.contains(object.index)) && (filter3.contains(object.index)) && (filter4.contains(object.index))
+            return (filter1.contains(object.index)) && (filter2.contains(Int(object.difficulty))) && (filter3.contains(Int(object.needPersonCnt))) && (filter4.contains(Int(object.needProps)))
         }
     }
     
@@ -254,6 +255,10 @@ extension GameRoundListController {
             keyLabel.sizeToFit()
             topSubView.addSubview(keyLabel)
             
+            let optionView = UIScrollView()
+            optionView.showsHorizontalScrollIndicator = false
+            topSubView.addSubview(optionView)
+            
             topSubView.snp.makeConstraints { (make) in
                 make.left.equalToSuperview()
                 make.top.equalToSuperview().offset(sub_height*CGFloat(i))
@@ -264,6 +269,13 @@ extension GameRoundListController {
             keyLabel.snp.makeConstraints { (make) in
                 make.left.equalToSuperview().offset(xMargin)
                 make.centerY.equalToSuperview()
+            }
+            
+            optionView.snp.makeConstraints { (make) in
+                make.centerY.equalToSuperview()
+                make.left.equalTo(keyLabel.snp.right)
+                make.right.equalToSuperview()
+                make.height.equalToSuperview()
             }
             
             var btn_width = 68
@@ -288,15 +300,16 @@ extension GameRoundListController {
                 valueBtn.layer.setValue((i+1), forKey: BtnKeyType)
                 valueBtn.layer.setValue(optionValue[j]["value"], forKey: BtnKeyValue)
                 valueBtn.addTarget(self, action: #selector(clickOptionBtn(_:)), for: .touchUpInside)
-                topSubView.addSubview(valueBtn)
+                optionView.addSubview(valueBtn)
                 
                 valueBtn.snp.makeConstraints { (make) in
-                    make.left.equalTo(keyLabel.snp.right).offset((btn_width+8)*j)
+                    make.left.equalToSuperview().offset((btn_width+8)*j)
                     make.centerY.equalToSuperview()
                     make.size.equalTo(CGSize(width: btn_width, height: btn_height))
                 }
-                
             }
+            
+            optionView.contentSize = CGSize(width: CGFloat((btn_width+8)*(optionValue.count)), height: sub_height)
         }
     }
     

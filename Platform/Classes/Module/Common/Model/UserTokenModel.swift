@@ -37,14 +37,13 @@ struct UserTokenModel {
     init() {}
     
     func modelToJson()->JSON{
-        
         let json:JSON = [
             "access_token":accessToken,
             "expires_in":expiresIn,
             "refresh_token":refreshToken,
             "scope":scope,
             "token_type":tokenType,
-            "expire_timestamp": expireTimestamp == 0 ? (Int64(Date().timeIntervalSince1970) + expiresIn) : expireTimestamp
+            "expire_timestamp": expireTimestamp
         ]
         return json
     }

@@ -44,6 +44,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         MyLocationManager.updatePrivacy()
         MyLocationManager.shared.startLocation()
+        // 检查token，如果token过期，去刷新
+        if !LoginManager.shared.isTokenValid() {
+            LoginManager.shared.refreshToken()
+        }
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

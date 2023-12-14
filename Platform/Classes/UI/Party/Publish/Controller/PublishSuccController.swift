@@ -159,7 +159,7 @@ extension PublishSuccController {
             
             if resp.status == .success {
                 LSLog("inviteJoinParty:\(resp)")
-                LSHUD.showInfo("邀请已发出")
+                LSHUD.showSuccess("邀请已发出")
             } else {
                 LSLog("inviteJoinParty fail")
             }

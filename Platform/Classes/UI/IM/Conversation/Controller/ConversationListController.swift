@@ -61,17 +61,16 @@ class ConversationListController: BaseController, V2TIMSDKListener {
 extension ConversationListController {
 
     func loadNewData() {
-        
         IMManager.shared.loadConversationList {
             self.dataList = IMManager.shared.conversationList
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
             self.tableView.reloadData()
+            
+            // 判断是否展示空页面
+            self.isEmpty()
         }
-        
-        // 判断是否展示空页面
-        self.isEmpty()
     }
     
     func isEmpty() {

@@ -88,6 +88,7 @@ class CardTaskView: UIView {
         label.sizeToFit()
         label.numberOfLines = 4
         label.lineBreakMode = .byWordWrapping
+        label.ls_shadow()
         return label
     }()
     
@@ -241,7 +242,7 @@ extension CardTaskView {
                 // 播放按钮先隐藏，视频已准备好播放时再显示
                 playBtn.isHidden = true
                 // 卡牌视频
-                avPlayerLayer.frame = contentView.bounds
+                avPlayerLayer.frame = mediaView.bounds
                 if let videoURL = URL(string: mediaUrl) {
                     // 创建AVPlayerItem，加载视频，但此处不播放
                     let playerItem = AVPlayerItem(url: videoURL)

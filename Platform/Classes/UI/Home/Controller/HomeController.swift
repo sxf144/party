@@ -17,6 +17,8 @@ class HomeController: BaseController {
     lazy var listContainerView: JXSegmentedListContainerView! = {
         return JXSegmentedListContainerView(dataSource: self)
     }()
+    var currCity: CityItem? = CityDataManager.shared.getCurrCity()
+    let recommendController: RecommendController = RecommendController()
     
     override func viewDidLoad() {
         showNavifationBar = false
@@ -25,6 +27,7 @@ class HomeController: BaseController {
         
         // 初始化controllers
         setupControllers()
+        setupUI()
         
         // 添加监听
         addObservers()
@@ -39,9 +42,33 @@ class HomeController: BaseController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        segmentedView.frame = CGRect(x: 0, y: 44, width: view.bounds.size.width, height: 50)
+        segmentedView.frame = CGRect(x: view.bounds.size.width/4, y: 44, width: view.bounds.size.width/2, height: 50)
         listContainerView.frame = CGRect(x: 0, y: 0, width: view.bounds.size.width, height: view.bounds.size.height - kTabBarHeight)
     }
+    
+    // 城市选择
+    fileprivate lazy var cityBtn: UIButton = {
+        let button = UIButton()
+        button.addTarget(self, action: #selector(clickCityBtn(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    fileprivate lazy var cityLabel: UILabel = {
+        let label = UILabel()
+        label.font = kFontMedium18
+        label.textColor = .white
+        label.text = currCity?.name
+        label.ls_shadow()
+        label.sizeToFit()
+        return label
+    }()
+    
+    fileprivate lazy var cityExpandIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.image = UIImage(named: "icon_expand_city")
+        return imageView
+    }()
 }
 
 extension HomeController {
@@ -49,6 +76,7 @@ extension HomeController {
     func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleLogin(_:)), name: NotificationName.loginSuccess, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleLogout(_:)), name: NotificationName.logoutSuccess, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLocationDidUpdate(_:)), name: NotificationName.locationDidUpdate, object: nil)
     }
     
     @objc func handleLogin(_ notification: Notification) {
@@ -60,12 +88,42 @@ extension HomeController {
         // 退出登录
     }
     
+    @objc func handleLocationDidUpdate(_ notification: Notification) {
+        // 定位城市发生变化，如果之前currCity不存在，则拉取数据
+        if currCity == nil {
+            refreshCity()
+        }
+    }
+    
     func loadData() {
         // 拉取自己的个人主页信息，主要为了获取代币信息
         LoginManager.shared.getUserPage()
         // 刷新会话信息，获取未读数
         IMManager.shared.loadConversationList {
             
+        }
+        // 获取城市信息
+        CityDataManager.shared.getCityList()
+    }
+    
+    // 点击选择城市
+    @objc func clickCityBtn(_ sender: UIButton) {
+        LSLog("clickCityBtn")
+        let vc = CitySelectController()
+        vc.selectBlock = { [weak self] cityItem in
+            // 保存新的当前城市
+            CityDataManager.shared.saveCurrCity(cityItem)
+            self?.refreshCity()
+        }
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    func refreshCity() {
+        currCity = CityDataManager.shared.getCurrCity()
+        if let currCity = currCity {
+            cityLabel.text = currCity.name
+            cityLabel.sizeToFit()
+            recommendController.loadNewData()
         }
     }
 }
@@ -87,7 +145,7 @@ extension HomeController: JXSegmentedListContainerViewDataSource {
         
         switch index {
         case 0:
-            return RecommendController()
+            return recommendController
         case 1:
             return FollowedController()
         default:
@@ -97,8 +155,8 @@ extension HomeController: JXSegmentedListContainerViewDataSource {
 }
 
 extension HomeController {
+    
     func setupControllers() {
-        
         //segmentedDataSource一定要通过属性强持有，不然会被释放掉
         segmentedDataSource = JXSegmentedTitleDataSource()
         //配置数据源相关配置属性
@@ -121,6 +179,30 @@ extension HomeController {
         indicator.indicatorWidth = 20
         indicator.indicatorColor = UIColor.ls_color("#ffffff")
         segmentedView.indicators = [indicator]
+    }
+    
+    fileprivate func setupUI() {
+        view.addSubview(cityBtn)
+        cityBtn.addSubview(cityLabel)
+        cityBtn.addSubview(cityExpandIcon)
+        
+        cityBtn.snp.makeConstraints { (make) in
+            make.centerY.equalTo(segmentedView)
+            make.left.equalToSuperview().offset(16)
+            make.height.equalTo(segmentedView)
+        }
+        
+        cityLabel.snp.makeConstraints { (make) in
+            make.centerY.equalToSuperview()
+            make.left.equalToSuperview()
+        }
+        
+        cityExpandIcon.snp.makeConstraints { (make) in
+            make.centerY.equalToSuperview()
+            make.left.equalTo(cityLabel.snp.right).offset(2)
+            make.size.equalTo(CGSize(width: 12, height: 12))
+            make.right.equalToSuperview()
+        }
     }
 }
 

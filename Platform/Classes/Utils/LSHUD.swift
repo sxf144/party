@@ -156,7 +156,8 @@ public class LSHUD:UIView {
     }
     
     lazy var activityView: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView(style: .whiteLarge)
+        let view = UIActivityIndicatorView(style: .large)
+        view.color = .white
         view.translatesAutoresizingMaskIntoConstraints = false
         view.startAnimating()
         return view

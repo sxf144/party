@@ -70,6 +70,14 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 获取城市列表
+    func getCityList(_ response: @escaping((CityResp) -> ()) ){
+        Network.shared.httpGetRequest(path: "/open/get_cities", para: nil) { (json) in
+            let resp = CityResp(json)
+            response(resp)
+        }
+    }
+    
     /// 编辑头像
     func editPortrait(_ portrait: String,_ response: @escaping((RespModel) -> ()) ){
         let para:[String:Any] = ["portrait": portrait]
@@ -116,7 +124,7 @@ class NetworkManager: NSObject {
     }
     
     /// 首页推荐列表
-    func recommend(_ cursor:String = "", cityCode:Int = 5101, pageSize:Int = 10 ,_ response: @escaping((RecommendResp) -> ()) ){
+    func recommend(_ cursor:String = "", cityCode:Int64 = 5101, _ pageSize:Int64 = 10 ,_ response: @escaping((RecommendResp) -> ()) ){
         var para:[String:Any] = ["page_size": pageSize]
         para["cursor_time"] = cursor
         para["city_code"] = cityCode
@@ -262,6 +270,16 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 点赞评论
+    func commentLike(_ id:Int64 = 0, cancel:Bool = false,_ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["id": id]
+        para["cancel"] = cancel
+        Network.shared.httpPostRequest(path: "/play/comment_like", para: para) { (json) in
+            let resp = RespModel(json)
+            response(resp)
+        }
+    }
+    
     /// 获取参与人信息
     func getParticipateList(_ uniqueCode:String = "", _ response: @escaping((ParticipateResp) -> ()) ){
         let para:[String:Any] = ["unique_code": uniqueCode]
@@ -342,6 +360,28 @@ class NetworkManager: NSObject {
     func getRechargeList(_ response: @escaping((RechargeListResp) -> ()) ){
         Network.shared.httpGetRequest(path: "/settings/coin/get_goods", para: nil) { (json) in
             let resp = RechargeListResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 创建订单
+    func createOrder(_ id:Int64 = 0,_ response: @escaping((CreateOrderResp) -> ()) ){
+        let para:[String:Any] = ["id": id]
+        Network.shared.httpPostRequest(path: "/settings/coin/create_order", para: para) { (json) in
+            let resp = CreateOrderResp(json)
+            response(resp)
+        }
+    }
+    
+    /// 成功支付通知结果
+    func payNotify(_ orderId:String = "", transactionId:String = "", originalTransactionId:String = "", receiptData:String = "", totalFee:Int64 = 0,_ response: @escaping((RespModel) -> ()) ){
+        var para:[String:Any] = ["order_id": orderId]
+        para["transaction_id"] = transactionId
+        para["original_transaction_id"] = originalTransactionId
+        para["receipt_data"] = receiptData
+        para["total_fee"] = totalFee
+        Network.shared.httpPostRequest(path: "/pay/iap/pay_notify", para: para) { (json) in
+            let resp = RespModel(json)
             response(resp)
         }
     }

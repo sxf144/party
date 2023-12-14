@@ -20,7 +20,7 @@ let kScreenW = UIScreen.main.bounds.size.width
 /// 屏幕高
 let kScreenH = UIScreen.main.bounds.size.height
 /// 状态栏高度
-let kStatusBarHeight = UIApplication.shared.statusBarFrame.size.height
+let kStatusBarHeight = kKeyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
 
 /// 导航栏高度
 let kNavBarHeight:CGFloat = kStatusBarHeight + 44

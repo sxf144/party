@@ -110,8 +110,10 @@ extension FansListController {
     func isEmpty() {
         if fansList.users.count == 0 {
             tableView.ls_showEmpty()
+            tableView.mj_footer.isHidden = true
         } else {
             tableView.ls_hideEmpty()
+            tableView.mj_footer.isHidden = false
         }
     }
 }

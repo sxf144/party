@@ -206,15 +206,20 @@ extension RecommendCell {
         likeBtn.isSelected = item?.like ?? false
         
         // 点赞数
-        likeLabel.isHidden = item?.likeCnt ?? 0 <= 0
-//        likeLabel.text = "\(item?.likeCnt ?? 0)"
-//        likeLabel.sizeToFit()
-        likeLabel.ls_shadow("\(item?.likeCnt ?? 0)")
+        if let likeCnt = item?.likeCnt, likeCnt != 0 {
+            likeLabel.text = "\(likeCnt)"
+        } else {
+            likeLabel.text = "赞"
+        }
         likeLabel.sizeToFit()
         
         // 评论数
-        commentLabel.isHidden = item?.commentCnt ?? 0 <= 0
         commentLabel.text = "\(item?.commentCnt ?? 0)"
+        if let commentCnt = item?.commentCnt, commentCnt != 0 {
+            commentLabel.text = "\(commentCnt)"
+        } else {
+            commentLabel.text = "抢首评"
+        }
         commentLabel.sizeToFit()
         
         // coverType 1、图片，2、视频
@@ -275,7 +280,8 @@ extension RecommendCell {
     }
     
     @objc func clickCommentBtn(_ sender:UIButton) {
-        
+        // 跳转到局详情
+        PageManager.shared.pushToPartyDetail(item?.uniqueCode ?? "")
     }
     
     @objc func clickShareBtn(_ sender:UIButton) {
@@ -347,7 +353,8 @@ extension RecommendCell {
     func handleUpHalf() {
         // 图片、跳转进入详情，视频、播放/暂停
         if item?.coverType == CoverType.image.rawValue {
-            
+            // 跳转到局详情
+            PageManager.shared.pushToPartyDetail(item?.uniqueCode ?? "")
         } else if (item?.coverType == CoverType.video.rawValue) {
             // 检查播放状态
             if avPlayer.rate > 0 && avPlayer.error == nil {
@@ -380,8 +387,8 @@ extension RecommendCell {
 }
 
 extension RecommendCell {
-    fileprivate func setupUI() {
-        
+    
+    fileprivate func setupUI() {    
         contentView.layer.addSublayer(avPlayerLayer)
         contentView.addSubview(videoImageView)
         contentView.addSubview(rightToolView)

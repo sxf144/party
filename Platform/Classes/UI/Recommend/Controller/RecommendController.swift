@@ -15,6 +15,7 @@ class RecommendController: BaseController {
     var recommendData: RecommendModel = RecommendModel()
     var lastIndexPath: IndexPath?
     var lastActiveCell: RecommendCell?
+    var currCity: CityItem?
 
     override func viewDidLoad() {
         self.slideBackEnabled = false
@@ -26,7 +27,7 @@ class RecommendController: BaseController {
         addObservers()
         
         // 拉取列表信息
-        getRecommend(cursor: "", cityCode: 5101)
+        loadNewData()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -103,7 +104,7 @@ extension RecommendController {
     
     @objc func handleLogin(_ notification: Notification) {
         // 登录成功，重新拉取列表信息
-        getRecommend(cursor: "", cityCode: 5101)
+        loadNewData()
     }
     
     @objc func handleLogout(_ notification: Notification) {
@@ -121,38 +122,50 @@ extension RecommendController {
         PageManager.shared.pushToChatController(conv)
     }
     
-    func getRecommend(cursor:String, cityCode:Int) {
+    func loadNewData() {
+        currCity = CityDataManager.shared.getCurrCity()
+        if let currCity = currCity, !currCity.code.isEmpty {
+            LSLog("city code:\(currCity.code)")
+            getRecommend(cursor: "", cityCode: currCity.code)
+        }
+    }
+    
+    func getRecommend(cursor:String, cityCode:String) {
         if cursor.isEmpty {
             LSHUD.showLoading()
         }
-        NetworkManager.shared.recommend(cursor, cityCode:cityCode, pageSize: 10) { resp in
-            LSLog("getRecommend data:\(String(describing: resp.data))")
-            LSHUD.hide()
-            if resp.status == .success {
-                LSLog("getRecommend succ")
-                self.recommendData = resp.data
-                if cursor.isEmpty {
+        if let cityCode = Int64(cityCode) {
+            NetworkManager.shared.recommend(cursor, cityCode:cityCode) { resp in
+                LSLog("getRecommend data:\(String(describing: resp.data))")
+                LSHUD.hide()
+                if resp.status == .success {
+                    LSLog("getRecommend succ")
                     self.recommendData = resp.data
+                    if cursor.isEmpty {
+                        self.recommendData = resp.data
+                    } else {
+                        self.recommendData.items?.append(contentsOf: resp.data.items ?? [])
+                        self.recommendData.cursorTime = resp.data.cursorTime
+                        self.recommendData.hasMore = resp.data.hasMore
+                        self.recommendData.ongoing = resp.data.ongoing
+                    }
+                    self.handleOnGoingView()
+                    self.tableView.reloadData()
+                    DispatchQueue.main.async {
+                        // 在这里执行reloadData完成后的操作
+                        // 例如，你可以更新UI或执行其他任务
+                        self.handleCurrentCell()
+                    }
+                    
+                    // 判断是否展示空页面
+                    self.isEmpty()
+                    
                 } else {
-                    self.recommendData.items?.append(contentsOf: resp.data.items ?? [])
-                    self.recommendData.cursorTime = resp.data.cursorTime
-                    self.recommendData.hasMore = resp.data.hasMore
-                    self.recommendData.ongoing = resp.data.ongoing
+                    LSLog("getRecommend fail")
                 }
-                self.handleOnGoingView()
-                self.tableView.reloadData()
-                DispatchQueue.main.async {
-                    // 在这里执行reloadData完成后的操作
-                    // 例如，你可以更新UI或执行其他任务
-                    self.handleCurrentCell()
-                }
-                
-                // 判断是否展示空页面
-                self.isEmpty()
-                
-            } else {
-                LSLog("getRecommend fail")
             }
+        } else {
+            LSHUD.hide()
         }
     }
     
@@ -184,7 +197,7 @@ extension RecommendController {
         // 判断是否需要去预加载
         if self.recommendData.items?.count ?? 0 > 0, self.recommendData.hasMore, index > (self.recommendData.items?.count ?? 0) - 5 {
             if !self.recommendData.cursorTime.isEmpty {
-                getRecommend(cursor: self.recommendData.cursorTime, cityCode: 5101)
+                getRecommend(cursor: self.recommendData.cursorTime, cityCode: currCity?.code ?? "")
             }
         }
     }

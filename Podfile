@@ -35,6 +35,7 @@ target 'Platform' do
   pod 'TXIMSDK_Plus_Swift_iOS'
   pod 'WechatOpenSDK-XCFramework'
   pod 'swiftScan'   #iOS qrCode、barCode Swift Version
+  pod 'Pinyin4Swift'
   # *********************************************** Objective-C ***********************************************
 
 end

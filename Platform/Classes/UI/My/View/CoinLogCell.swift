@@ -79,7 +79,7 @@ extension CoinLogCell {
         timeLabel.sizeToFit()
         
         // 收支金额
-        amountLabel.text = String(item.amount/100)
+        amountLabel.text = String(format: "%.2f", Double(item.amount)/100)
         amountLabel.sizeToFit()
     }
 }

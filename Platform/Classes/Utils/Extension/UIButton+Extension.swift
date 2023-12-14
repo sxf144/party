@@ -10,7 +10,7 @@ import UIKit
 
 
 
-extension UIButton{
+extension UIButton {
     
     /// 按钮布局样式（图片+文字）
     enum LayoutStyle:UInt8 {

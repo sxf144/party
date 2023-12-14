@@ -48,6 +48,13 @@ class CommentCell: UITableViewCell {
         return label
     }()
     
+    // 点赞区域
+    fileprivate lazy var likeBtn: UIButton = {
+        let button = UIButton()
+        button.addTarget(self, action: #selector(clickLikeBtn(_:)), for: .touchUpInside)
+        return button
+    }()
+    
     // 点赞数
     fileprivate lazy var likeCntLabel: UILabel = {
         let label = UILabel()
@@ -126,15 +133,47 @@ extension CommentCell {
             timeLabel.sizeToFit()
         }
     }
+    
+    @objc func clickLikeBtn(_ sender: UIButton) {
+        LSLog("clickLikeBtn")
+        sender.isSelected = !sender.isSelected
+        if (sender.isSelected) {
+            item.likeCnt += 1
+        } else {
+            item.likeCnt -= 1
+        }
+        
+        if item.likeCnt < 0 {
+            item.likeCnt = 0
+        }
+        
+        likeCntLabel.text = String(item.likeCnt)
+        likeCntLabel.sizeToFit()
+        
+        // 发送给服务器修改
+        commentLike(!sender.isSelected)
+    }
+    
+    func commentLike(_ cancel:Bool) {
+        NetworkManager.shared.commentLike( item.id, cancel: cancel) { resp in
+            if resp.status == .success {
+                LSLog("commentLike succ")
+            } else {
+                LSLog("commentLike fail")
+            }
+        }
+    }
 }
 
-extension CommentCell{
-    fileprivate func setupUI(){
+extension CommentCell {
+    
+    fileprivate func setupUI() {
         
         contentView.addSubview(avatar)
         contentView.addSubview(nick)
-        contentView.addSubview(likeCntLabel)
-        contentView.addSubview(likeIcon)
+        contentView.addSubview(likeBtn)
+        likeBtn.addSubview(likeCntLabel)
+        likeBtn.addSubview(likeIcon)
         contentView.addSubview(contentLabel)
         contentView.addSubview(timeLabel)
         contentView.addSubview(replyTipLabel)
@@ -150,15 +189,22 @@ extension CommentCell{
             make.top.equalTo(avatar)
         }
         
-        likeCntLabel.snp.makeConstraints { (make) in
+        likeBtn.snp.makeConstraints { (make) in
             make.right.equalToSuperview().offset(-leftMargin)
             make.centerY.equalTo(nick)
+            make.height.equalTo(24)
+        }
+        
+        likeCntLabel.snp.makeConstraints { (make) in
+            make.right.equalToSuperview()
+            make.centerY.equalToSuperview()
         }
         
         likeIcon.snp.makeConstraints { (make) in
             make.right.equalTo(likeCntLabel.snp.left).offset(-2)
-            make.centerY.equalTo(nick)
+            make.centerY.equalToSuperview()
             make.size.equalTo(CGSize(width: 22, height: 22))
+            make.left.equalToSuperview().offset(4)
         }
         
         contentLabel.snp.makeConstraints { (make) in

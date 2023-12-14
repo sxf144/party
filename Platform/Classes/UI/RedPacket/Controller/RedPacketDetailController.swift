@@ -125,7 +125,7 @@ class RedPacketDetailController: BaseController {
         return view
     }()
     
-    // 评论列表
+    // 红包记录列表
     fileprivate lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.dataSource = self
