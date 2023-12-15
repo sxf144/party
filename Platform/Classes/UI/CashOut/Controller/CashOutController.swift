@@ -199,7 +199,7 @@ class CashOutController: BaseController {
         let label = UILabel()
         label.font = kFontRegualer12
         label.textColor = kColorGray
-        label.text = "提现规则说明\n1.每次提现最少100元，单笔最大10000元。\n提交审核后，一般会在72小时内到账。\n3.超过一定额度后，系统会自动扣税，税额根据用户一个自然月的提现总额计算。"
+        label.text = "提现规则说明\n1. 每次提现最少100元，单笔最大10000元。\n2.提交审核后，一般会在72小时内到账。\n3.超过一定额度后，系统会自动扣税，税额根据用户一个自然月的提现总额计算。"
         label.numberOfLines = 0;
         label.sizeToFit()
         return label

@@ -65,6 +65,7 @@
 		0F8E1BC22ACBDFA800C67D62 /* ParticipateResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8E1BC12ACBDFA800C67D62 /* ParticipateResp.swift */; };
 		0F9EC3292AB87E980079B763 /* MapSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9EC3282AB87E980079B763 /* MapSearchController.swift */; };
 		0FA0A6CE2B2ABEB9009C6F5C /* CreateOrderResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA0A6CD2B2ABEB9009C6F5C /* CreateOrderResp.swift */; };
+		0FA0A6D02B2C008F009C6F5C /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA0A6CF2B2C008F009C6F5C /* UpdateManager.swift */; };
 		0FA0B03F2ACD4A58001F20DB /* JoinResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA0B03E2ACD4A58001F20DB /* JoinResp.swift */; };
 		0FA0B0472ACD5C54001F20DB /* FollowListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA0B0422ACD5C53001F20DB /* FollowListController.swift */; };
 		0FA0B0482ACD5C54001F20DB /* FollowListResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA0B0442ACD5C53001F20DB /* FollowListResp.swift */; };
@@ -316,6 +317,7 @@
 		0F8E1BC12ACBDFA800C67D62 /* ParticipateResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticipateResp.swift; sourceTree = "<group>"; };
 		0F9EC3282AB87E980079B763 /* MapSearchController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapSearchController.swift; sourceTree = "<group>"; };
 		0FA0A6CD2B2ABEB9009C6F5C /* CreateOrderResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateOrderResp.swift; sourceTree = "<group>"; };
+		0FA0A6CF2B2C008F009C6F5C /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
 		0FA0B03E2ACD4A58001F20DB /* JoinResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JoinResp.swift; sourceTree = "<group>"; };
 		0FA0B0422ACD5C53001F20DB /* FollowListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowListController.swift; sourceTree = "<group>"; };
 		0FA0B0442ACD5C53001F20DB /* FollowListResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowListResp.swift; sourceTree = "<group>"; };
@@ -1654,6 +1656,7 @@
 		49FBBF94268DA6D2000C851E /* Manager */ = {
 			isa = PBXGroup;
 			children = (
+				0FA0A6CF2B2C008F009C6F5C /* UpdateManager.swift */,
 				0FFBA47B2B285638006CFC59 /* CityDataManager.swift */,
 				0F683D1E2B2312660068BD87 /* PhotoManager.swift */,
 				0F3743A52B148856008F6B31 /* WXApiManager.swift */,
@@ -2071,6 +2074,7 @@
 				0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */,
 				0FB10E742AF88BEE00E64777 /* ChatKeyboardView.swift in Sources */,
 				0FDC58FB2B1F2D3800022ABA /* CashOutLogCell.swift in Sources */,
+				0FA0A6D02B2C008F009C6F5C /* UpdateManager.swift in Sources */,
 				49FBBF7C268DA6A5000C851E /* UIFont+Extension.swift in Sources */,
 				0FA940672AE9432F009A10C9 /* DefaultMessageCell.swift in Sources */,
 				49FBBF81268DA6A5000C851E /* UIView+Extension.swift in Sources */,

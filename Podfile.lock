@@ -61,6 +61,7 @@ PODS:
   - SwiftyJSON (5.0.1)
   - TXIMSDK_Plus_Swift_iOS (7.6.5011)
   - WechatOpenSDK-XCFramework (2.0.2)
+  - YYText (1.0.7)
   - ZLPhotoBrowser (4.4.8):
     - ZLPhotoBrowser/Core (= 4.4.8)
   - ZLPhotoBrowser/Core (4.4.8)
@@ -85,6 +86,7 @@ DEPENDENCIES:
   - SwiftyJSON
   - TXIMSDK_Plus_Swift_iOS
   - WechatOpenSDK-XCFramework
+  - YYText
   - ZLPhotoBrowser
 
 SPEC REPOS:
@@ -111,6 +113,7 @@ SPEC REPOS:
     - SwiftyJSON
     - TXIMSDK_Plus_Swift_iOS
     - WechatOpenSDK-XCFramework
+    - YYText
     - ZLPhotoBrowser
 
 SPEC CHECKSUMS:
@@ -136,8 +139,9 @@ SPEC CHECKSUMS:
   SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
   TXIMSDK_Plus_Swift_iOS: e47e53bf3116962b88233480866a58d4804a2c36
   WechatOpenSDK-XCFramework: acdeeda129efbef9532bca8a10c24e1b4b8c7d69
+  YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
   ZLPhotoBrowser: 7724f2d5f75fcde3af952c846dbad44d28933446
 
-PODFILE CHECKSUM: 58956867afaae864401e25e2d584a67db63b12c6
+PODFILE CHECKSUM: bb4a84fb1ddf7ce976bf41718d3c14501cb961f0
 
 COCOAPODS: 1.12.1

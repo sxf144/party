@@ -257,6 +257,7 @@ extension CitySelectController: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: - UITableView 代理
 extension CitySelectController: UISearchBarDelegate {
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         LSLog("searchBarSearchButtonClicked searchText:\(searchBar.text ?? "")")
         filterData(searchBar.text ?? "")
@@ -280,7 +281,7 @@ extension CitySelectController: UISearchBarDelegate {
             // 过滤数据
             dataList = allData.filter { section in
                 let cityList = section.cityList.filter { city in
-                    return (city.name.contains(text)) || (city.pinyin.lowercased().contains(text.lowercased()))
+                    return (city.name.contains(text)) || (city.pinyin.uppercased().contains(text.uppercased()))
                 }
                 
                 return cityList.count > 0

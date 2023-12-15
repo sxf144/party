@@ -36,6 +36,7 @@ target 'Platform' do
   pod 'WechatOpenSDK-XCFramework'
   pod 'swiftScan'   #iOS qrCode、barCode Swift Version
   pod 'Pinyin4Swift'
+  pod 'YYText'
   # *********************************************** Objective-C ***********************************************
 
 end

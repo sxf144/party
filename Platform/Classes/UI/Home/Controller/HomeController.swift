@@ -32,11 +32,12 @@ class HomeController: BaseController {
         // 添加监听
         addObservers()
         
-        // checkToken
-//        LoginManager.shared.login()
+        // 刷新token
         LoginManager.shared.refreshToken()
         // 加载数据
         loadData()
+        // 检查更新
+        UpdateManager.checkForUpdate()
     }
     
     override func viewDidLayoutSubviews() {

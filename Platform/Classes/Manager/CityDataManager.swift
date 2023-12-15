@@ -50,9 +50,8 @@ extension CityDataManager {
     
     // 保存城市信息
     func saveCityInfo(_ cityModel: CityModel) {
-        cityInfo = cityModel
+        cityInfo = handleCityInfo(cityModel)
         if let cityInfo = cityInfo {
-            cityInfo.sections = getSections(cityInfo)
             let json = cityInfo.modelToJson()
             var data: Data?
             do {
@@ -62,6 +61,15 @@ extension CityDataManager {
             }
             UserDefaults.standard.set(data, forKey: KEY_CITY_INFO)
         }
+    }
+    
+    func handleCityInfo(_ cityModel:CityModel) -> CityModel {
+        var tempCityInfo = cityModel
+        // 处理all
+        tempCityInfo.sections = getSections(tempCityInfo)
+        // 处理hots
+        tempCityInfo.hots = getHots(tempCityInfo)
+        return tempCityInfo
     }
     
     func getSections(_ cityModel:CityModel) -> [PinyinSection] {
@@ -79,7 +87,6 @@ extension CityDataManager {
                 tempAll.append(cityItem)
             }
         }
-        
         /**
          *
          * 2、根据拼音排序
@@ -98,6 +105,23 @@ extension CityDataManager {
                 finalAll.append(pinyinSection)
             }
             pinyinSection.cityList.append(item)
+        }
+        
+        return finalAll
+    }
+    
+    func getHots(_ cityModel:CityModel) -> [CityItem] {
+        /**
+         * 处理成按拼音排序的section的数组
+         * 1、先转换拼音
+         */
+        var finalAll: [CityItem] = []
+        for cityItem in cityModel.hots {
+            cityItem.pinyin = PinyinHelper.getHeaderLettersWithString(cityItem.name)
+            if let firstCharacter = cityItem.pinyin.first {
+                cityItem.headerLeater = String(firstCharacter)
+            }
+            finalAll.append(cityItem)
         }
         
         return finalAll
