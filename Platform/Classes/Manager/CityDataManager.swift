@@ -185,7 +185,6 @@ extension CityDataManager {
     func getCityList() {
         NetworkManager.shared.getCityList() { resp in
             if resp.status == .success {
-                LSLog("getCityList data:\(resp.data)")
                 // 保存城市信息
                 if let cityInfo = resp.data {
                     // 获取默认城市信息

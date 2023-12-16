@@ -218,6 +218,11 @@ extension CardTaskView {
             redPacketBtn.isHidden = true
         }
         
+        // 先移除老的监听
+        if let playerItem = avPlayer.currentItem {
+            playerItem.removeObserver(self, forKeyPath: "status")
+        }
+        
         // 判断是否有媒体资源
         if let mediaUrl = limMsg.gameElem?.action.cardInfo.introductionMedia, !mediaUrl.isEmpty {
             
@@ -247,9 +252,11 @@ extension CardTaskView {
                     // 创建AVPlayerItem，加载视频，但此处不播放
                     let playerItem = AVPlayerItem(url: videoURL)
                     avPlayer.replaceCurrentItem(with: playerItem)
-                    LSHUD.showLoading()
-                    // 添加新的观察者
-                    playerItem.addObserver(self, forKeyPath: "status", options: .new, context: nil)
+                    if let playerItem = avPlayer.currentItem {
+                        LSHUD.showLoading()
+                        // 添加新的观察者
+                        playerItem.addObserver(self, forKeyPath: "status", options: .new, context: nil)
+                    }
                 }
             }
             

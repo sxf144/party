@@ -148,5 +148,12 @@ fileprivate extension NavigationView {
             make.width.greaterThanOrEqualTo(44)
             make.height.equalTo(44)
         }
+        
+        self.addSubview(seperateLine)
+        seperateLine.snp.makeConstraints { (make) in
+            make.bottom.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalTo(0.5)
+        }
     }
 }

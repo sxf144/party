@@ -133,7 +133,7 @@ extension LoginManager {
         let userInfo = LoginManager.shared.getUserInfo()
         let currTimestamp = Date().timeIntervalSince1970
         if let expireTimestamp = userInfo?.expireTimestamp {
-            valid = expireTimestamp > Int64(currTimestamp)
+            valid = expireTimestamp > Int64(currTimestamp) + 600
         }
         
         return valid
@@ -141,6 +141,8 @@ extension LoginManager {
 
     //保存用户信息
     func saveUserInfo(_ user: UserInfoModel) {
+        var user = user
+        user.expireTimestamp = (Int64(Date().timeIntervalSince1970) + user.expiresIn)
         userInfo = user
         let json = user.modelToJson()
         var data: Data?

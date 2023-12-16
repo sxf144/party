@@ -51,8 +51,15 @@ class RecommendCell: UITableViewCell {
         return playerLayer
     }()
     
-    // 视频封面图
-    fileprivate lazy var videoImageView: UIImageView = {
+    fileprivate lazy var activityView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.color = .gray
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    // 封面图
+    fileprivate lazy var cover: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -222,9 +229,14 @@ extension RecommendCell {
         }
         commentLabel.sizeToFit()
         
+        // 先移除老的监听
+        if let playerItem = avPlayer.currentItem {
+            playerItem.removeObserver(self, forKeyPath: "status")
+        }
+        
         // coverType 1、图片，2、视频
         if (item?.coverType == CoverType.image.rawValue) {
-            videoImageView.kf.setImage(with: URL(string: item?.cover ?? "")) { result in
+            cover.kf.setImage(with: URL(string: item?.cover ?? "")) { result in
                 switch result {
                 case .success(let value):
                     LSLog("cover load succ")
@@ -234,11 +246,13 @@ extension RecommendCell {
                 }
             }
             avPlayerLayer.isHidden = true
-            videoImageView.isHidden = false
+            activityView.isHidden = true
+            cover.isHidden = false
         } else if (item?.coverType == CoverType.video.rawValue) {
             avPlayerLayer.isHidden = false
-            videoImageView.isHidden = true
-            videoImageView.kf.setImage(with: URL(string: item?.coverThumbnail ?? "")) { result in
+            activityView.isHidden = false
+            cover.isHidden = true
+            cover.kf.setImage(with: URL(string: item?.coverThumbnail ?? "")) { result in
                 switch result {
                 case .success(let value):
                     LSLog("coverThumbnail load succ")
@@ -252,6 +266,11 @@ extension RecommendCell {
                 // 创建AVPlayerItem，加载视频，但此处不播放
                 let playerItem = AVPlayerItem(url: videoURL)
                 avPlayer.replaceCurrentItem(with: playerItem)
+                if let playerItem = avPlayer.currentItem {
+                    activityView.startAnimating()
+                    // 添加新的观察者
+                    playerItem.addObserver(self, forKeyPath: "status", options: .new, context: nil)
+                }
             }
         }
     }
@@ -384,13 +403,33 @@ extension RecommendCell {
             }
         }
     }
+    
+    // 观察者回调
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "status" {
+            if let playerItem = object as? AVPlayerItem {
+                activityView.stopAnimating()
+                if playerItem.status == .readyToPlay {
+                    // 视频已准备好播放
+                    LSLog("视频已准备好播放")
+                } else if playerItem.status == .failed {
+                    // 播放失败
+                    LSLog("播放失败")
+                } else if playerItem.status == .unknown {
+                    // 未知状态
+                    LSLog("未知状态")
+                }
+            }
+        }
+    }
 }
 
 extension RecommendCell {
     
     fileprivate func setupUI() {    
         contentView.layer.addSublayer(avPlayerLayer)
-        contentView.addSubview(videoImageView)
+        contentView.addSubview(activityView)
+        contentView.addSubview(cover)
         contentView.addSubview(rightToolView)
         rightToolView.addSubview(avatar)
         rightToolView.addSubview(likeBtn)
@@ -404,8 +443,11 @@ extension RecommendCell {
         infoArea.addSubview(desLabel)
         infoArea.addSubview(addressBtn)
         
+        activityView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         
-        videoImageView.snp.makeConstraints { (make) in
+        cover.snp.makeConstraints { (make) in
             make.top.equalToSuperview()
             make.centerX.equalToSuperview()
             make.size.equalToSuperview()

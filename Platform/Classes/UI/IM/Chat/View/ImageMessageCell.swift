@@ -13,13 +13,14 @@ import ImSDK_Plus_Swift
 class ImageMessageCell: UITableViewCell {
     
     /// 回调闭包
-    public var imageClickBlock: (() -> ())?
+    public var imageClickBlock: ((_ image: UIImage?) -> ())?
     let xMargin: CGFloat = 16.0
     let yMargin: CGFloat = 10.0
     let HeadWidth: CGFloat = 44.0
     let ContentImageWidth: CGFloat = 140.0
     var item: LIMMessage = LIMMessage()
     var party: PartyDetailModel = PartyDetailModel()
+    var image: UIImage?
     weak var delegate: ChatDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -142,10 +143,22 @@ extension ImageMessageCell {
         }
         
         // 图片消息
-        if let imagePath = item.imageElem?.path, !imagePath.isEmpty {
-            ivContent.image = UIImage(contentsOfFile: imagePath)
-        } else if (item.imageElem?.imageList.count ?? 0 > 0) {
-            ivContent.kf.setImage(with: URL(string: item.imageElem?.imageList[0].url ?? ""), placeholder: PlaceHolderSmall)
+        if let imageElem = item.imageElem {
+            if let imagePath = imageElem.path, !imagePath.isEmpty {
+                ivContent.image = UIImage(contentsOfFile: imagePath)
+            } else if (imageElem.imageList.count > 0) {
+                let url = imageElem.imageList.count >= 2 ? imageElem.imageList[1].url :imageElem.imageList[0].url
+//                ivContent.kf.setImage(with: URL(string: url), placeholder: PlaceHolderSmall)
+                ivContent.kf.setImage(with: URL(string: url ), placeholder: PlaceHolderSmall) { result in
+                    switch result {
+                    case .success(let value):
+                        LSLog("ivContent load succ")
+                        self.image = value.image
+                    case .failure(let error):
+                        LSLog("ivContent load error:\(error)")
+                    }
+                }
+            }
         }
     }
     
@@ -167,7 +180,7 @@ extension ImageMessageCell {
     // 点击图片
     @objc private func imageTaped(_ tap: UITapGestureRecognizer) {
         if let imageClickBlock = imageClickBlock {
-            imageClickBlock()
+            imageClickBlock(image ?? nil)
         }
     }
 }

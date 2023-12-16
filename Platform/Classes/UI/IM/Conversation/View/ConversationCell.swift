@@ -19,7 +19,7 @@ class ConversationCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
-        self.backgroundColor = UIColor.ls_color("#F8F8F8")
+        self.backgroundColor = .white
         setupUI()
     }
 

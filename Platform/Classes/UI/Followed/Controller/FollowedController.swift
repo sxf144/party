@@ -47,7 +47,7 @@ class FollowedController: BaseController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
-        tableView.backgroundColor = .black
+        tableView.backgroundColor = .white
         
         // 注册UITableViewCell类
         tableView.register(RecommendCell.self, forCellReuseIdentifier: "RecommendCell")

@@ -71,7 +71,7 @@ class UserInfoModel {
         let json:JSON = [
             "im": ["user_sig": userSig,
                    "expires_in": expiresIn,
-                   "expire_timestamp": expireTimestamp == 0 ? (Int64(Date().timeIntervalSince1970) + expiresIn) : expireTimestamp],
+                   "expire_timestamp": expireTimestamp],
             "user": ["intro": intro,
                      "mobile": mobile,
                      "nick": nick,

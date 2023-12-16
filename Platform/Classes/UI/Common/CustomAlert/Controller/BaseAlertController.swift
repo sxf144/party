@@ -43,6 +43,8 @@ class BaseAlertAction: NSObject {
 
     open var isEnabled: Bool = true
     
+    open var isForce: Bool = false
+    
     /// 回调闭包
     public var actionBlock: ((_ action:BaseAlertAction) -> ())?
 }
@@ -165,8 +167,12 @@ extension BaseAlertController {
             if let handler = action.actionBlock {
                 handler(action)
             }
+            if !action.isForce {
+                dismiss(animated: true)
+            }
+        } else {
+            dismiss(animated: true)
         }
-        dismiss(animated: true)
     }
     
     @objc func clickActionBtn2(_ sender:UIButton) {
@@ -175,8 +181,12 @@ extension BaseAlertController {
             if let handler = action.actionBlock {
                 handler(action)
             }
+            if !action.isForce {
+                dismiss(animated: true)
+            }
+        } else {
+            dismiss(animated: true)
         }
-        dismiss(animated: true)
     }
 }
 

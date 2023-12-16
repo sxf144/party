@@ -52,6 +52,7 @@ class CommentCell: UITableViewCell {
     fileprivate lazy var likeBtn: UIButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(clickLikeBtn(_:)), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     

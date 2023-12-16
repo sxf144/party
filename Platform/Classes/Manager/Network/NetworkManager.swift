@@ -529,6 +529,14 @@ class NetworkManager: NSObject {
         }
     }
     
+    /// 检查版本
+    func checkVersion(_ response: @escaping((CheckVersionResp) -> ()) ){
+        Network.shared.httpGetRequest(path: "/settings/update/check", para: nil) { (json) in
+            let resp = CheckVersionResp(json)
+            response(resp)
+        }
+    }
+    
     /// 举报
     func report(_ objType:Int64, objId:String, reasonId:Int64,_ response: @escaping((RespModel) -> ()) ){
         var para:[String:Any] = ["obj_type": objType]

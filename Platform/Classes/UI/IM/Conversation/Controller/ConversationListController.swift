@@ -19,7 +19,7 @@ class ConversationListController: BaseController, V2TIMSDKListener {
     override func viewDidLoad() {
 //        showNavifationBar = false
 //        slideBackEnabled = false
-        view.backgroundColor = UIColor.ls_color("#F8F8F8")
+        view.backgroundColor = .white
         super.viewDidLoad()
         resetNavigation()
         setupUI()
@@ -33,7 +33,7 @@ class ConversationListController: BaseController, V2TIMSDKListener {
     // 创建UITableView
     fileprivate lazy var tableView: UITableView = {
         let tableView = UITableView(frame: view.bounds, style: .plain)
-        tableView.backgroundColor = UIColor.ls_color("#F8F8F8")
+        tableView.backgroundColor = .white
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never

@@ -36,8 +36,6 @@ class HomeController: BaseController {
         LoginManager.shared.refreshToken()
         // 加载数据
         loadData()
-        // 检查更新
-        UpdateManager.checkForUpdate()
     }
     
     override func viewDidLayoutSubviews() {
@@ -105,6 +103,8 @@ extension HomeController {
         }
         // 获取城市信息
         CityDataManager.shared.getCityList()
+        // 检查更新
+        UpdateManager.checkForUpdate()
     }
     
     // 点击选择城市

@@ -281,8 +281,22 @@ class PartyDetailController: BaseController {
     }()
     
     fileprivate lazy var personContent: UIView = {
-        let v = UIView()
-        return v
+        let view = UIView()
+        return view
+    }()
+    
+    fileprivate lazy var segmentView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    fileprivate lazy var commentTotalLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.ls_mediumFont(16)
+        label.textColor = UIColor.ls_color("#333333")
+        label.text = "评论"
+        label.sizeToFit()
+        return label
     }()
     
     // footer
@@ -348,7 +362,7 @@ class PartyDetailController: BaseController {
         return button
     }()
     
-    // 加入组局
+    // 立即加入
     fileprivate lazy var joinBtn: UIButton = {
         let button = UIButton()
         button.setTitleColor(kColorTextWhite, for: .normal)
@@ -356,7 +370,7 @@ class PartyDetailController: BaseController {
         button.layer.cornerRadius = 20
         button.clipsToBounds = true
         button.backgroundColor = UIColor.ls_color("#FE9C5B")
-        button.setTitle("加入组局", for: .normal)
+        button.setTitle("立即加入", for: .normal)
         button.addTarget(self, action: #selector(clickJoinBtn(_:)), for: .touchUpInside)
         return button
     }()
@@ -479,7 +493,7 @@ extension PartyDetailController {
             
             if resp.status == .success {
                 LSLog("inviteJoinParty:\(resp)")
-                LSHUD.showInfo("邀请已发出")
+                LSHUD.showSuccess("邀请已发出")
             } else {
                 LSLog("inviteJoinParty fail")
             }
@@ -617,8 +631,15 @@ extension PartyDetailController {
         if let detail = partyDetail {
             isOwner = userInfo?.userId == detail.userId
             
+            var coverUrl: String = ""
+            if detail.coverType == CoverType.image.rawValue {
+                coverUrl = detail.cover
+            } else {
+                coverUrl = detail.coverThumbnail
+            }
+            
             // 封面
-            cover.kf.setImage(with: URL(string: detail.coverThumbnail ), placeholder: PlaceHolderBig) { result in
+            cover.kf.setImage(with: URL(string: coverUrl ), placeholder: PlaceHolderBig) { result in
                 switch result {
                 case .success(let value):
                     LSLog("cover load succ")
@@ -626,7 +647,6 @@ extension PartyDetailController {
                 case .failure(let error):
                     LSLog("cover load error:\(error)")
                 }
-                
             }
             
             // 创建者头像
@@ -661,6 +681,14 @@ extension PartyDetailController {
             addressNameLabel.sizeToFit()
             addressDetailLabel.text = detail.address
             addressDetailLabel.sizeToFit()
+            
+            // 评论数量
+            var commentStr: String = "评论"
+            if detail.commentCnt > 0 {
+                commentStr = "评论(\(detail.commentCnt))"
+            }
+            commentTotalLabel.text = commentStr
+            commentTotalLabel.sizeToFit()
             
             // 根据参数确认底部按钮
             if detail.state == 2 {
@@ -705,14 +733,14 @@ extension PartyDetailController {
                 joinBtn.backgroundColor = UIColor.ls_color("#FE9C5B")
                 joinBtn.setTitleColor(UIColor.white, for: .normal)
                 let fee = String(format: "%.2f", Float(detail.fee)/100)
-                joinBtn.setTitle("¥\(fee)加入组局", for: .normal)
+                joinBtn.setTitle("¥\(fee)立即加入", for: .normal)
             } else if (detail.joinState == 0) {
                 // 未加入
                 joinBtn.isEnabled = true
                 joinBtn.layer.borderWidth = 0
                 joinBtn.backgroundColor = UIColor.ls_color("#FE9C5B")
                 joinBtn.setTitleColor(UIColor.white, for: .normal)
-                joinBtn.setTitle("加入组局", for: .normal)
+                joinBtn.setTitle("立即加入", for: .normal)
             }
         }
     }
@@ -973,7 +1001,7 @@ extension PartyDetailController {
             // 二次确认解散
             showDismissAlert()
         } else if (partyDetail?.joinState == 0 || partyDetail?.joinState == 2) {
-            // 加入组局
+            // 立即加入
             joinParty()
         } else if (partyDetail?.joinState == 1) {
             // 二次确认退出
@@ -1061,7 +1089,7 @@ extension PartyDetailController {
     
     // 查看游戏
     @objc func handleGameTap() {
-        if let relationGame = partyDetail?.relationGame{
+        if let relationGame = partyDetail?.relationGame, relationGame.gameId != 0 {
             var item = GameItem()
             item.id = relationGame.gameId
             item.name = relationGame.name
@@ -1071,14 +1099,11 @@ extension PartyDetailController {
             item.introduction = relationGame.introduction
             item.interactPersonCount = relationGame.interactPersonCount
             PageManager.shared.pushToGameDetail(item)
-        } else {
-            
         }
     }
     
     // 查看位置
     @objc func handleLocationTap() {
-        
         if let lat = partyDetail?.latitude, let lon = partyDetail?.longitude {
             PageManager.shared.pushToMapNavigationController(partyDetail?.landmark ?? "", address: partyDetail?.address ?? "", lat: lat, lon: lon)
         } else {
@@ -1246,6 +1271,8 @@ extension PartyDetailController {
         detailView.addSubview(personView)
         personView.addSubview(personTitleLabel)
         personView.addSubview(personContent)
+        detailView.addSubview(segmentView)
+        segmentView.addSubview(commentTotalLabel)
 //        footerView.addSubview(footLabel)
 //        footerView.addSubview(footerIcon)
         view.addSubview(bottomView)
@@ -1270,7 +1297,6 @@ extension PartyDetailController {
             make.top.equalToSuperview()
             make.width.equalToSuperview()
             make.centerX.equalToSuperview()
-            make.bottom.equalTo(detailView).offset(10)
         }
         
         topView.snp.makeConstraints { (make) in
@@ -1310,7 +1336,7 @@ extension PartyDetailController {
             make.top.equalTo(topView.snp.bottom).offset(-8)
             make.width.equalToSuperview()
             make.centerX.equalToSuperview()
-            make.bottom.equalTo(personView)
+            make.bottom.equalTo(headerView).offset(-10)
         }
         
         timeLabel.snp.makeConstraints { (make) in
@@ -1404,7 +1430,6 @@ extension PartyDetailController {
             make.left.equalToSuperview()
             make.top.equalTo(addressView.snp.bottom)
             make.width.equalToSuperview()
-            make.bottom.equalTo(personContent).offset(10)
         }
         
         personTitleLabel.snp.makeConstraints { (make) in
@@ -1417,6 +1442,20 @@ extension PartyDetailController {
             make.right.equalToSuperview().offset(-leftMargin)
             make.top.equalTo(personTitleLabel.snp.bottom).offset(14)
             make.height.equalTo(111)
+            make.bottom.equalTo(personView).offset(-10)
+        }
+        
+        segmentView.snp.makeConstraints { make in
+            make.top.equalTo(personView.snp.bottom)
+            make.left.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.equalTo(30)
+            make.bottom.equalTo(detailView)
+        }
+        
+        commentTotalLabel.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.left.equalToSuperview().offset(leftMargin)
         }
         
         bottomView.snp.makeConstraints { (make) in

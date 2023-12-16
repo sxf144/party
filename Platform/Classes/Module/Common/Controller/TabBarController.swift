@@ -30,6 +30,7 @@ class TabBarController: UITabBarController {
          在iOS7中，UIView新增了一个属性tintColor，被使用在UIView中改变应用程序的外观的。默认tintColor的值为nil，这表示它将会运用父视图层次的颜色来进行着色。如果父视图中没有设置tintColor，那么默认系统就会使用蓝色。
          */
         tabBar.tintColor = kColorTabSelected
+        addShadowToTabBar()
     }
     
     func addBadge(index: Int, value: String?) {
@@ -43,6 +44,14 @@ class TabBarController: UITabBarController {
         } else {
             tabItem.badgeValue = value
         }
+    }
+    
+    func addShadowToTabBar() {
+        // 设置阴影属性
+        tabBar.layer.shadowColor = UIColor.black.cgColor
+        tabBar.layer.shadowOffset = CGSize(width: 0, height: 0)
+        tabBar.layer.shadowOpacity = 0.5
+        tabBar.layer.masksToBounds = false
     }
 }
 

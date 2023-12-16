@@ -1083,23 +1083,22 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                 let tempCell = tableView.dequeueReusableCell(withIdentifier: "ImageMessageCell", for: indexPath) as! ImageMessageCell
                 tempCell.configure(item, party: partyDetail)
                 tempCell.delegate = self
-                tempCell.imageClickBlock = {
+                tempCell.imageClickBlock = { image in
                     if let imagePath = item.imageElem?.path, !imagePath.isEmpty {
                         let images = [UIImage(contentsOfFile: imagePath)]
                         let vc = ZLImagePreviewController(datas: images as [Any], showSelectBtn: false, showBottomView: false)
                         PageManager.shared.currentNav()?.pushViewController(vc)
-                        
                     } else if (item.imageElem?.imageList.count ?? 0 > 0) {
-                        
                         if let imageList = item.imageElem?.imageList, imageList.count > 0 {
                             var datas: [Any] = []
-                            for image in imageList {
-                                datas.append(URL(string: image.url)!)
-                            }
-                            
+                            datas.append(URL(string: imageList[0].url)!)
                             let vc = ZLImagePreviewController(datas: datas, index: 0, showSelectBtn: false, showBottomView: false) { url -> ZLURLType in
                                 return .image
                             } urlImageLoader: { url, imageView, progress, loadFinish in
+                                // 如果聊天列表里缩略图存在，则先展示缩略图
+                                if image != nil {
+                                    imageView.image = image
+                                }
                                 imageView.kf.setImage(with: url) { receivedSize, totalSize in
                                     let percentage = (CGFloat(receivedSize) / CGFloat(totalSize))
                                     progress(percentage)
