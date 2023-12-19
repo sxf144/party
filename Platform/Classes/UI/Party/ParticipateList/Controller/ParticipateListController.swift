@@ -25,13 +25,8 @@ class ParticipateListController: BaseController {
         resetNavigation()
         setupUI()
         
-        // 设置下拉刷新
-        tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
-            // 在这里执行下拉刷新的操作，例如加载最新数据
-            self?.loadNewData()
-        })
-        
-        tableView.mj_header?.beginRefreshing()
+        // 拉取数据
+        loadNewData()
     }
     
     override func pop() {
@@ -39,15 +34,27 @@ class ParticipateListController: BaseController {
     }
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tv = UITableView(frame: view.bounds, style: .plain)
-        tv.dataSource = self
-        tv.delegate = self
-        tv.contentInsetAdjustmentBehavior = .never
-        
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
+        // 设置下拉刷新
+        tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
+            // 在这里执行下拉刷新的操作，例如加载最新数据
+            self?.loadNewData()
+        })
         // 注册UITableViewCell类
-        tv.register(ParticipateCell.self, forCellReuseIdentifier: "ParticipateCell")
-        return tv
+        tableView.register(ParticipateCell.self, forCellReuseIdentifier: "ParticipateCell")
+        return tableView
     }()
     
 }
@@ -81,8 +88,12 @@ extension ParticipateListController {
                 LSLog("getParticipateList succ")
                 self.handleData(resp.data.participateList)
                 self.tableView.reloadData()
+                
+                // 判断是否展示空页面
+                self.changeTableViewStatus()
             } else {
                 LSLog("getParticipateList fail")
+                self.tableView.dataStatus = .error
             }
         }
     }
@@ -103,6 +114,14 @@ extension ParticipateListController {
     func loadNewData() {
         // 在这里执行下拉刷新的操作
         getParticipateList()
+    }
+    
+    func changeTableViewStatus() {
+        if participateList.count == 0 {
+            tableView.dataStatus = .empty
+        } else {
+            tableView.dataStatus = .none
+        }
     }
     
     func resetSelectedNum() {

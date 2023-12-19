@@ -71,6 +71,58 @@ extension MyLocationManager {
         
         return finalStr
     }
+    
+    func checkLocationServices() {
+        if CLLocationManager.locationServicesEnabled() {
+            // 定位服务已经开启
+            checkLocationAuthorization()
+        } else {
+            // 定位服务未开启，提示用户打开
+            showLocationAlert()
+        }
+    }
+
+    func checkLocationAuthorization() {
+        switch CLLocationManager.authorizationStatus() {
+        case .authorizedWhenInUse:
+            // 已经授权使用定位服务
+            break
+        case .denied:
+            // 用户已拒绝授权，提示用户打开定位服务
+            showLocationAlert()
+        case .notDetermined:
+            // 未决定是否授权，请求用户授权
+//            myLocationManager.requestWhenInUseAuthorization()
+            break
+        case .restricted:
+            // 定位服务受限制，可能是由于家长控制等原因
+            showLocationAlert()
+        case .authorizedAlways:
+            // 始终授权，根据实际需求处理
+            break
+        @unknown default:
+            break
+        }
+    }
+
+    func showLocationAlert() {
+        // 提示开启定位服务
+        let alertController = BaseAlertController(title: "定位服务未开启", message: "请在设置中打开定位服务以使用该功能")
+                
+        let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
+            // 处理取消按钮点击后的操作
+        }
+        
+        let okAction = BaseAlertAction(title: "去设置", style: .destructive) {(action) in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        PageManager.shared.currentVC()?.present(alertController, animated: true, completion: nil)
+    }
 }
 
 //MARK: - AMapLocationManagerDelegate

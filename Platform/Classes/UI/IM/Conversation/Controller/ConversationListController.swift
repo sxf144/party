@@ -14,11 +14,8 @@ import ImSDK_Plus_Swift
 class ConversationListController: BaseController, V2TIMSDKListener {
     
     let CellHeight = 80.0
-    var dataList: [LIMConversation] = []
 
     override func viewDidLoad() {
-//        showNavifationBar = false
-//        slideBackEnabled = false
         view.backgroundColor = .white
         super.viewDidLoad()
         resetNavigation()
@@ -26,13 +23,13 @@ class ConversationListController: BaseController, V2TIMSDKListener {
         IMManager.shared.conversationDelegate = self
         
         // 下拉刷新
-        tableView.mj_header?.beginRefreshing()
+        loadNewData()
     }
     
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: view.bounds, style: .plain)
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
         tableView.backgroundColor = .white
         tableView.dataSource = self
         tableView.delegate = self
@@ -40,6 +37,14 @@ class ConversationListController: BaseController, V2TIMSDKListener {
         tableView.separatorStyle = .none
         tableView.estimatedRowHeight = CellHeight
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         } else {
@@ -62,22 +67,21 @@ extension ConversationListController {
 
     func loadNewData() {
         IMManager.shared.loadConversationList {
-            self.dataList = IMManager.shared.conversationList
             if (self.tableView.mj_header.isRefreshing) {
                 self.tableView.mj_header.endRefreshing()
             }
             self.tableView.reloadData()
             
             // 判断是否展示空页面
-            self.isEmpty()
+            self.changeTableViewStatus()
         }
     }
     
-    func isEmpty() {
-        if dataList.count == 0 {
-            tableView.ls_showEmpty()
+    func changeTableViewStatus() {
+        if IMManager.shared.conversationList.count == 0 {
+            tableView.dataStatus = .empty
         } else {
-            tableView.ls_hideEmpty()
+            tableView.dataStatus = .none
         }
     }
 }
@@ -88,11 +92,11 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
     
     // 实现UITableViewDataSource方法
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataList.count
+        return IMManager.shared.conversationList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let item = dataList[indexPath.row]
+        let item = IMManager.shared.conversationList[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "ConversationCell", for: indexPath) as! ConversationCell
         cell.configure(with: item)
         return cell
@@ -100,7 +104,7 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 选中cell
-        let item = dataList[indexPath.row]
+        let item = IMManager.shared.conversationList[indexPath.row]
         PageManager.shared.pushToChatController(item)
     }
     
@@ -112,17 +116,6 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
         return kNavBarHeight
     }
     
-//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-//        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: kNavBarHeight))
-//        headerView.backgroundColor = UIColor.ls_color("#F8F8F8")
-//        let titleLabel = UILabel(frame: CGRect(x: 16, y: kStatusBarHeight + 10, width: headerView.frame.width, height: 24))
-//        titleLabel.text = "聊天"
-//        titleLabel.font = UIFont.ls_mediumFont(18)
-//        titleLabel.textColor = UIColor.ls_color("#333333")
-//        headerView.addSubview(titleLabel)
-//        return headerView
-//    }
-    
     // 启用左滑删除
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
@@ -131,7 +124,7 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // 在这里处理删除操作，更新数据源
-            let item = dataList[indexPath.row]
+            let item = IMManager.shared.conversationList[indexPath.row]
             
             // IM删除会话
             if let convID = item.conversationID {
@@ -143,13 +136,13 @@ extension ConversationListController: UITableViewDataSource, UITableViewDelegate
             }
             
             // 删除当前数据
-            dataList.remove(at: indexPath.row)
+            IMManager.shared.conversationList.remove(at: indexPath.row)
+            // 执行UI
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
     
     func updateConversationComplete(_ data: [LIMConversation]) {
-        dataList = data
         tableView.reloadData()
     }
 }

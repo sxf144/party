@@ -259,8 +259,8 @@ class PublishPartyController: BaseController {
     
     // 创建地图选择器
     fileprivate lazy var chooseLocationView: ChooseLocationView = {
-        let clv = ChooseLocationView(frame: self.view.frame)
-        return clv
+        let clView = ChooseLocationView(frame: self.view.frame)
+        return clView
     }()
     
     // 游戏
@@ -449,7 +449,7 @@ extension PublishPartyController {
     @objc func handleTimeTap() {
         resignResponders()
         // 显示时间选择器
-        pickerView.showInWindow { [unowned self] (date, hourCnt) in
+        pickerView.showInWindow { [weak self] (date, hourCnt) in
             LSLog("date:\(date), hourCnt:\(hourCnt)")
             let beginTimeStamp:Int? = Int(date.ls_timeStamp)
             var endDate:Date?
@@ -465,14 +465,14 @@ extension PublishPartyController {
             let beginDateStr = date.ls_formatterStr(dateFormat1)
             let endDateStr = endDate?.ls_formatterStr(dateFormat2)
             
-            beginTime = date.ls_formatterStr(dateFormat)
-            endTime = endDate?.ls_formatterStr(dateFormat) ?? ""
+            self?.beginTime = date.ls_formatterStr(dateFormat)
+            self?.endTime = endDate?.ls_formatterStr(dateFormat) ?? ""
             
             LSLog("beginDate:\(beginDateStr), endDate:\(endDateStr ?? "")")
             
             // 展示时间
-            timeLabel.text = Date.formatDate(startTime: beginTime, endTime: endTime)
-            timeLabel.sizeToFit()
+            self?.timeLabel.text = Date.formatDate(startTime: self?.beginTime, endTime: self?.endTime)
+            self?.timeLabel.sizeToFit()
         }
     }
     
@@ -480,14 +480,14 @@ extension PublishPartyController {
         resignResponders()
         
         // 显示地图
-        chooseLocationView.showInWindow { [self] poiItem in
+        chooseLocationView.showInWindow { [weak self] poiItem in
             LSLog("showInWindow poiItem:\(poiItem)")
-            locationItem = poiItem
-            addressNameLabel.text = poiItem.name
-            addressNameLabel.sizeToFit()
+            self?.locationItem = poiItem
+            self?.addressNameLabel.text = poiItem.name
+            self?.addressNameLabel.sizeToFit()
             
-            addressDetailLabel.text = poiItem.address
-            addressDetailLabel.sizeToFit()
+            self?.addressDetailLabel.text = poiItem.address
+            self?.addressDetailLabel.sizeToFit()
         }
     }
     

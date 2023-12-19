@@ -142,8 +142,10 @@ extension ChooseLocationView {
         self.frame = CGRect(x: 0, y: kScreenH, width: kScreenW, height: kScreenH)
         self.confirmBlock = confirmBlock
         //显示页面
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.3, animations: {
             self.frame = CGRect(x: 0, y: 0, width: kScreenW, height: kScreenH)
+        }) { (suc) in
+            self.searchAround()
         }
     }
     
@@ -245,7 +247,9 @@ extension ChooseLocationView {
         }
         // 回调闭包
         let poiItem:AMapPOI = responseList[selectedRowIndex ?? 0]
-        self.confirmBlock?(poiItem)
+        if let confirmBlock = confirmBlock {
+            confirmBlock(poiItem)
+        }
         dissmiss()
     }
     
@@ -265,7 +269,7 @@ extension ChooseLocationView: MAMapViewDelegate, AMapSearchDelegate {
     func mapViewDidFinishLoadingMap(_ mapView: MAMapView!) {
         LSLog("mapViewDidFinishLoadingMap:\(mapView.centerCoordinate)")
         // 地图加载完成，搜索周边
-        searchAround()
+//        searchAround()
     }
     
     func mapView(_ mapView: MAMapView!, mapDidMoveByUser wasUserAction: Bool) {

@@ -48,6 +48,7 @@
 		0F76D9EE2ACFBB4F0031DADE /* MyPartyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F76D9EB2ACFBB4F0031DADE /* MyPartyCell.swift */; };
 		0F76D9F02AD05FBD0031DADE /* MyHistoryPartyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F76D9EF2AD05FBD0031DADE /* MyHistoryPartyCell.swift */; };
 		0F8028652ABC600F00324720 /* PoiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8028642ABC600E00324720 /* PoiCell.swift */; };
+		0F8825A72B2EB2C9006DA3C7 /* BaseTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8825A62B2EB2C9006DA3C7 /* BaseTableView.swift */; };
 		0F8E1B922AC6BB8A00C67D62 /* SlideDownTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8E1B912AC6BB8A00C67D62 /* SlideDownTransitionAnimator.swift */; };
 		0F8E1B942AC6C61D00C67D62 /* ChooseLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8E1B932AC6C61D00C67D62 /* ChooseLocationView.swift */; };
 		0F8E1B9E2AC7DA3400C67D62 /* GameListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8E1B992AC7DA3400C67D62 /* GameListController.swift */; };
@@ -301,6 +302,7 @@
 		0F76D9EB2ACFBB4F0031DADE /* MyPartyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyPartyCell.swift; sourceTree = "<group>"; };
 		0F76D9EF2AD05FBD0031DADE /* MyHistoryPartyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyHistoryPartyCell.swift; sourceTree = "<group>"; };
 		0F8028642ABC600E00324720 /* PoiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoiCell.swift; sourceTree = "<group>"; };
+		0F8825A62B2EB2C9006DA3C7 /* BaseTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseTableView.swift; sourceTree = "<group>"; };
 		0F8E1B912AC6BB8A00C67D62 /* SlideDownTransitionAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlideDownTransitionAnimator.swift; sourceTree = "<group>"; };
 		0F8E1B932AC6C61D00C67D62 /* ChooseLocationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChooseLocationView.swift; sourceTree = "<group>"; };
 		0F8E1B992AC7DA3400C67D62 /* GameListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameListController.swift; sourceTree = "<group>"; };
@@ -1772,6 +1774,7 @@
 		49FBBFCC268DA77A000C851E /* View */ = {
 			isa = PBXGroup;
 			children = (
+				0F8825A62B2EB2C9006DA3C7 /* BaseTableView.swift */,
 				49FBBFCD268DA77A000C851E /* RateView.swift */,
 				49FBBFCE268DA77A000C851E /* DashedView.swift */,
 				49FBBFCF268DA77A000C851E /* NavigationView.swift */,
@@ -2098,6 +2101,7 @@
 				49FBBFD8268DA77A000C851E /* RateView.swift in Sources */,
 				0F37439A2B123160008F6B31 /* GiftLogCell.swift in Sources */,
 				0F4DFE9C2AF0B23800DD158A /* GameRoundListResp.swift in Sources */,
+				0F8825A72B2EB2C9006DA3C7 /* BaseTableView.swift in Sources */,
 				49FBBFA5268DA6D2000C851E /* LSNotification.swift in Sources */,
 				0FDC58FD2B1F3DCE00022ABA /* CashOutLogController.swift in Sources */,
 				0F2CBB2B2B16EC5600D976C0 /* QueryRedPacketResp.swift in Sources */,
@@ -2413,7 +2417,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = P2GU72CK9K;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2439,7 +2443,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 100;
+				MARKETING_VERSION = 12;
 				PRODUCT_BUNDLE_IDENTIFIER = net.juzitang.party;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2459,11 +2463,12 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Platform/Platform.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = P2GU72CK9K;
+				ENABLE_TESTABILITY = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2487,11 +2492,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 100;
+				MARKETING_VERSION = 12;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = net.juzitang.party;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = JUZITANG_DEV_PROFILE;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = JUZITANG_DIS_PROFILE;
 				SWIFT_OBJC_BRIDGING_HEADER = "${SRCROOT}/Platform/Support/Platform-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

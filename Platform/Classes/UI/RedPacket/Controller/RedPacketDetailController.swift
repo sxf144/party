@@ -159,7 +159,6 @@ extension RedPacketDetailController {
                 if let data = resp.data {
                     self.handleData(data)
                 }
-                
             } else {
                 LSLog("queryRedPacket fail")
             }

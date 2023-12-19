@@ -24,16 +24,25 @@ class ReportReasonListController: BaseController {
         super.viewDidLoad()
         setupUI()
         
-        tableView.mj_header?.beginRefreshing()
+        // 加载数据
+        loadNewData()
     }
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: view.bounds, style: .plain)
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.separatorStyle = .none
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据
@@ -76,8 +85,12 @@ extension ReportReasonListController {
                 
                 self.tableView.reloadData()
                 
+                // 判断是否展示空页面
+                self.changeTableViewStatus()
+                
             } else {
                 LSLog("getReportReasonList fail")
+                self.tableView.dataStatus = .error
             }
         }
     }
@@ -85,6 +98,14 @@ extension ReportReasonListController {
     func loadNewData() {
         // 在这里执行下拉刷新的操作
         getReasonList()
+    }
+    
+    func changeTableViewStatus() {
+        if dataList.reasonList.count == 0 {
+            tableView.dataStatus = .empty
+        } else {
+            tableView.dataStatus = .none
+        }
     }
     
     // 点击确认

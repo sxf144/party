@@ -112,6 +112,7 @@ extension IMManager: V2TIMConversationListener, V2TIMGroupListener {
         // 在这里执行下拉刷新的操作
         V2TIMManager.shared.getConversationList(nextSeq: 0, count: INT_MAX) { list, nextSeq, isFinished in
             // 获取成功，list 为会话列表
+            self.conversationList = []
             self.updateConversation(convList: list)
             completion()
         } fail: { code, desc in

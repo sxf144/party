@@ -42,9 +42,9 @@ class PageManager: NSObject {
     /// 完善资料
     func pushToSupplyUser() {
         let vc = SupplyUserController()
-        // 如果没有头像就跳转入完善资料
+        // 如果SupplyUserController不存在堆栈里，则跳转进入
         if let nav = currentNav() {
-            if nav.viewControllers.contains(vc) {
+            if !nav.viewControllers.contains(vc) {
                 nav.pushViewController(vc, animated: true)
             }
         }

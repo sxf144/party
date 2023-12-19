@@ -14,6 +14,7 @@ import ImSDK_Plus_Swift
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var launched: Bool = false
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // app initialize
@@ -37,6 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
+        LSLog("applicationDidBecomeActive")
         // 应用回到前台时，刷新几个数据
         OSSManager.shared.loadOssInfo()
         AMapServices.shared().apiKey = "f41fc14a42f6ca6000e016f5a0bd322c"
@@ -44,9 +46,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         MyLocationManager.updatePrivacy()
         MyLocationManager.shared.startLocation()
-        // 检查token，如果token过期，去刷新
+        // 检查token，如果token过期，去刷新，如果有效，则登录IM
         if !LoginManager.shared.isTokenValid() {
             LoginManager.shared.refreshToken()
+        } else {
+            if !launched {
+                launched = true
+                // 登录IM
+                IMManager.shared.loginIM()
+            }
         }
     }
     
@@ -123,7 +131,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 登录成功
         resetRootViewController()
         judgeToSupplyUserController()
-        // 发起IM登录
+        // 登录IM
         IMManager.shared.loginIM()
     }
     

@@ -22,7 +22,7 @@ class CoinLogController: BaseController {
         setupUI()
         
         view.backgroundColor = UIColor.ls_color("#F6F6F6")
-        tableView.mj_header?.beginRefreshing()
+        loadNewData()
     }
     
     // 创建顶部View
@@ -51,13 +51,21 @@ class CoinLogController: BaseController {
     
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: view.bounds, style: .plain)
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = UIColor.ls_color("#F6F6F6")
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据
@@ -69,6 +77,7 @@ class CoinLogController: BaseController {
             // 在这里执行上拉加载更多的操作，例如加载更多数据
             self?.loadMoreData()
         })
+        tableView.mj_footer.isHidden = true
         
         // 注册UITableViewCell类
         tableView.register(CoinLogCell.self, forCellReuseIdentifier: "CoinLogCell")
@@ -111,10 +120,11 @@ extension CoinLogController {
                     }
                     
                     // 判断是否展示空页面
-                    self.isEmpty()
+                    self.changeTableViewStatus()
                 }
             } else {
                 LSLog("getCoinLogs fail")
+                self.tableView.dataStatus = .error
             }
         }
     }
@@ -133,12 +143,12 @@ extension CoinLogController {
         }
     }
     
-    func isEmpty() {
+    func changeTableViewStatus() {
         if dataList.items.count == 0 {
-            tableView.ls_showEmpty()
+            tableView.dataStatus = .empty
             tableView.mj_footer.isHidden = true
         } else {
-            tableView.ls_hideEmpty()
+            tableView.dataStatus = .none
             tableView.mj_footer.isHidden = false
         }
     }

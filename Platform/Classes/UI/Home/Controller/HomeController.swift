@@ -32,8 +32,6 @@ class HomeController: BaseController {
         // 添加监听
         addObservers()
         
-        // 刷新token
-        LoginManager.shared.refreshToken()
         // 加载数据
         loadData()
     }
@@ -56,7 +54,11 @@ class HomeController: BaseController {
         let label = UILabel()
         label.font = kFontMedium18
         label.textColor = .white
-        label.text = currCity?.name
+        if let cityName = currCity?.name, !cityName.isEmpty {
+            label.text = cityName
+        } else {
+            label.text = "定位中"
+        }
         label.ls_shadow()
         label.sizeToFit()
         return label

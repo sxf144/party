@@ -62,22 +62,22 @@ fileprivate extension RateView{
             make.size.equalTo(CGSize(width: 16, height: 16))
         }
         rateIcon2.snp.makeConstraints { (make) in
-            make.right.equalTo(rateIcon1.snp_left).offset(-4)
+            make.right.equalTo(rateIcon1.snp.left).offset(-4)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSize(width: 16, height: 16))
         }
         rateIcon3.snp.makeConstraints { (make) in
-            make.right.equalTo(rateIcon2.snp_left).offset(-4)
+            make.right.equalTo(rateIcon2.snp.left).offset(-4)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSize(width: 16, height: 16))
         }
         rateIcon4.snp.makeConstraints { (make) in
-            make.right.equalTo(rateIcon3.snp_left).offset(-4)
+            make.right.equalTo(rateIcon3.snp.left).offset(-4)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSize(width: 16, height: 16))
         }
         rateIcon5.snp.makeConstraints { (make) in
-            make.right.equalTo(rateIcon4.snp_left).offset(-4)
+            make.right.equalTo(rateIcon4.snp.left).offset(-4)
             make.centerY.equalToSuperview()
             make.size.equalTo(CGSize(width: 16, height: 16))
         }

@@ -9,6 +9,7 @@
 import UIKit
 import SnapKit
 import JXSegmentedView
+import CoreLocation
 
 class RecommendController: BaseController {
     
@@ -41,13 +42,21 @@ class RecommendController: BaseController {
     }
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: view.bounds, style: .plain)
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
         tableView.isPagingEnabled = true
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.backgroundColor = .white
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试、打开定位
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            } 
+        }
         
         // 注册UITableViewCell类
         tableView.register(RecommendCell.self, forCellReuseIdentifier: "RecommendCell")
@@ -124,20 +133,13 @@ extension RecommendController {
     
     func loadNewData() {
         currCity = CityDataManager.shared.getCurrCity()
-        if let currCity = currCity, !currCity.code.isEmpty {
-            LSLog("city code:\(currCity.code)")
-            getRecommend(cursor: "", cityCode: currCity.code)
-        }
+        getRecommend(cursor: "", cityCode: currCity?.code ?? "")
     }
     
     func getRecommend(cursor:String, cityCode:String) {
-        if cursor.isEmpty {
-            LSHUD.showLoading()
-        }
         if let cityCode = Int64(cityCode) {
             NetworkManager.shared.recommend(cursor, cityCode:cityCode) { resp in
                 LSLog("getRecommend data:\(String(describing: resp.data))")
-                LSHUD.hide()
                 if resp.status == .success {
                     LSLog("getRecommend succ")
                     self.recommendData = resp.data
@@ -158,14 +160,19 @@ extension RecommendController {
                     }
                     
                     // 判断是否展示空页面
-                    self.isEmpty()
+                    self.changeTableViewStatus()
                     
                 } else {
                     LSLog("getRecommend fail")
+                    // 如果不是授权失败，才展示错误页面
+                    if resp.status != .token_expired {
+                        self.tableView.dataStatus = .error
+                    }
                 }
             }
         } else {
-            LSHUD.hide()
+            // 没有城市code时，检查是否开启了定位权限
+            checkLocationAuthorization()
         }
     }
     
@@ -212,11 +219,35 @@ extension RecommendController {
         }
     }
     
-    func isEmpty() {
+    func changeTableViewStatus() {
         if recommendData.items?.count == 0 {
-            tableView.ls_showEmpty()
+            tableView.dataStatus = .empty
         } else {
-            tableView.ls_hideEmpty()
+            tableView.dataStatus = .none
+        }
+    }
+    
+    func checkLocationAuthorization() {
+        LSLog("checkLocationAuthorization:\(CLLocationManager.authorizationStatus())")
+        switch CLLocationManager.authorizationStatus() {
+        case .authorizedWhenInUse:
+            // 已经授权使用定位服务
+            break
+        case .denied:
+            // 用户已拒绝授权，提示用户打开定位服务
+            tableView.dataStatus = .location
+        case .notDetermined:
+            // 未决定是否授权，请求用户授权
+//            myLocationManager.requestWhenInUseAuthorization()
+            break
+        case .restricted:
+            // 定位服务受限制，可能是由于家长控制等原因
+            tableView.dataStatus = .location
+        case .authorizedAlways:
+            // 始终授权，根据实际需求处理
+            break
+        @unknown default:
+            break
         }
     }
 }

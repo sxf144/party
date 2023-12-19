@@ -263,7 +263,8 @@ extension LoginManager {
                 } else {
                     // 刷新token失败，重新登录
                     LSHUD.showError(resp.msg)
-                    loginExpird()
+                    // 目前refreshToken失败无需返回登录界面
+//                    loginExpird()
                 }
                 
                 tokenRefreshing = false

@@ -24,6 +24,23 @@ class FollowListController: BaseController {
         resetNavigation()
         setupUI()
         
+        loadNewData()
+    }
+    
+    // 创建UITableView
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
         // 设置下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             // 在这里执行下拉刷新的操作，例如加载最新数据
@@ -35,20 +52,11 @@ class FollowListController: BaseController {
             // 在这里执行上拉加载更多的操作，例如加载更多数据
             self?.loadMoreData()
         })
-        
-        tableView.mj_header?.beginRefreshing()
-    }
-    
-    // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tv = UITableView(frame: view.bounds, style: .plain)
-        tv.dataSource = self
-        tv.delegate = self
-        tv.contentInsetAdjustmentBehavior = .never
+        tableView.mj_footer.isHidden = true
         
         // 注册UITableViewCell类
-        tv.register(FollowCell.self, forCellReuseIdentifier: "FollowCell")
-        return tv
+        tableView.register(FollowCell.self, forCellReuseIdentifier: "FollowCell")
+        return tableView
     }()
 }
 
@@ -93,10 +101,11 @@ extension FollowListController {
                     }
                     
                     // 判断是否展示空页面
-                    self.isEmpty()
+                    self.changeTableViewStatus()
                 }
             } else {
                 LSLog("getFollowList fail")
+                self.tableView.dataStatus = .error
             }
         }
     }
@@ -115,12 +124,12 @@ extension FollowListController {
         }
     }
     
-    func isEmpty() {
+    func changeTableViewStatus() {
         if followList.users.count == 0 {
-            tableView.ls_showEmpty()
+            tableView.dataStatus = .empty
             tableView.mj_footer.isHidden = true
         } else {
-            tableView.ls_hideEmpty()
+            tableView.dataStatus = .none
             tableView.mj_footer.isHidden = false
         }
     }

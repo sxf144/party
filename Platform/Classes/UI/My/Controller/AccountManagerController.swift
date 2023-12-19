@@ -131,13 +131,13 @@ extension AccountManagerController {
     
     func showDeleteAlert() {
         // 二次确认是否要退出
-        let alertController = BaseAlertController(title: "确定要注销账号吗？", message: nil)
+        let alertController = BaseAlertController(title: "确定要注销账号吗？", message: "注销后账号内所有数据都会被清空，且无法恢复账号，请谨慎操作。")
                 
         let cancelAction = BaseAlertAction(title: "取消", style: .default) { (action) in
             // 处理取消按钮点击后的操作
         }
         
-        let okAction = BaseAlertAction(title: "确定", style: .destructive) {(action) in
+        let okAction = BaseAlertAction(title: "继续注销", style: .destructive) {(action) in
             self.deleteAccount()
         }
         
@@ -147,7 +147,9 @@ extension AccountManagerController {
     }
     
     func deleteAccount() {
+        LSHUD.showLoading()
         NetworkManager.shared.deleteAccount() { resp in
+            LSHUD.hide()
             if resp.status == .success {
                 LSLog("deleteAccount succ")
                 // 删除成功，调用退出登录

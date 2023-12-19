@@ -27,7 +27,7 @@ class FollowedController: BaseController {
         addObservers()
         
         // 拉取列表信息
-        getFollowed()
+        loadNewData()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -41,13 +41,21 @@ class FollowedController: BaseController {
     }
     
     // 创建UITableView
-    fileprivate lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: view.bounds, style: .plain)
+    fileprivate lazy var tableView: BaseTableView = {
+        let tableView = BaseTableView(frame: view.bounds, style: .plain)
         tableView.isPagingEnabled = true
         tableView.dataSource = self
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.backgroundColor = .white
+        tableView.dataStatus = .loading
+        tableView.actionBlock = { [weak self] in
+            // 重试
+            if tableView.dataStatus == .error {
+                tableView.dataStatus = .loading
+                self?.loadNewData()
+            }
+        }
         
         // 注册UITableViewCell类
         tableView.register(RecommendCell.self, forCellReuseIdentifier: "RecommendCell")
@@ -65,11 +73,15 @@ extension FollowedController {
     
     @objc func handleLogin(_ notification: Notification) {
         // 登录成功，重新拉取列表信息
-        getFollowed()
+        loadNewData()
     }
     
     @objc func handleLogout(_ notification: Notification) {
         // 退出登录
+    }
+    
+    func loadNewData() {
+        getFollowed()
     }
     
     func getFollowed() {
@@ -87,10 +99,11 @@ extension FollowedController {
                 }
                 
                 // 判断是否展示空页面
-                self.isEmpty()
+                self.changeTableViewStatus()
                 
             } else {
                 LSLog("getFollowed fail")
+                self.tableView.dataStatus = .error
             }
         }
     }
@@ -116,11 +129,11 @@ extension FollowedController {
         }
     }
     
-    func isEmpty() {
+    func changeTableViewStatus() {
         if recommendData.items?.count == 0 {
-            tableView.ls_showEmpty()
+            tableView.dataStatus = .empty
         } else {
-            tableView.ls_hideEmpty()
+            tableView.dataStatus = .none
         }
     }
 }

@@ -65,7 +65,6 @@ class ChatController: BaseController {
         tableView.delegate = self
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.separatorStyle = .none
-//        tableView.estimatedRowHeight = CellHeight
         tableView.rowHeight = UITableView.automaticDimension
         
         // 注册UITableViewCell类
@@ -1099,6 +1098,7 @@ extension ChatController: UITableViewDataSource, UITableViewDelegate, UIScrollVi
                                 if image != nil {
                                     imageView.image = image
                                 }
+                                // 加载原图
                                 imageView.kf.setImage(with: url) { receivedSize, totalSize in
                                     let percentage = (CGFloat(receivedSize) / CGFloat(totalSize))
                                     progress(percentage)

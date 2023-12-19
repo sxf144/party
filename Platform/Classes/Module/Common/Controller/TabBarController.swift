@@ -48,9 +48,9 @@ class TabBarController: UITabBarController {
     
     func addShadowToTabBar() {
         // 设置阴影属性
-        tabBar.layer.shadowColor = UIColor.black.cgColor
+        tabBar.layer.shadowColor = UIColor.ls_color("#000000", alpha: 0.3).cgColor
         tabBar.layer.shadowOffset = CGSize(width: 0, height: 0)
-        tabBar.layer.shadowOpacity = 0.5
+        tabBar.layer.shadowOpacity = 0.3
         tabBar.layer.masksToBounds = false
     }
 }
