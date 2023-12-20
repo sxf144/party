@@ -229,10 +229,10 @@ extension RecommendCell {
         }
         commentLabel.sizeToFit()
         
-        // 先移除老的监听
-        if let playerItem = avPlayer.currentItem {
-            playerItem.removeObserver(self, forKeyPath: "status")
-        }
+        // 先移除老的监听，有时会移除没有添加过监听的，导致crash，先去掉
+//        if let playerItem = avPlayer.currentItem {
+//            playerItem.removeObserver(self, forKeyPath: "status")
+//        }
         
         // coverType 1、图片，2、视频
         if (item?.coverType == CoverType.image.rawValue) {

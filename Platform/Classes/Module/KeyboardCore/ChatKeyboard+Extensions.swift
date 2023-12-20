@@ -26,7 +26,7 @@ public extension NSNotification.Name {
 
 public extension URL {
 
-    static let kAppleEmojiURL = URL(fileURLWithPath: Bundle.main.path(forResource: "Emoticons.bundle/com.apple.emoji/info", ofType:"plist")!)
+    static let kAppleEmojiURL = URL(fileURLWithPath: Bundle.main.path(forResource: "Emoticons.bundle/com.apple.emoji/Info", ofType:"plist")!)
     
     static let kWeChatEmojiURL = URL(fileURLWithPath: Bundle.main.path(forResource: "Expression.bundle/Expression", ofType:"plist")!)
 }

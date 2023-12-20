@@ -122,6 +122,13 @@ class CardTaskView: UIView {
         return playerLayer
     }()
     
+    fileprivate lazy var activityView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.color = .gray
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // 播放按钮
     fileprivate lazy var playBtn: UIButton = {
         let button = UIButton()
@@ -218,10 +225,10 @@ extension CardTaskView {
             redPacketBtn.isHidden = true
         }
         
-        // 先移除老的监听
-        if let playerItem = avPlayer.currentItem {
-            playerItem.removeObserver(self, forKeyPath: "status")
-        }
+        // 先移除老的监听，有时会移除没有添加过监听的，导致crash，先去掉
+//        if let playerItem = avPlayer.currentItem {
+//            playerItem.removeObserver(self, forKeyPath: "status")
+//        }
         
         // 判断是否有媒体资源
         if let mediaUrl = limMsg.gameElem?.action.cardInfo.introductionMedia, !mediaUrl.isEmpty {
@@ -238,12 +245,14 @@ extension CardTaskView {
             if limMsg.gameElem?.action.cardInfo.introductionMediaType == 1 {
                 cardImageView.isHidden = false
                 avPlayerLayer.isHidden = true
+                activityView.isHidden = true
                 playBtn.isHidden = true
                 // 卡牌图片
                 cardImageView.kf.setImage(with: URL(string: mediaUrl))
             } else if limMsg.gameElem?.action.cardInfo.introductionMediaType == 2 {
                 cardImageView.isHidden = true
                 avPlayerLayer.isHidden = false
+                activityView.isHidden = false
                 // 播放按钮先隐藏，视频已准备好播放时再显示
                 playBtn.isHidden = true
                 // 卡牌视频
@@ -253,7 +262,7 @@ extension CardTaskView {
                     let playerItem = AVPlayerItem(url: videoURL)
                     avPlayer.replaceCurrentItem(with: playerItem)
                     if let playerItem = avPlayer.currentItem {
-                        LSHUD.showLoading()
+                        activityView.startAnimating()
                         // 添加新的观察者
                         playerItem.addObserver(self, forKeyPath: "status", options: .new, context: nil)
                     }
@@ -303,7 +312,7 @@ extension CardTaskView {
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "status" {
             if let playerItem = object as? AVPlayerItem {
-                LSHUD.hide()
+                activityView.stopAnimating()
                 if playerItem.status == .readyToPlay {
                     // 视频已准备好播放
                     LSLog("视频已准备好播放")
@@ -333,6 +342,7 @@ extension CardTaskView {
         cardContentView.addSubview(mediaView)
         mediaView.addSubview(cardImageView)
         mediaView.layer.addSublayer(avPlayerLayer)
+        mediaView.addSubview(activityView)
         mediaView.addSubview(playBtn)
         contentView.addSubview(redPacketBtn)
         
@@ -370,6 +380,10 @@ extension CardTaskView {
             make.width.equalToSuperview()
             make.height.equalToSuperview().offset(-82)
             make.bottom.equalToSuperview()
+        }
+        
+        activityView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
         
         cardImageView.snp.makeConstraints { (make) in

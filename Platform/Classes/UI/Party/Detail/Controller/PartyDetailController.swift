@@ -471,13 +471,16 @@ extension PartyDetailController {
         tempComment.to = toUser
         updateComment(tempComment)
         
-        NetworkManager.shared.sendComment(uniqueCode, toCommentId: toCommentItem?.id ?? 0, content: content ) { [self] resp in
+        NetworkManager.shared.sendComment(uniqueCode, toCommentId: toCommentItem?.id ?? 0, content: content ) { resp in
             if resp.status == .success {
                 LSLog("sendComment succ")
                 self.selectedIndexPath = nil
                 self.tempIndexPath = nil
                 tempComment.id = resp.data.commentId
                 self.updateComment(tempComment)
+                // 增加评论数
+                self.partyDetail?.commentCnt += 1
+                self.refreshCommentCnt()
             } else {
                 self.selectedIndexPath = nil
                 self.tempIndexPath = nil
@@ -613,6 +616,18 @@ extension PartyDetailController {
         self.loadNewData()
         // 发送局状态变更通知
         LSNotification.postPartyStatusChange()
+    }
+    
+    func refreshCommentCnt() {
+        // 评论数量
+        if let detail = partyDetail {
+            var commentStr: String = "评论"
+            if detail.commentCnt > 0 {
+                commentStr = "评论(\(detail.commentCnt))"
+            }
+            commentTotalLabel.text = commentStr
+            commentTotalLabel.sizeToFit()
+        }
     }
     
     func showSuccAlert() {

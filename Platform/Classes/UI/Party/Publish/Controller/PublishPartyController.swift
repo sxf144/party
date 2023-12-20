@@ -547,7 +547,11 @@ extension PublishPartyController {
         para["relation_game_id"] = selectGameItem.id
         para["male_cnt"] = maleCnt
         para["female_cnt"] = femaleCnt
-        para["fee"] = Int64(feeTextField.text ?? "")
+        if let text = feeTextField.text, let number = Int(text) {
+            para["fee"] = Int64(number*100)
+        } else {
+            para["fee"] = 0
+        }
         
         NetworkManager.shared.publishParty(para) { [weak self] resp in
             LSHUD.hide()
@@ -599,6 +603,14 @@ extension PublishPartyController {
         if (maleCnt == 0 || femaleCnt == 0) {
             LSLog("checkParam maleCnt err")
             LSHUD.showInfo("请设置人数")
+            return false
+        }
+        
+        if let text = feeTextField.text, let number = Int(text) {
+            // 格式正确
+        } else {
+            // 输入不是数字
+            LSHUD.showInfo("请正确设置费用")
             return false
         }
         
