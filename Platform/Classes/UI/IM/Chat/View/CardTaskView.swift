@@ -117,7 +117,7 @@ class CardTaskView: UIView {
     
     fileprivate lazy var avPlayerLayer: AVPlayerLayer = {
         let playerLayer = AVPlayerLayer(player: avPlayer)
-        playerLayer.frame = cardImageView.bounds
+        playerLayer.frame = mediaView.bounds
         playerLayer.videoGravity = .resizeAspectFill
         return playerLayer
     }()
@@ -256,6 +256,8 @@ extension CardTaskView {
                 // 播放按钮先隐藏，视频已准备好播放时再显示
                 playBtn.isHidden = true
                 // 卡牌视频
+                // 加入 layoutIfNeeded以确保mediaView.bounds不为0
+                self.layoutIfNeeded()
                 avPlayerLayer.frame = mediaView.bounds
                 if let videoURL = URL(string: mediaUrl) {
                     // 创建AVPlayerItem，加载视频，但此处不播放

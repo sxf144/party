@@ -19,6 +19,9 @@ class LoginController: BaseController {
         
         super.viewDidLoad()
         setupView()
+        
+        // 是否隐藏第三方登录
+        isHiddenThirdBtn()
     }
     
     @objc func backDismiss(){
@@ -113,7 +116,11 @@ extension LoginController {
             return
         }
         LSLog("clickWxLoginBtn")
-        WXApiManager.shared.sendAuthRequest()
+        if UIApplication.shared.canOpenURL(URL(string: "weixin://")!) {
+            WXApiManager.shared.sendAuthRequest()
+        } else {
+            LSHUD.showInfo("请安装微信后使用！")
+        }
     }
     
     // 点击苹果登录
@@ -159,6 +166,32 @@ extension LoginController {
             LSHUD.showInfo("请阅读并同意《用户服务协议》和《隐私协议》")
         }
         return result
+    }
+    
+    func isHiddenThirdBtn() {
+        let wxInstalled = WXApi.isWXAppInstalled()
+        if (wxInstalled) {
+            wxLoginBtn.isHidden = false
+            wxLoginBtn.snp.remakeConstraints { (make) in
+                make.centerX.equalToSuperview().offset(-50)
+                make.top.equalTo(phoneLoginBtn.snp.bottom).offset(30)
+                make.size.equalTo(CGSize(width: 42, height: 42))
+            }
+            
+            appleLoginBtn.snp.remakeConstraints { (make) in
+                make.centerX.equalToSuperview().offset(50)
+                make.top.equalTo(phoneLoginBtn.snp.bottom).offset(30)
+                make.size.equalTo(CGSize(width: 42, height: 42))
+            }
+        } else {
+            wxLoginBtn.isHidden = true
+            
+            appleLoginBtn.snp.remakeConstraints { (make) in
+                make.centerX.equalToSuperview()
+                make.top.equalTo(phoneLoginBtn.snp.bottom).offset(30)
+                make.size.equalTo(CGSize(width: 42, height: 42))
+            }
+        }
     }
 }
 
@@ -224,7 +257,7 @@ extension LoginController: ASAuthorizationControllerDelegate {
 
 extension LoginController {
     
-    fileprivate func setupView(){
+    fileprivate func setupView() {
         
         view.addSubview(bgIv)
         view.addSubview(phoneLoginBtn)
@@ -268,5 +301,7 @@ extension LoginController {
             make.centerY.equalTo(tipLabel)
             make.size.equalTo(CGSize(width: 20, height: 20))
         }
+        
+        
     }
 }

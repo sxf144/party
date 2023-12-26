@@ -606,12 +606,16 @@ extension PublishPartyController {
             return false
         }
         
-        if let text = feeTextField.text, let number = Int(text) {
-            // 格式正确
+        if let text = feeTextField.text, !text.isEmpty {
+            if let _ = Int(text) {
+                // 格式正确
+            } else {
+                // 输入的不是数字
+                LSHUD.showInfo("请正确设置费用")
+                return false
+            }
         } else {
-            // 输入不是数字
-            LSHUD.showInfo("请正确设置费用")
-            return false
+            // 可以为空
         }
         
         return true

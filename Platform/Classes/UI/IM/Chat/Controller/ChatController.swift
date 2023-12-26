@@ -1300,8 +1300,8 @@ extension ChatController {
     fileprivate func resetNavigation() {
         
         navigationView.showAvatar()
-        let rightImg = UIImage(named: "icon_more_black")
-        let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
-        navigationView.rightButton.setImage(shareImg, for: .normal)
+        let tempImg = UIImage(named: "icon_more_black")
+        let rightImg = tempImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.rightButton.setImage(rightImg, for: .normal)
     }
 }

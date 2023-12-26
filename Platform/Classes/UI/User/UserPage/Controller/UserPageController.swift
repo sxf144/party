@@ -500,8 +500,8 @@ extension UserPageController {
         let leftImg = UIImage(named: "icon_back_white")
         let backImg = leftImg?.withRenderingMode(.alwaysOriginal)
         navigationView.leftButton.setImage(backImg, for: .normal)
-        let rightImg = UIImage(named: "icon_more_white")
-        let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
-        navigationView.rightButton.setImage(shareImg, for: .normal)
+        let tempImg = UIImage(named: "icon_more_white")
+        let rightImg = tempImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.rightButton.setImage(rightImg, for: .normal)
     }
 }

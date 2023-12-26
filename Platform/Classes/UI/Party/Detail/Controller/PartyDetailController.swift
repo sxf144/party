@@ -1129,12 +1129,70 @@ extension PartyDetailController {
     override func rightAction() {
         LSLog("PartyDetail rightAction")
         // 分享
+//        if let party = partyDetail, let cImage = coverImage {
+//            let title = "邀请你加入\(party.name)"
+//            let desc = timeLabel.text!
+//            let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(party.uniqueCode)"
+//            
+//            WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cImage)
+//        }
+        
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        // 添加带有图标的动作
+        let action1 = UIAlertAction(title: "举报", style: .default) { (action) in
+            self.handleReport()
+        }
+        action1.setValue(UIImage(named: "icon_report"), forKey: "image")
+        action1.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+        alertController.addAction(action1)
+        
         if let party = partyDetail, let cImage = coverImage {
-            let title = "邀请你加入\(party.name)"
-            let desc = timeLabel.text!
-            let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(party.uniqueCode)"
-            
-            WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cImage)
+            let action2Title = "分享"
+            let action2 = UIAlertAction(title: action2Title, style: .default) { (action) in
+                
+                let title = "邀请你加入\(party.name)"
+                let desc = self.timeLabel.text!
+                let pageUrl = "\(UNIVERSAL_LINK)/detail?code=\(party.uniqueCode)"
+                
+                WXApiManager.shared.shareToWX(title, description: desc, pageUrl: pageUrl, image: cImage)
+            }
+            action2.setValue(UIImage(named: "icon_share_black"), forKey: "image")
+            action2.setValue(CATextLayerAlignmentMode.left, forKey: "titleTextAlignment")
+            alertController.addAction(action2)
+        }
+
+        // 添加动作到操作表
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel)
+        alertController.addAction(cancelAction)
+
+        // 显示操作表
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func handleReport() {
+        // 选择举报理由
+        let vc = ReportReasonListController()
+        vc.reasonConfirmBlock = { [weak self] reasonItem in
+            self?.report(reasonItem)
+        }
+        vc.hidesBottomBarWhenPushed = true
+        PageManager.shared.currentNav()?.pushViewController(vc, animated: true)
+    }
+    
+    func report(_ resonItem:ReportReasonItem) {
+        // objType 1用户，2局
+        var objType: Int64 = 2
+        var objId: String = partyDetail?.uniqueCode ?? ""
+        
+        NetworkManager.shared.report(objType, objId: objId, reasonId: resonItem.reasonId) { resp in
+            if resp.status == .success {
+                LSLog("report succ")
+                LSHUD.showInfo("操作成功")
+            } else {
+                LSLog("report fail")
+                LSHUD.showInfo("操作失败")
+            }
         }
     }
     
@@ -1506,8 +1564,8 @@ extension PartyDetailController {
         let leftImg = UIImage(named: "icon_back_white")
         let backImg = leftImg?.withRenderingMode(.alwaysOriginal)
         navigationView.leftButton.setImage(backImg, for: .normal)
-        let rightImg = UIImage(named: "icon_share_detail")
-        let shareImg = rightImg?.withRenderingMode(.alwaysOriginal)
-        navigationView.rightButton.setImage(shareImg, for: .normal)
+        let tempImg = UIImage(named: "icon_more_black")
+        let rightImg = tempImg?.withRenderingMode(.alwaysOriginal)
+        navigationView.rightButton.setImage(rightImg, for: .normal)
     }
 }
