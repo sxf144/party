@@ -23,6 +23,7 @@
 		0F3743A02B1322D7008F6B31 /* AccountManagerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */; };
 		0F3743A22B132FC8008F6B31 /* CardTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743A12B132FC8008F6B31 /* CardTaskView.swift */; };
 		0F3743A62B148856008F6B31 /* WXApiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3743A52B148856008F6B31 /* WXApiManager.swift */; };
+		0F3796112B4539D00086FA5D /* YearMonthPickerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3796102B4539D00086FA5D /* YearMonthPickerController.swift */; };
 		0F4338F72ACC8C320014F0C5 /* SubCommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */; };
 		0F4B97872B29921000F8C167 /* LocalCityItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4B97862B29921000F8C167 /* LocalCityItemCell.swift */; };
 		0F4DFE772AEBD6EF00DD158A /* GiftListResp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */; };
@@ -277,6 +278,7 @@
 		0F37439F2B1322D7008F6B31 /* AccountManagerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManagerController.swift; sourceTree = "<group>"; };
 		0F3743A12B132FC8008F6B31 /* CardTaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTaskView.swift; sourceTree = "<group>"; };
 		0F3743A52B148856008F6B31 /* WXApiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WXApiManager.swift; sourceTree = "<group>"; };
+		0F3796102B4539D00086FA5D /* YearMonthPickerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YearMonthPickerController.swift; sourceTree = "<group>"; };
 		0F4338F62ACC8C310014F0C5 /* SubCommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubCommentCell.swift; sourceTree = "<group>"; };
 		0F4B97862B29921000F8C167 /* LocalCityItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalCityItemCell.swift; sourceTree = "<group>"; };
 		0F4DFE762AEBD6EF00DD158A /* GiftListResp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GiftListResp.swift; sourceTree = "<group>"; };
@@ -1746,6 +1748,7 @@
 		49FBBFC2268DA77A000C851E /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				0F3796102B4539D00086FA5D /* YearMonthPickerController.swift */,
 				49FBBFC4268DA77A000C851E /* BaseController.swift */,
 				49FBBFC5268DA77A000C851E /* NavigationController.swift */,
 				49FBBFC6268DA77A000C851E /* DatePickerController.swift */,
@@ -2206,6 +2209,7 @@
 				0FA940652AE93165009A10C9 /* GameCardMessageCell.swift in Sources */,
 				0F4DFE8D2AEF8E6900DD158A /* GiftGiveResp.swift in Sources */,
 				0F4DFE8B2AEEA68700DD158A /* UserPageResp.swift in Sources */,
+				0F3796112B4539D00086FA5D /* YearMonthPickerController.swift in Sources */,
 				0FE2DBA32B1867F800826222 /* FansCell.swift in Sources */,
 				0FA0A6D22B2C458F009C6F5C /* CheckVersionModel.swift in Sources */,
 				0FFF000F2B0B778F0072FCFA /* EditUserController.swift in Sources */,

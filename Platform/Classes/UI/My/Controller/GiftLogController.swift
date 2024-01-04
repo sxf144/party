@@ -155,15 +155,11 @@ extension GiftLogController {
     // 选择日期
     @objc func clickDateBtn(_ sender:UIButton) {
         LSLog("clickDateBtn")
-        // 设置最小和最大日期
-        let maxDate = Date()
-        let minDate:Date = Calendar.current.date(byAdding: .year, value: -1, to: currentDate) ?? Date()
-        let datePickerController = DatePickerController()
-        datePickerController.setDate(currentDate)
-        datePickerController.setMinimumDate(minDate)
-        datePickerController.setMaximumDate(maxDate)
         
-        datePickerController.confirmAction = { date in
+        let yearMonthPickerController = YearMonthPickerController()
+        yearMonthPickerController.setDate(currentDate)
+        
+        yearMonthPickerController.confirmAction = { date in
             LSLog("confirmAction date:\(date)")
             self.currentDate = date
             self.dateLabel.text = self.currentDate.ls_formatterStr("yyyy-MM")
@@ -171,7 +167,7 @@ extension GiftLogController {
             // 重新拉取数据
             self.loadNewData()
         }
-        datePickerController.show()
+        yearMonthPickerController.show()
     }
 }
 

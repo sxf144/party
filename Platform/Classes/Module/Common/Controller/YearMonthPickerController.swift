@@ -1,5 +1,5 @@
 //
-//  DatePickerController.swift
+//  YearMonthPickerController.swift
 //  constellation
 //
 //  Created by Lee on 2020/4/22.
@@ -8,32 +8,39 @@
 
 import UIKit
 
-class DatePickerController: BaseController {
+class YearMonthPickerController: BaseController {
 
-    public typealias Action = (Date) -> Void
+    public typealias Action = (_ date:Date) -> Void
        
-    var valueChangeAction: Action?
     var confirmAction: Action?
+    var years: [Int] = []
+    var months: [String] = []
+    var selectedYear: Int = 0
+    var selectedMonth: Int = 0
     
-    required init(mode: UIDatePicker.Mode = .date, date: Date? = nil, minimumDate: Date? = nil, maximumDate: Date? = nil) {
-        super.init(nibName: nil, bundle: nil)
-        datePicker.datePickerMode = mode
-        datePicker.date = date ?? Date()
-        if #available(iOS 13.4, *) {
-            datePicker.preferredDatePickerStyle = .wheels
-        } 
-        datePicker.minimumDate = minimumDate
-        datePicker.maximumDate = maximumDate
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     // MARK: - 生命周期
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if selectedYear == 0 || selectedMonth == 0 {
+            // 初始化年份和月份数据
+            selectedYear = Calendar.current.component(.year, from: Date())
+            selectedMonth = Calendar.current.component(.month, from: Date())
+        }
+        
+        years = Array((selectedYear-10)...(selectedYear+10))
+        months = DateFormatter().monthSymbols
+        
         setupView()
         self.transitioningDelegate = self as UIViewControllerTransitioningDelegate//自定义转场动画
+        // 设置选择器的初始值
+        if let initialSelectedIndex = years.firstIndex(of: selectedYear) {
+            if selectedMonth < 1 || selectedMonth > 12  {
+                selectedMonth = 1
+            }
+            pickerView.selectRow(initialSelectedIndex, inComponent: 0, animated: false)
+            pickerView.selectRow(selectedMonth-1, inComponent: 1, animated: false)
+        }
     }
 
     ///点击任意位置view消失
@@ -50,11 +57,12 @@ class DatePickerController: BaseController {
         // Dispose of any resources that can be recreated.
     }
     
-    lazy var datePicker: UIDatePicker = {
-        let picker = UIDatePicker(frame: CGRect(x: 0, y: 24, width: kScreenW, height: 216))
-        picker.locale = Locale(identifier: "zh_CN")
-        picker.addTarget(self, action: #selector(actionForDatePicker), for: .valueChanged)
-        return picker
+    lazy var pickerView: UIPickerView = {
+        let pickerView = UIPickerView(frame: CGRect(x: 0, y: 24, width: kScreenW, height: 216))
+
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        return pickerView
     }()
 
     fileprivate lazy var containView:UIView = {
@@ -69,7 +77,7 @@ class DatePickerController: BaseController {
     }()
 }
 
-extension DatePickerController{
+extension YearMonthPickerController {
     
     func show() {
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
@@ -77,32 +85,45 @@ extension DatePickerController{
     }
     
     public func setDate(_ date: Date) {
-        datePicker.setDate(date, animated: true)
-    }
-    
-    public func setMinimumDate(_ date: Date) {
-        datePicker.minimumDate = date
-    }
-    
-    func setMaximumDate(_ date: Date){
-        datePicker.maximumDate = date
+        selectedYear = Calendar.current.component(.year, from: date)
+        selectedMonth = Calendar.current.component(.month, from: date)
     }
 }
 
-fileprivate extension DatePickerController{
+fileprivate extension YearMonthPickerController {
     
     // MARK: onClick
-    @objc func actionForDatePicker() {
-        valueChangeAction?(datePicker.date)
-    }
-    
     @objc func onClickCancel() {
         self.dismiss(animated: true, completion: nil)
     }
     
     @objc func onClickSure() {
-        confirmAction?(datePicker.date)
+        // 使用示例
+        if let date = createDateFromYearMonth(year: selectedYear, month: selectedMonth) {
+            confirmAction?(date)
+        } else {
+            confirmAction?(Date())
+        }
+        
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    func createDateFromYearMonth(year: Int, month: Int) -> Date? {
+        // 创建一个日期组件
+        var dateComponents = DateComponents()
+        dateComponents.year = year
+        dateComponents.month = month
+        dateComponents.day = 1 // 设定日期为每月的第一天
+
+        // 创建一个日历
+        let calendar = Calendar.current
+
+        // 获取日期对象
+        if let date = calendar.date(from: dateComponents) {
+            return date
+        } else {
+            return nil
+        }
     }
     
     // MARK: - Func
@@ -123,34 +144,65 @@ fileprivate extension DatePickerController{
         //创建日期选择器
         self.containView.addSubview(cancel)
         self.containView.addSubview(sure)
-        self.containView.addSubview(datePicker)
+        self.containView.addSubview(pickerView)
         self.view.addSubview(self.containView)
     }
 }
 
+extension YearMonthPickerController: UIPickerViewDelegate, UIPickerViewDataSource {
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 2 // 年份和月份
+    }
+
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        if component == 0 {
+            return years.count
+        } else {
+            return months.count
+        }
+    }
+
+    // MARK: - UIPickerViewDelegate
+
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        if component == 0 {
+            return "\(years[row])"
+        } else {
+            return months[row]
+        }
+    }
+
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedYear = years[pickerView.selectedRow(inComponent: 0)]
+        selectedMonth = pickerView.selectedRow(inComponent: 1) + 1
+    }
+}
+
+
 // MARK: - 转场动画delegate
-extension DatePickerController:UIViewControllerTransitioningDelegate {
+extension YearMonthPickerController:UIViewControllerTransitioningDelegate {
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        let animated = LSDatePickerPresentAnimated(type: .present)
+        let animated = YearMonthPickerPresentAnimated(type: .present)
         return animated
     }
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        let animated = LSDatePickerPresentAnimated(type: .dismiss)
+        let animated = YearMonthPickerPresentAnimated(type: .dismiss)
         return animated
     }
 }
 
-fileprivate enum LSDatePickerPresentAnimateType {
+fileprivate enum YearMonthPickerPresentAnimateType {
     case present//被推出时
     case dismiss//取消时
 }
 
 // DatePickerViewController的推出和取消动画
-fileprivate class LSDatePickerPresentAnimated: NSObject,UIViewControllerAnimatedTransitioning {
+fileprivate class YearMonthPickerPresentAnimated: NSObject,UIViewControllerAnimatedTransitioning {
 
-    var type: LSDatePickerPresentAnimateType = .present
+    var type: YearMonthPickerPresentAnimateType = .present
 
-    init(type: LSDatePickerPresentAnimateType) {
+    init(type: YearMonthPickerPresentAnimateType) {
         self.type = type
     }
     /// 动画时间
@@ -162,7 +214,7 @@ fileprivate class LSDatePickerPresentAnimated: NSObject,UIViewControllerAnimated
 
         switch type {
         case .present:
-            guard let toVC = transitionContext.viewController(forKey: .to) as? DatePickerController else {
+            guard let toVC = transitionContext.viewController(forKey: .to) as? YearMonthPickerController else {
                 return
             }
 
@@ -187,7 +239,7 @@ fileprivate class LSDatePickerPresentAnimated: NSObject,UIViewControllerAnimated
                 })
             }
         case .dismiss:
-            guard let toVC = transitionContext.viewController(forKey: .from) as? DatePickerController else {
+            guard let toVC = transitionContext.viewController(forKey: .from) as? YearMonthPickerController else {
                 return
             }
             UIView.animate(withDuration: 0.25, animations: {

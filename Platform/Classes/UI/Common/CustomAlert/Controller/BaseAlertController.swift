@@ -222,7 +222,7 @@ fileprivate enum BaseAlertPresentAnimateType {
     case dismiss//取消时
 }
 
-//EWDatePickerViewController的推出和取消动画
+// BaseAlertViewController的推出和取消动画
 fileprivate class BaseAlertPresentAnimated: NSObject,UIViewControllerAnimatedTransitioning {
 
     var type: BaseAlertPresentAnimateType = .present
